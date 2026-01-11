@@ -14,11 +14,11 @@ export interface Region {
   name: string;
   description: string;
   icon: string;
-  imageUrl?: string; // Path to the new high-res icon image
+  imageUrl?: string;
   color: string;
   position: { x: number; y: number };
   lessons: Lesson[];
-  requiredLessons: number; // How many lessons needed to unlock
+  requiredLessons: number;
 }
 
 export const REGIONS: Region[] = [
@@ -54,7 +54,7 @@ export const REGIONS: Region[] = [
   {
     id: 'dorp',
     name: 'Het Startdorp',
-    description: 'Leer de thuisrij: A S D F J K L ;',
+    description: 'Leer de thuisrij: A S D F G H J K L ;',
     icon: '🏠',
     imageUrl: '/images/map/icon-dorp.png',
     color: 'bg-lettoria-dorp',
@@ -81,7 +81,7 @@ export const REGIONS: Region[] = [
         title: 'De Smid en de Lantaarnmaker',
         description: 'Leer de letters S en L',
         newKeys: ['s', 'l'],
-        exercises: ['sss', 'lll', 'slsl', 'lsls', 'sal', 'las', 'als', 'sla', 'fjfj', 'a;fj'],
+        exercises: ['sss', 'lll', 'slsl', 'lsls', 'sal', 'las', 'als', 'sla', 'fjfj', 'a;fj', 'laf', 'jas', 'sas', 'sjaal'],
         storyIntro: `De smid kon vroeger de mooiste zwaarden maken.
           En de lantaarnmaker zorgde voor licht in heel het dorp.
           Met S en L kunnen ze weer aan het werk!`,
@@ -94,7 +94,7 @@ export const REGIONS: Region[] = [
         title: 'De Dokter en de Klokkenmaker',
         description: 'Leer de letters D en K',
         newKeys: ['d', 'k'],
-        exercises: ['ddd', 'kkk', 'dkdk', 'kdkd', 'sad', 'lak', 'dal', 'klas', 'fjfj', 'asdf jkl;'],
+        exercises: ['ddd', 'kkk', 'dkdk', 'kdkd', 'sad', 'lak', 'dal', 'klas', 'dak', 'kas', 'daad', 'kaas', 'kaal', 'slak'],
         storyIntro: `Dokter Daan hielp iedereen die ziek was.
           En klokkenmaker Karel zorgde dat niemand te laat kwam.
           Breng D en K terug naar het dorp!`,
@@ -104,23 +104,23 @@ export const REGIONS: Region[] = [
       },
       {
         id: 4,
-        title: 'De Visser en de Juwelier',
-        description: 'Oefen met F en J - je wijsvingers!',
-        newKeys: [],
-        exercises: ['fjfj', 'jfjf', 'faja', 'jafs', 'alfa', 'jaks', 'flaks', 'slafs', 'asdf jkl;', 'fjfj fjfj'],
-        storyIntro: `De visser en de juwelier waren beste vrienden.
-          De een ving vis, de ander maakte sieraden.
-          Laten we F en J nog eens extra oefenen!`,
-        storyImageUrl: '/images/stories/lesson_4_fisherman.png',
-        storyOutro: `De visser gooit zijn net uit en de juwelier polijst zijn eerste edelsteen!
-          Het dorp komt tot leven!`,
+        title: 'De Herbergier en de Houthakker',
+        description: 'Leer de letters G en H',
+        newKeys: ['g', 'h'],
+        exercises: ['ggg', 'hhh', 'ghgh', 'hghg', 'dag', 'hag', 'slag', 'lach', 'had', 'gas', 'hak', 'haas', 'gala', 'hakhak'],
+        storyIntro: `In de herberg was het altijd gezellig en warm.
+          En de houthakker zorgde voor hout voor het haardvuur.
+          Met G en H brengen we de gezelligheid terug!`,
+        storyImageUrl: '/images/stories/lesson_4_innkeeper.png',
+        storyOutro: `Het haardvuur knettert weer in de herberg!
+          Iedereen heft zijn glas. Proost!`,
       },
       {
         id: 5,
         title: 'De Marktplaats',
         description: 'Leer de spatiebalk gebruiken',
         newKeys: [' '],
-        exercises: ['f j', 'a ;', 's l', 'd k', 'jas das', 'al fal', 'as ja', 'sla dal', 'jak als', 'das ja als'],
+        exercises: ['f j', 'd k', 's l', 'a ;', 'g h', 'dag dag', 'ha ha', 'ja ja', 'als sla', 'hallo', 'hal', 'ga sla sla'],
         storyIntro: `De marktplaats was het hart van het dorp.
           Hier kwamen alle dorpelingen samen.
           Met de SPATIE maak je ruimte tussen woorden!`,
@@ -144,7 +144,7 @@ export const REGIONS: Region[] = [
         title: 'De Boer en de Imker',
         description: 'Leer de letters E en I',
         newKeys: ['e', 'i'],
-        exercises: ['eee', 'iii', 'eiei', 'die', 'lei', 'de jas', 'die das', 'ik zie', 'die is lief', 'ik zei ja'],
+        exercises: ['eee', 'iii', 'eiei', 'die', 'lei', 'geit', 'hek', 'kiel', 'ezel', 'eis', 'fel', 'hel', 'gel', 'kil', 'lik', 'dik', 'sik', 'eik', 'lek', 'dek'],
         storyIntro: `De gouden korenvelden liggen er verlaten bij.
           Boer Erik en imker Iris wachten op de terugkeer van de magie.
           E en I brengen het land weer tot leven!`,
@@ -157,13 +157,52 @@ export const REGIONS: Region[] = [
         title: 'De Molenaar en de Uil',
         description: 'Leer de letters R en U',
         newKeys: ['r', 'u'],
-        exercises: ['rrr', 'uuu', 'ruru', 'uur', 'deur', 'reis', 'de deur', 'die reis', 'ik leer', 'de uil is heus'],
+        exercises: ['rrr', 'uuu', 'ruru', 'uur', 'ruw', 'rug', 'ruk', 'raak', 'rijk', 'rek', 'kar', 'sar', 'aar', 'raar', 'ruis', 'lus', 'deur', 'reus'],
         storyIntro: `De oude molen staat stil zonder wind.
           En de wijze uil kan niet meer praten.
           R en U brengen beweging en wijsheid terug!`,
         storyImageUrl: '/images/stories/lesson_7_miller.png',
         storyOutro: `De wieken van de molen draaien weer!
           "Wie?" roept de uil. Hij kan weer praten!`,
+      },
+      {
+        id: 8,
+        title: 'De Torenwachter en de Yak',
+        description: 'Leer de letters T en Y',
+        newKeys: ['t', 'y'],
+        exercises: ['ttt', 'yyy', 'tyty', 'tijd', 'kat', 'rat', 'gat', 'het', 'dat', 'dit', 'yeti', 'yak', 'yurt', 'test', 'taart', 'start', 'staat', 'rit', 'wit', 'fit', 'kit', 'jury'],
+        storyIntro: `Hoog op de uitkijktoren tuurt de wachter in de verte.
+          En in de wei graast een bijzondere yak.
+          T en Y maken het uitzicht weer helder!`,
+        storyImageUrl: '/images/stories/lesson_8_tower.png',
+        storyOutro: `De wachter blaast op zijn trompet!
+          De yak springt vrolijk in het rond.`,
+      },
+      {
+        id: 9,
+        title: 'De Pottenbakker en Opa',
+        description: 'Leer de letters O en P',
+        newKeys: ['o', 'p'],
+        exercises: ['ooo', 'ppp', 'opop', 'top', 'pot', 'pop', 'dop', 'kop', 'oog', 'oor', 'loop', 'rood', 'poot', 'hoop', 'tor', 'pol', 'dol', 'rol', 'soep', 'poes', 'kip', 'lip', 'sip', 'dip', 'gip'],
+        storyIntro: `Opa vertelt verhalen bij de pottenbakkerij.
+          Maar de oven is koud en de verhalen zijn vergeten.
+          O en P bakken weer mooie potten!`,
+        storyImageUrl: '/images/stories/lesson_9_potter.png',
+        storyOutro: `De pottenbakker draait weer prachtige vazen!
+          En opa vertelt zijn mooiste avonturen.`,
+      },
+      {
+        id: 10,
+        title: 'De Kwibus en de Waarzegster',
+        description: 'Leer de letters Q en W',
+        newKeys: ['q', 'w'],
+        exercises: ['qqq', 'www', 'qwqw', 'kwark', 'wak', 'wat', 'wie', 'wit', 'wip', 'wis', 'was', 'wee', 'wol', 'qua', 'aqua', 'wok', 'wel', 'wet', 'wei'],
+        storyIntro: `De grappige kwibus en de mysterieuze waarzegster
+          zijn hun stem kwijt.
+          Q en W brengen de raadsels en grappen terug!`,
+        storyImageUrl: '/images/stories/lesson_10_fortuneteller.png',
+        storyOutro: `De kwibus maakt iedereen aan het lachen!
+          De waarzegster ziet weer een prachtige toekomst.`,
       },
     ],
   },
@@ -175,14 +214,14 @@ export const REGIONS: Region[] = [
     imageUrl: '/images/map/icon-woud.png',
     color: 'bg-lettoria-woud',
     position: { x: 25, y: 30 },
-    requiredLessons: 12,
+    requiredLessons: 11,
     lessons: [
       {
-        id: 8,
+        id: 11,
         title: 'De Tovenaar en de Nachtegaal',
         description: 'Leer de letters Z en M',
         newKeys: ['z', 'm'],
-        exercises: ['zzz', 'mmm', 'zmzm', 'zam', 'mes', 'zelf', 'de zee', 'ik zem', 'de magie is zel', 'zel maf'],
+        exercises: ['zzz', 'mmm', 'zmzm', 'zam', 'mes', 'zelf', 'zeep', 'zoom', 'zoet', 'zout', 'map', 'mot', 'mol', 'mis', 'mus', 'man', 'maan', 'maat', 'mat', 'tam', 'dam', 'lam', 'kam', 'ham'],
         storyIntro: `Het Fluisterwoud is donker en stil geworden.
           Tovenaar Zeno heeft zijn spreukboek verloren.
           En de nachtegaal Mira kan niet meer zingen.
@@ -192,11 +231,11 @@ export const REGIONS: Region[] = [
           Mira zingt weer en het woud komt tot leven!`,
       },
       {
-        id: 9,
+        id: 12,
         title: 'De Heks en de Nimf',
         description: 'Leer de letters X en N',
         newKeys: ['x', 'n'],
-        exercises: ['nnn', 'xxx', 'nxnx', 'nex', 'nam', 'nek', 'een man', 'de nek', 'ik ren en ren', 'een mixen'],
+        exercises: ['nnn', 'xxx', 'nxnx', 'in', 'en', 'aan', 'een', 'niet', 'net', 'nat', 'noot', 'nu', 'pan', 'dan', 'kan', 'mix', 'max', 'fax', 'text', 'extra', 'next', 'sfinx'],
         storyIntro: `Dieper in het woud woont heks Xandra.
           En nimf Nina danst tussen de bomen.
           X en N geven hen hun krachten terug!`,
@@ -205,11 +244,11 @@ export const REGIONS: Region[] = [
           Nina's dans laat bloemen bloeien in het woud!`,
       },
       {
-        id: 10,
+        id: 13,
         title: 'De Centaur en de Vos',
         description: 'Leer de letters C en V',
         newKeys: ['c', 'v'],
-        exercises: ['ccc', 'vvv', 'cvcv', 'cel', 'vel', 'vis', 'de vis', 'een veer', 'ik kan cel en vel', 'de vos rent'],
+        exercises: ['ccc', 'vvv', 'cvcv', 'cel', 'vel', 'vis', 'vat', 'vet', 'vaak', 'veel', 'vier', 'vijf', 'code', 'cola', 'cactus', 'cavia', 'actie', 'vacht', 'lucht', 'nacht'],
         storyIntro: `Centaur Carlo bewaakt het woud al eeuwen.
           En slimme vos Victor kent alle geheime paden.
           C en V maken het woud weer veilig!`,
@@ -218,11 +257,11 @@ export const REGIONS: Region[] = [
           Victor leidt reizigers veilig door het bos!`,
       },
       {
-        id: 11,
+        id: 14,
         title: 'De Beer en het Bos',
         description: 'Leer de letter B en leestekens . en ,',
         newKeys: ['b', '.', ','],
-        exercises: ['bbb', 'b.b', 'b,b', 'been', 'bier', 'de beer is bruin.', 'ik zie een boom, en een beer.', 'de bloem is rood, blauw.', 'bruno slaapt.', 'de beer rent, de vos rent.'],
+        exercises: ['bbb', 'b.b', 'b,b', 'bal', 'bel', 'bol', 'bak', 'bek', 'bok', 'bad', 'bed', 'bod', 'heb', 'web', 'rob', 'big', 'de beer is bruin.', 'ik zie een boom, en een beer.', 'bruno slaapt.', 'de vos rent.'],
         storyIntro: `Beer Bruno slaapt al veel te lang.
           Het bos mist zijn beschermer.
           B wekt de beer en het hele woud!
@@ -241,10 +280,10 @@ export const REGIONS: Region[] = [
     imageUrl: '/images/map/icon-toppen.png',
     color: 'bg-lettoria-toppen',
     position: { x: 50, y: 15 },
-    requiredLessons: 12,
+    requiredLessons: 15,
     lessons: [
       {
-        id: 12,
+        id: 15,
         title: 'De Eerste Bergbeklimmer',
         description: 'Leer de cijfers 1, 2 en 3',
         newKeys: ['1', '2', '3'],
@@ -257,7 +296,7 @@ export const REGIONS: Region[] = [
           De cijfers gloeien op in het gesteente!`,
       },
       {
-        id: 13,
+        id: 16,
         title: 'De Kristalgrot',
         description: 'Leer de cijfers 4, 5 en 6',
         newKeys: ['4', '5', '6'],
@@ -270,7 +309,7 @@ export const REGIONS: Region[] = [
           De getallen dansen over de wanden!`,
       },
       {
-        id: 14,
+        id: 17,
         title: 'De Wolkenweg',
         description: 'Leer de cijfers 7, 8 en 9',
         newKeys: ['7', '8', '9'],
@@ -283,7 +322,7 @@ export const REGIONS: Region[] = [
           Bijna bij de top nu!`,
       },
       {
-        id: 15,
+        id: 18,
         title: 'De Top Bereikt',
         description: 'Leer 0 en oefen alle cijfers',
         newKeys: ['0'],
@@ -306,10 +345,10 @@ export const REGIONS: Region[] = [
     imageUrl: '/images/map/icon-zee.png',
     color: 'bg-lettoria-zee',
     position: { x: 75, y: 50 },
-    requiredLessons: 16,
+    requiredLessons: 19,
     lessons: [
       {
-        id: 16,
+        id: 19,
         title: 'De Haven van Haast',
         description: 'Snelheidsuitdaging: korte woorden',
         newKeys: [],
@@ -322,7 +361,7 @@ export const REGIONS: Region[] = [
           Je vingers worden steeds sneller!`,
       },
       {
-        id: 17,
+        id: 20,
         title: 'De Dolfijnenrace',
         description: 'Snelheidsuitdaging: langere woorden',
         newKeys: [],
@@ -335,7 +374,7 @@ export const REGIONS: Region[] = [
           Ze springen van vreugde!`,
       },
       {
-        id: 18,
+        id: 21,
         title: 'De Schattenkaart',
         description: 'Snelheidsuitdaging: zinnen',
         newKeys: [],
@@ -347,7 +386,7 @@ export const REGIONS: Region[] = [
           Een kist vol magische edelstenen!`,
       },
       {
-        id: 19,
+        id: 22,
         title: 'De Stormrace',
         description: 'Ultieme snelheidstest',
         newKeys: [],
@@ -369,14 +408,14 @@ export const REGIONS: Region[] = [
     imageUrl: '/images/map/icon-kasteel.png',
     color: 'bg-lettoria-kasteel',
     position: { x: 75, y: 20 },
-    requiredLessons: 20,
+    requiredLessons: 23,
     lessons: [
       {
-        id: 20,
+        id: 23,
         title: 'De Kasteelpoort',
         description: 'Test: thuisrij en bovenste rij',
         newKeys: [],
-        exercises: ['qwerty', 'asdfg', 'poiuy', 'water', 'rivier', 'de poort is groot.', 'ik zie het kasteel.', 'de ridder wacht.', 'we gaan naar binnen.', 'het is prachtig.'],
+        exercises: ['qwerty', 'asdfgh', 'poiuy', 'water', 'rivier', 'de poort is groot.', 'ik zie het kasteel.', 'de ridder wacht.', 'we gaan naar binnen.', 'het is prachtig.'],
         storyIntro: `Kasteel Compleet verschijnt aan de horizon!
           De grote poort is vergrendeld met lettermachines.
           Bewijs je kennis van de thuisrij en bovenste rij!`,
@@ -385,7 +424,7 @@ export const REGIONS: Region[] = [
           Je bent het kasteel binnengelaten!`,
       },
       {
-        id: 21,
+        id: 24,
         title: 'De Ridderzaal',
         description: 'Test: onderste rij en cijfers',
         newKeys: [],
@@ -398,7 +437,7 @@ export const REGIONS: Region[] = [
           De ridders buigen voor je!`,
       },
       {
-        id: 22,
+        id: 25,
         title: 'De Troonzaal',
         description: 'Ultieme meesterschapstest',
         newKeys: [],

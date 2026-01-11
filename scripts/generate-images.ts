@@ -72,6 +72,12 @@ const STORY_IMAGES: ImagePrompt[] = [
     folder: 'public/images/stories',
     prompt: 'Watercolor illustration of a medieval marketplace coming back to life with colorful stalls, happy villagers trading goods, warm sunlight. Storybook style, soft colors.',
   },
+  // Lesson 4 - Innkeeper and Woodcutter (G, H) - NEW
+  {
+    filename: 'lesson_4_innkeeper.png',
+    folder: 'public/images/stories',
+    prompt: 'Watercolor illustration of a cozy medieval inn with a warm fireplace, a friendly innkeeper serving drinks, and a strong woodcutter with an axe bringing firewood. Warm orange glow, welcoming atmosphere. Storybook style, soft colors.',
+  },
   // Lesson 6 - Farmer and Beekeeper (Velden)
   {
     filename: 'lesson_6_farmer.png',
@@ -83,6 +89,24 @@ const STORY_IMAGES: ImagePrompt[] = [
     filename: 'lesson_7_miller.png',
     folder: 'public/images/stories',
     prompt: 'Watercolor illustration of an old windmill with spinning sails and a wise owl perched nearby, magical wind swirling around. Storybook style, soft colors.',
+  },
+  // Lesson 8 - Tower Guard and Yak (T, Y) - NEW
+  {
+    filename: 'lesson_8_tower.png',
+    folder: 'public/images/stories',
+    prompt: 'Watercolor illustration of a tall medieval watchtower with a vigilant guard looking through a telescope, and a fluffy yak grazing peacefully in a mountain meadow below. Clear blue sky, distant mountains. Storybook style, soft colors.',
+  },
+  // Lesson 9 - Potter and Grandpa (O, P) - NEW
+  {
+    filename: 'lesson_9_potter.png',
+    folder: 'public/images/stories',
+    prompt: 'Watercolor illustration of a cozy pottery workshop with a potter spinning beautiful vases on a wheel, and a kind grandfather telling stories to children by a warm oven. Clay pots and storytelling magic. Storybook style, soft colors.',
+  },
+  // Lesson 10 - Jester and Fortune Teller (Q, W) - NEW
+  {
+    filename: 'lesson_10_fortuneteller.png',
+    folder: 'public/images/stories',
+    prompt: 'Watercolor illustration of a funny court jester juggling colorful balls and making people laugh, next to a mysterious fortune teller with a crystal ball and flowing robes. Magical sparkles and whimsy. Storybook style, soft colors.',
   },
   // Woud lessons
   {
