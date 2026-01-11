@@ -76,14 +76,14 @@ export function Eric({ mood = 'happy', message, size = 'medium' }: EricProps) {
         <motion.div
           initial={{ opacity: 0, scale: 0.8, x: -10 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
-          className="relative bg-white rounded-2xl rounded-bl-none px-4 py-3 shadow-lg max-w-xs"
+          className="relative bg-white rounded-2xl rounded-bl-none px-5 py-4 shadow-lg max-w-sm"
         >
           {/* Mood indicator */}
-          <span className="absolute -top-2 -right-2 text-lg">
+          <span className="absolute -top-3 -right-3 text-2xl">
             {MOOD_EMOJIS[mood]}
           </span>
 
-          <p className="text-gray-700 text-sm leading-relaxed">{message}</p>
+          <p className="text-gray-700 text-base md:text-lg leading-relaxed font-medium">{message}</p>
 
           {/* Speech bubble tail */}
           <div className="absolute bottom-0 -left-2 w-4 h-4 bg-white transform rotate-45" />
