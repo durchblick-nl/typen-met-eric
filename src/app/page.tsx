@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
@@ -15,9 +17,12 @@ export default function Home() {
             Welkom in de magische wereld van Lettoria! Samen met Eric de draak
             ga je op avontuur en leer je typen.
           </p>
-          <button className="bg-eric-green hover:bg-eric-green/90 text-white font-bold py-3 px-8 rounded-full text-lg transition-all hover:scale-105 shadow-md">
+          <Link
+            href="/oefenen"
+            className="inline-block bg-eric-green hover:bg-eric-green/90 text-white font-bold py-3 px-8 rounded-full text-lg transition-all hover:scale-105 shadow-md"
+          >
             Start je avontuur
-          </button>
+          </Link>
         </div>
 
         <p className="mt-8 text-sm text-gray-500">

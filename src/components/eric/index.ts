@@ -1,0 +1,1 @@
+export { Eric } from './Eric';
