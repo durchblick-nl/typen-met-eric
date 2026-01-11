@@ -256,12 +256,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 <TypingArea />
               </div>
 
-              <div className="mb-8">
-                <LiveStats />
-              </div>
-
-              <div className="flex justify-center">
+              {/* Keyboard with Stats on the right */}
+              <div className="flex justify-center items-start gap-4">
                 <VirtualKeyboard showFingerHints={true} lessonId={lessonId} />
+                <LiveStats vertical={true} />
               </div>
             </motion.div>
           )}
