@@ -214,12 +214,26 @@ export function LessonClient({ lessonId }: LessonClientProps) {
             >
               <div className="mb-6">
                 <Eric
-                  mood={exerciseComplete ? (accuracy >= 85 ? 'celebrating' : 'encouraging') : 'happy'}
-                  message={
+                  mood={
                     exerciseComplete
                       ? accuracy >= 85
+                        ? 'celebrating'
+                        : accuracy >= 60
+                          ? 'encouraging'
+                          : 'worried'
+                      : 'happy'
+                  }
+                  message={
+                    exerciseComplete
+                      ? accuracy >= 95
                         ? 'Uitstekend!'
-                        : 'Goed gedaan!'
+                        : accuracy >= 85
+                          ? 'Heel goed!'
+                          : accuracy >= 70
+                            ? 'Dat gaat al aardig!'
+                            : accuracy >= 50
+                              ? 'Blijf oefenen, het komt goed!'
+                              : 'Oeps! Probeer het nog eens...'
                       : 'Concentreer je... je kunt het!'
                   }
                 />
