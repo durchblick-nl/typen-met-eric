@@ -8,23 +8,40 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Primary language: Dutch (with German and English planned)
 
-## Planned Tech Stack
+## Tech Stack
 
-- **Framework:** Next.js 14 (App Router)
+- **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **Animations:** Framer Motion + Lottie
 - **State:** Zustand
 - **Auth/DB/Storage:** Supabase (Auth, PostgreSQL, Storage)
-- **ORM:** Prisma
-- **Email:** Resend
+- **ORM:** Prisma (planned)
+- **Email:** Resend (planned)
 - **Hosting:** Cloudflare Pages
 - **Repository:** GitHub
 
-## Project Status
+## Commands
 
-Currently in planning phase. The repository contains:
-- `typen-met-eric-plan.md` - Complete project specification including database schema, UI designs, lesson structure, and implementation roadmap
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run lint         # Run ESLint
+npm run pages:build  # Build for Cloudflare Pages
+```
+
+## Project Structure
+
+```
+src/app/             # Next.js App Router pages
+  layout.tsx         # Root layout
+  page.tsx           # Landing page
+  globals.css        # Global styles with Tailwind
+```
+
+## Planning Documents
+
+- `typen-met-eric-plan.md` - Complete project specification including database schema, UI designs, lesson structure
 - `canva/` - Design assets and AI image prompts for Eric the dragon character
 
 ## Key Concepts
@@ -50,17 +67,15 @@ The game world has 7 regions unlocked progressively:
 - Daily streaks with rewards
 - Achievements system
 
-## When Starting Development
+## Next Steps
 
-The plan specifies this initial setup:
-1. Create Next.js 14 project with TypeScript, Tailwind, App Router, src/ directory
-2. Install: @supabase/supabase-js, @supabase/ssr, prisma, @prisma/client, framer-motion, zustand, zod
-3. Install @cloudflare/next-on-pages for Cloudflare Pages deployment
-4. Implement Prisma schema from `typen-met-eric-plan.md` section 4.2
-5. Follow project structure in section 4.3
+1. Set up Supabase project and configure environment variables
+2. Implement Prisma schema from `typen-met-eric-plan.md` section 4.2
+3. Build the typing engine components
+4. Create the world map and lesson flow
 
 ## Deployment
 
 - Push to GitHub triggers automatic deployment via Cloudflare Pages
 - Build command: `npx @cloudflare/next-on-pages`
-- Use Cloudflare Pages Functions for API routes
+- Output directory: `.vercel/output/static`
