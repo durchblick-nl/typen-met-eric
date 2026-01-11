@@ -1,10 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Sparkles } from '@/components/ui/Sparkles';
 import { Footer } from '@/components/Footer';
+import { KeyboardHint, KeyboardHintDark } from '@/components/ui/KeyboardHint';
 
 const container = {
   hidden: { opacity: 0 },
@@ -28,6 +31,28 @@ const fadeIn = {
 };
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        router.push('/kaart');
+      } else if (e.key === 'i' || e.key === 'I') {
+        e.preventDefault();
+        router.push('/over');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [router]);
+
   return (
     <main className="min-h-screen overflow-x-hidden">
       {/* Hero Section */}
@@ -88,15 +113,17 @@ export default function Home() {
               className="group relative inline-flex items-center justify-center"
             >
               <div className="absolute transition-all duration-200 rounded-full -inset-1 bg-gradient-to-r from-eric-green to-eric-belly opacity-70 blur group-hover:opacity-100 group-hover:blur-md"></div>
-              <span className="relative inline-block bg-eric-green hover:bg-eric-green/90 text-white font-bold py-4 px-10 rounded-full text-xl transition-all hover:scale-105 shadow-xl">
-                Start gratis met typen 🚀
+              <span className="relative inline-flex items-center bg-eric-green hover:bg-eric-green/90 text-white font-bold py-4 px-10 rounded-full text-xl transition-all hover:scale-105 shadow-xl">
+                Start gratis met typen
+                <KeyboardHint keyName="↵" />
               </span>
             </Link>
             <Link
               href="/over"
-              className="inline-block bg-white hover:bg-gray-50 text-eric-green font-bold py-4 px-10 rounded-full text-xl transition-all hover:scale-105 shadow-md border-2 border-eric-green"
+              className="inline-flex items-center bg-white hover:bg-gray-50 text-eric-green font-bold py-4 px-10 rounded-full text-xl transition-all hover:scale-105 shadow-md border-2 border-eric-green"
             >
               Info voor ouders
+              <KeyboardHintDark keyName="I" />
             </Link>
           </motion.div>
 
@@ -265,8 +292,9 @@ export default function Home() {
               className="group relative inline-flex items-center justify-center"
             >
               <div className="absolute transition-all duration-200 rounded-full -inset-1 bg-eric-green opacity-70 blur group-hover:opacity-100 group-hover:blur-md"></div>
-              <span className="relative inline-block bg-eric-green hover:bg-eric-green/90 text-white font-bold py-5 px-12 rounded-full text-xl transition-all hover:scale-105 shadow-xl">
+              <span className="relative inline-flex items-center bg-eric-green hover:bg-eric-green/90 text-white font-bold py-5 px-12 rounded-full text-xl transition-all hover:scale-105 shadow-xl">
                 Speel nu gratis
+                <KeyboardHint keyName="↵" />
               </span>
             </Link>
           </motion.div>

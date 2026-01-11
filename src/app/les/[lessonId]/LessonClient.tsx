@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTypingStore } from '@/lib/stores/typingStore';
 import { useProgressStore } from '@/lib/stores/progressStore';
 import { getLessonById } from '@/lib/data/regions';
@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { KeyboardHint, KeyboardHintDark } from '@/components/ui/KeyboardHint';
 
 type LessonPhase = 'intro' | 'exercise' | 'outro' | 'complete';
 
@@ -84,9 +85,34 @@ export function LessonClient({ lessonId }: LessonClientProps) {
     router.push(`/regio/${region.id}`);
   };
 
-  const handleNextLesson = () => {
+  const handleNextLesson = useCallback(() => {
     router.push(`/les/${lessonId + 1}`);
-  };
+  }, [router, lessonId]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger during exercise phase (user is typing)
+      if (phase === 'exercise') return;
+
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (phase === 'intro') {
+          handleStartExercise();
+        } else if (phase === 'outro') {
+          handleContinue();
+        } else if (phase === 'complete') {
+          handleNextLesson();
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleBackToRegion();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, handleNextLesson]);
 
   // Calculate stars
   const stars = accuracy >= 95 ? 3 : accuracy >= 85 ? 2 : 1;
@@ -169,9 +195,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
                 <button
                   onClick={handleStartExercise}
-                  className="px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-bold text-lg transition-all hover:scale-105 shadow-lg"
+                  className="inline-flex items-center px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-bold text-lg transition-all hover:scale-105 shadow-lg"
                 >
                   Start de oefening!
+                  <KeyboardHint keyName="↵" />
                 </button>
               </div>
             </motion.div>
@@ -233,9 +260,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
               <button
                 onClick={handleContinue}
-                className="px-8 py-4 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-bold text-lg transition-all hover:scale-105 shadow-lg"
+                className="inline-flex items-center px-8 py-4 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-bold text-lg transition-all hover:scale-105 shadow-lg"
               >
                 Bekijk je resultaat!
+                <KeyboardHint keyName="↵" />
               </button>
             </motion.div>
           )}
@@ -293,15 +321,17 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={handleBackToRegion}
-                  className="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition-colors"
+                  className="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition-colors"
                 >
                   Terug naar {region.name}
+                  <KeyboardHintDark keyName="Esc" />
                 </button>
                 <button
                   onClick={handleNextLesson}
-                  className="px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-semibold transition-colors"
+                  className="inline-flex items-center px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-semibold transition-colors"
                 >
-                  Volgende les →
+                  Volgende les
+                  <KeyboardHint keyName="↵" />
                 </button>
               </div>
             </motion.div>
