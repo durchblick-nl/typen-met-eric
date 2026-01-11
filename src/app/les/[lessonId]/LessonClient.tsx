@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTypingStore } from '@/lib/stores/typingStore';
 import { useProgressStore } from '@/lib/stores/progressStore';
-import { getLessonById } from '@/lib/data/regions';
+import { getLessonById, getTotalLessons } from '@/lib/data/regions';
 import { TypingArea, VirtualKeyboard, LiveStats } from '@/components/typing';
 import { Eric } from '@/components/eric';
 import Link from 'next/link';
@@ -81,13 +81,30 @@ export function LessonClient({ lessonId }: LessonClientProps) {
     setPhase('complete');
   };
 
-  const handleBackToRegion = () => {
-    router.push(`/regio/${region.id}`);
-  };
+  const isLastLesson = lessonId >= getTotalLessons() - 1;
+
+  const handleBackToRegion = useCallback(() => {
+    if (isLastLesson) {
+      router.push('/kaart');
+    } else {
+      router.push(`/regio/${region.id}`);
+    }
+  }, [router, region.id, isLastLesson]);
 
   const handleNextLesson = useCallback(() => {
-    router.push(`/les/${lessonId + 1}`);
-  }, [router, lessonId]);
+    if (!isLastLesson) {
+      router.push(`/les/${lessonId + 1}`);
+    }
+  }, [router, lessonId, isLastLesson]);
+
+  const handleRetry = useCallback(() => {
+    resetTyping();
+    setPhase('intro');
+    setExerciseIndex(0);
+  }, [resetTyping]);
+
+  // Calculate stars
+  const stars = accuracy >= 95 ? 3 : accuracy >= 85 ? 2 : 1;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -102,7 +119,12 @@ export function LessonClient({ lessonId }: LessonClientProps) {
         } else if (phase === 'outro') {
           handleContinue();
         } else if (phase === 'complete') {
-          handleNextLesson();
+          // Only go to next lesson if 3 stars, otherwise retry
+          if (stars >= 3 && !isLastLesson) {
+            handleNextLesson();
+          } else if (stars < 3) {
+            handleRetry();
+          }
         }
       } else if (e.key === 'Escape') {
         e.preventDefault();
@@ -112,10 +134,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [phase, handleNextLesson]);
-
-  // Calculate stars
-  const stars = accuracy >= 95 ? 3 : accuracy >= 85 ? 2 : 1;
+  }, [phase, handleNextLesson, handleBackToRegion, handleRetry, isLastLesson, stars]);
 
   return (
     <main className="min-h-screen bg-perkament p-4 md:p-8">
@@ -341,6 +360,17 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                     <div className="text-sm text-gray-500">Nauwkeurig</div>
                   </div>
                 </div>
+
+                {/* Encouragement for retry */}
+                {stars < 3 && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-accent">
+                      Je hebt 3 sterren nodig om verder te gaan.
+                      <br />
+                      Probeer het nog eens voor een betere score!
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-center gap-4">
@@ -348,16 +378,28 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                   onClick={handleBackToRegion}
                   className="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition-colors"
                 >
-                  Terug naar {region.name}
+                  {isLastLesson ? 'Terug naar kaart' : `Terug naar ${region.name}`}
                   <KeyboardHintDark keyName="Esc" />
                 </button>
-                <button
-                  onClick={handleNextLesson}
-                  className="inline-flex items-center px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-semibold transition-colors"
-                >
-                  Volgende les
-                  <KeyboardHint keyName="↵" />
-                </button>
+                {stars < 3 ? (
+                  <button
+                    onClick={handleRetry}
+                    className="inline-flex items-center px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-full font-semibold transition-colors"
+                  >
+                    Opnieuw proberen
+                    <KeyboardHint keyName="↵" />
+                  </button>
+                ) : (
+                  !isLastLesson && (
+                    <button
+                      onClick={handleNextLesson}
+                      className="inline-flex items-center px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-semibold transition-colors"
+                    >
+                      Volgende les
+                      <KeyboardHint keyName="↵" />
+                    </button>
+                  )
+                )}
               </div>
             </motion.div>
           )}

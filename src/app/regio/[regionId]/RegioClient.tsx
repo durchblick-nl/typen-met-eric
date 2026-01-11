@@ -21,9 +21,11 @@ export function RegioClient({ regionId }: RegioClientProps) {
   }
 
   const isLessonCompleted = (lessonId: number) => completedLessons.includes(lessonId);
+  const hasPerfectScore = (lessonId: number) => lessonStars[lessonId] === 3;
   const isLessonUnlocked = (lessonId: number) => {
     if (lessonId === 0) return true;
-    return completedLessons.includes(lessonId - 1);
+    // Need 3 stars on previous lesson to unlock next
+    return lessonStars[lessonId - 1] === 3;
   };
 
   const completedInRegion = region.lessons.filter((l) =>
@@ -77,12 +79,14 @@ export function RegioClient({ regionId }: RegioClientProps) {
             const unlocked = isLessonUnlocked(lesson.id);
             const stars = lessonStars[lesson.id] || 0;
 
+            const needsMoreStars = completed && stars < 3;
+
             return (
               <div
                 key={lesson.id}
                 className={`
                   relative bg-white rounded-2xl p-6 shadow-lg border-2 transition-all
-                  ${completed ? 'border-succes' : unlocked ? 'border-eric-gold' : 'border-gray-200'}
+                  ${completed && stars === 3 ? 'border-succes' : completed ? 'border-accent' : unlocked ? 'border-eric-gold' : 'border-gray-200'}
                   ${!unlocked ? 'opacity-60' : ''}
                 `}
               >
@@ -92,15 +96,18 @@ export function RegioClient({ regionId }: RegioClientProps) {
                     <div
                       className={`
                         w-12 h-12 rounded-full flex items-center justify-center text-xl
-                        ${completed ? 'bg-succes text-white' : unlocked ? 'bg-eric-gold/20' : 'bg-gray-100'}
+                        ${completed && stars === 3 ? 'bg-succes text-white' : completed ? 'bg-accent/20' : unlocked ? 'bg-eric-gold/20' : 'bg-gray-100'}
                       `}
                     >
-                      {completed ? '✓' : unlocked ? lesson.id + 1 : '🔒'}
+                      {completed && stars === 3 ? '✓' : completed ? '↺' : unlocked ? lesson.id + 1 : '🔒'}
                     </div>
 
                     <div>
                       <h3 className="font-bold text-gray-800">{lesson.title}</h3>
                       <p className="text-sm text-gray-500">{lesson.description}</p>
+                      {needsMoreStars && (
+                        <p className="text-xs text-accent mt-1">Nog oefenen voor 3 sterren!</p>
+                      )}
                       {lesson.newKeys.length > 0 && (
                         <div className="flex gap-1 mt-1">
                           {lesson.newKeys.map((key) => (
@@ -137,13 +144,15 @@ export function RegioClient({ regionId }: RegioClientProps) {
                         href={`/les/${lesson.id}`}
                         className={`
                           px-6 py-2 rounded-full font-semibold transition-all
-                          ${completed
+                          ${completed && stars === 3
                             ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                            : 'bg-eric-green hover:bg-eric-green/90 text-white'
+                            : needsMoreStars
+                              ? 'bg-accent hover:bg-accent/90 text-white'
+                              : 'bg-eric-green hover:bg-eric-green/90 text-white'
                           }
                         `}
                       >
-                        {completed ? 'Opnieuw' : 'Start'}
+                        {completed && stars === 3 ? 'Opnieuw' : needsMoreStars ? 'Herhalen' : 'Start'}
                       </Link>
                     )}
                   </div>
