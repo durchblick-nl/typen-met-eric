@@ -120,19 +120,15 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center"
             >
-              <div className="mb-8">
-                <Eric mood="thinking" size="large" />
-              </div>
-
+              {/* Story Image - top, compact */}
               {lesson.storyImageUrl && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mb-6 rounded-xl overflow-hidden shadow-md max-w-lg mx-auto border-4 border-white transform rotate-1"
+                  className="mb-4 rounded-xl overflow-hidden shadow-md max-w-md mx-auto border-4 border-white transform rotate-1"
                 >
-                  <div className="relative aspect-[4/3] w-full">
+                  <div className="relative aspect-[16/9] w-full">
                     <Image
                       src={lesson.storyImageUrl}
                       alt="Story Illustration"
@@ -143,34 +139,41 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 </motion.div>
               )}
 
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-eric-gold/30 max-w-2xl mx-auto mb-8">
-                <p className="text-lg text-gray-700 whitespace-pre-line leading-relaxed">
-                  {lesson.storyIntro}
-                </p>
+              {/* Eric + Story Text side by side */}
+              <div className="flex items-start gap-4 max-w-2xl mx-auto mb-4">
+                <div className="flex-shrink-0">
+                  <Eric mood="thinking" size="small" />
+                </div>
+                <div className="bg-white rounded-2xl p-5 shadow-lg border-2 border-eric-gold/30 flex-1">
+                  <p className="text-base text-gray-700 whitespace-pre-line leading-relaxed">
+                    {lesson.storyIntro}
+                  </p>
+                </div>
               </div>
 
-              {lesson.newKeys.length > 0 && (
-                <div className="mb-8">
-                  <p className="text-sm text-gray-500 mb-2">Nieuwe letters:</p>
-                  <div className="flex justify-center gap-2">
+              {/* New keys + Start button in row */}
+              <div className="flex items-center justify-center gap-6">
+                {lesson.newKeys.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">Nieuw:</span>
                     {lesson.newKeys.map((key) => (
                       <span
                         key={key}
-                        className="w-12 h-12 bg-eric-gold text-gray-900 rounded-lg flex items-center justify-center text-xl font-bold font-mono shadow-lg"
+                        className="w-10 h-10 bg-eric-gold text-gray-900 rounded-lg flex items-center justify-center text-lg font-bold font-mono shadow-lg"
                       >
                         {key === ' ' ? '␣' : key.toUpperCase()}
                       </span>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
 
-              <button
-                onClick={handleStartExercise}
-                className="px-8 py-4 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-bold text-lg transition-all hover:scale-105 shadow-lg"
-              >
-                Start de oefening!
-              </button>
+                <button
+                  onClick={handleStartExercise}
+                  className="px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-bold text-lg transition-all hover:scale-105 shadow-lg"
+                >
+                  Start de oefening!
+                </button>
+              </div>
             </motion.div>
           )}
 
