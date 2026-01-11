@@ -17,12 +17,20 @@ export default function Home() {
             Welkom in de magische wereld van Lettoria! Samen met Eric de draak
             ga je op avontuur en leer je typen.
           </p>
-          <Link
-            href="/oefenen"
-            className="inline-block bg-eric-green hover:bg-eric-green/90 text-white font-bold py-3 px-8 rounded-full text-lg transition-all hover:scale-105 shadow-md"
-          >
-            Start je avontuur
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/kaart"
+              className="inline-block bg-eric-green hover:bg-eric-green/90 text-white font-bold py-3 px-8 rounded-full text-lg transition-all hover:scale-105 shadow-md"
+            >
+              🗺️ Start je avontuur
+            </Link>
+            <Link
+              href="/oefenen"
+              className="inline-block bg-white hover:bg-gray-50 text-eric-green font-bold py-3 px-8 rounded-full text-lg transition-all hover:scale-105 shadow-md border-2 border-eric-green"
+            >
+              ⌨️ Snel oefenen
+            </Link>
+          </div>
         </div>
 
         <p className="mt-8 text-sm text-gray-500">
