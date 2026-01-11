@@ -54,106 +54,130 @@ const FINGER_HEX_COLORS: Record<number, string> = {
 // Home row keys (have bumps on F and J)
 const HOME_KEYS = ['a', 's', 'd', 'f', 'j', 'k', 'l', ';'];
 
-// Left Hand SVG component - thumb points RIGHT (toward center)
+// Left Hand SVG - viewed from above, fingers pointing UP toward keyboard
 function LeftHandSVG({ activeFingerIndex }: { activeFingerIndex: number | null }) {
-  const fingerIndices = [0, 1, 2, 3]; // pinky, ring, middle, index
+  // Left hand: pinky=0, ring=1, middle=2, index=3
+  const fingers = [
+    { x: 12, fingerIndex: 0 },  // pinky (leftmost)
+    { x: 28, fingerIndex: 1 },  // ring
+    { x: 44, fingerIndex: 2 },  // middle
+    { x: 60, fingerIndex: 3 },  // index
+  ];
 
   return (
-    <svg viewBox="0 0 120 100" className="w-32 h-24">
-      {/* Palm */}
-      <ellipse cx="55" cy="65" rx="40" ry="30" fill="#e8c4a0" stroke="#d4a574" strokeWidth="2" />
+    <svg viewBox="0 0 90 120" className="w-20 h-28">
+      {/* Wrist/sleeve */}
+      <rect x="15" y="95" width="50" height="20" rx="4" fill="#4a5568" stroke="#2d3748" strokeWidth="2" />
 
-      {/* Thumb - points RIGHT toward center */}
-      <ellipse
-        cx="95"
-        cy="55"
-        rx="18"
-        ry="10"
+      {/* Palm */}
+      <path
+        d="M 10 95 Q 5 70 12 55 L 12 55 L 68 55 Q 75 70 70 95 Z"
         fill="#e8c4a0"
         stroke="#d4a574"
         strokeWidth="2"
       />
 
-      {/* Fingers - from left to right: pinky, ring, middle, index */}
-      {[
-        { cx: 20, cy: 28, rx: 9, ry: 22 },   // pinky (leftmost)
-        { cx: 38, cy: 18, rx: 9, ry: 28 },   // ring
-        { cx: 58, cy: 14, rx: 9, ry: 30 },   // middle
-        { cx: 78, cy: 20, rx: 9, ry: 26 },   // index (rightmost, near thumb)
-      ].map((finger, idx) => {
-        const fingerIndex = fingerIndices[idx];
+      {/* Fingers - pointing UP */}
+      {fingers.map(({ x, fingerIndex }) => {
         const isActive = activeFingerIndex === fingerIndex;
-        const baseColor = FINGER_HEX_COLORS[fingerIndex];
+        const color = FINGER_HEX_COLORS[fingerIndex];
+        const height = fingerIndex === 2 ? 45 : fingerIndex === 1 || fingerIndex === 3 ? 40 : 32; // middle longest
 
         return (
-          <ellipse
-            key={idx}
-            cx={finger.cx}
-            cy={finger.cy}
-            rx={finger.rx}
-            ry={finger.ry}
-            fill={baseColor}
-            stroke={isActive ? '#fff' : '#00000020'}
-            strokeWidth={isActive ? 3 : 1}
-            className={isActive ? 'animate-pulse' : ''}
-            style={{
-              filter: isActive ? 'drop-shadow(0 0 10px rgba(255,255,255,0.9))' : 'none',
-            }}
-          />
+          <g key={fingerIndex}>
+            <rect
+              x={x}
+              y={55 - height}
+              width={12}
+              height={height}
+              rx={6}
+              fill={color}
+              stroke={isActive ? '#fff' : '#00000030'}
+              strokeWidth={isActive ? 3 : 1.5}
+              className={isActive ? 'animate-pulse' : ''}
+              style={{
+                filter: isActive ? 'drop-shadow(0 0 8px rgba(255,255,255,0.9))' : 'none',
+              }}
+            />
+          </g>
         );
       })}
+
+      {/* Thumb - pointing RIGHT toward center */}
+      <rect
+        x="68"
+        y="60"
+        width="28"
+        height="14"
+        rx={7}
+        fill="#e8c4a0"
+        stroke="#d4a574"
+        strokeWidth="2"
+      />
     </svg>
   );
 }
 
-// Right Hand SVG component - thumb points LEFT (toward center)
+// Right Hand SVG - viewed from above, fingers pointing UP toward keyboard
 function RightHandSVG({ activeFingerIndex }: { activeFingerIndex: number | null }) {
-  const fingerIndices = [4, 5, 6, 7]; // index, middle, ring, pinky
+  // Right hand: index=4, middle=5, ring=6, pinky=7
+  const fingers = [
+    { x: 18, fingerIndex: 4 },  // index
+    { x: 34, fingerIndex: 5 },  // middle
+    { x: 50, fingerIndex: 6 },  // ring
+    { x: 66, fingerIndex: 7 },  // pinky (rightmost)
+  ];
 
   return (
-    <svg viewBox="0 0 120 100" className="w-32 h-24">
-      {/* Palm */}
-      <ellipse cx="65" cy="65" rx="40" ry="30" fill="#e8c4a0" stroke="#d4a574" strokeWidth="2" />
+    <svg viewBox="0 0 90 120" className="w-20 h-28">
+      {/* Wrist/sleeve */}
+      <rect x="25" y="95" width="50" height="20" rx="4" fill="#4a5568" stroke="#2d3748" strokeWidth="2" />
 
-      {/* Thumb - points LEFT toward center */}
-      <ellipse
-        cx="25"
-        cy="55"
-        rx="18"
-        ry="10"
+      {/* Palm */}
+      <path
+        d="M 20 95 Q 15 70 22 55 L 22 55 L 78 55 Q 85 70 80 95 Z"
         fill="#e8c4a0"
         stroke="#d4a574"
         strokeWidth="2"
       />
 
-      {/* Fingers - from left to right: index, middle, ring, pinky */}
-      {[
-        { cx: 42, cy: 20, rx: 9, ry: 26 },   // index (leftmost, near thumb)
-        { cx: 62, cy: 14, rx: 9, ry: 30 },   // middle
-        { cx: 82, cy: 18, rx: 9, ry: 28 },   // ring
-        { cx: 100, cy: 28, rx: 9, ry: 22 },  // pinky (rightmost)
-      ].map((finger, idx) => {
-        const fingerIndex = fingerIndices[idx];
+      {/* Fingers - pointing UP */}
+      {fingers.map(({ x, fingerIndex }) => {
         const isActive = activeFingerIndex === fingerIndex;
-        const baseColor = FINGER_HEX_COLORS[fingerIndex];
+        const color = FINGER_HEX_COLORS[fingerIndex];
+        const height = fingerIndex === 5 ? 45 : fingerIndex === 4 || fingerIndex === 6 ? 40 : 32; // middle longest
 
         return (
-          <ellipse
-            key={idx}
-            cx={finger.cx}
-            cy={finger.cy}
-            rx={finger.rx}
-            ry={finger.ry}
-            fill={baseColor}
-            stroke={isActive ? '#fff' : '#00000020'}
-            strokeWidth={isActive ? 3 : 1}
-            className={isActive ? 'animate-pulse' : ''}
-            style={{
-              filter: isActive ? 'drop-shadow(0 0 10px rgba(255,255,255,0.9))' : 'none',
-            }}
-          />
+          <g key={fingerIndex}>
+            <rect
+              x={x}
+              y={55 - height}
+              width={12}
+              height={height}
+              rx={6}
+              fill={color}
+              stroke={isActive ? '#fff' : '#00000030'}
+              strokeWidth={isActive ? 3 : 1.5}
+              className={isActive ? 'animate-pulse' : ''}
+              style={{
+                filter: isActive ? 'drop-shadow(0 0 8px rgba(255,255,255,0.9))' : 'none',
+              }}
+            />
+          </g>
         );
       })}
+
+      {/* Thumb - pointing LEFT toward center */}
+      <rect
+        x="-6"
+        y="60"
+        width="28"
+        height="14"
+        rx={7}
+        fill="#e8c4a0"
+        stroke="#d4a574"
+        strokeWidth="2"
+      />
     </svg>
   );
 }
