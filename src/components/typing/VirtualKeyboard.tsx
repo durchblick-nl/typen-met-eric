@@ -2,8 +2,9 @@
 
 import { useTypingStore } from '@/lib/stores/typingStore';
 
-// Keyboard layout (Dutch QWERTY)
+// Keyboard layout (Dutch QWERTY) with number row
 const KEYBOARD_ROWS = [
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
   ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'],
   ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.'],
@@ -13,6 +14,9 @@ const KEYBOARD_ROWS = [
 // 0 = left pinky, 1 = left ring, 2 = left middle, 3 = left index
 // 4 = right index, 5 = right middle, 6 = right ring, 7 = right pinky
 const FINGER_MAP: Record<string, number> = {
+  // Number row
+  '1': 0, '2': 1, '3': 2, '4': 3, '5': 3,
+  '6': 4, '7': 4, '8': 5, '9': 6, '0': 7,
   // Top row
   'q': 0, 'w': 1, 'e': 2, 'r': 3, 't': 3,
   'y': 4, 'u': 4, 'i': 5, 'o': 6, 'p': 7,
@@ -195,8 +199,8 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
   const currentKey = highlightKey || targetText[currentIndex]?.toLowerCase() || '';
   const currentFingerIndex = currentKey ? FINGER_MAP[currentKey] : null;
 
-  // Show detailed legend only for first 5 lessons (0-4)
-  const showDetailedLegend = lessonId <= 4;
+  // Always show hands
+  const showHands = true;
 
   return (
     <div className="bg-gray-800/95 backdrop-blur rounded-2xl p-4 shadow-xl border border-gray-700 box-glow">
@@ -204,8 +208,8 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
       {KEYBOARD_ROWS.map((row, rowIndex) => (
         <div key={rowIndex} className="flex justify-center gap-1 mb-1">
           {/* Add offset for home and bottom rows */}
-          {rowIndex === 1 && <div className="w-4" />}
-          {rowIndex === 2 && <div className="w-8" />}
+          {rowIndex === 2 && <div className="w-4" />}
+          {rowIndex === 3 && <div className="w-8" />}
 
           {row.map((key) => {
             const isCurrentKey = key === currentKey;
@@ -263,8 +267,8 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
         </div>
       </div>
 
-      {/* Hand illustrations - only for lessons 0-4 */}
-      {showFingerHints && showDetailedLegend && (
+      {/* Hand illustrations */}
+      {showFingerHints && showHands && (
         <div className="mt-6 pt-4 border-t border-gray-700">
           {/* Hands - thumbs pointing toward center */}
           <div className="flex justify-center items-center gap-4">
