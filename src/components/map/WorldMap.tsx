@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { REGIONS, Region } from '@/lib/data/regions';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface WorldMapProps {
   completedLessons: number;
@@ -19,11 +20,19 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
   return (
     <div className="relative w-full max-w-4xl mx-auto aspect-[4/3] bg-gradient-to-b from-lettoria-toppen/30 via-lettoria-velden/20 to-lettoria-zee/30 rounded-3xl overflow-hidden shadow-2xl border-4 border-eric-gold/50">
       {/* Background decorations */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-10 left-10 text-4xl">☁️</div>
-        <div className="absolute top-20 right-20 text-3xl">☁️</div>
-        <div className="absolute bottom-20 left-1/4 text-2xl">🌳</div>
-        <div className="absolute bottom-30 right-1/3 text-2xl">🌳</div>
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-10 left-10 w-24 h-16">
+          <Image src="/images/map/deco-cloud.png" alt="Cloud" fill className="object-contain" />
+        </div>
+        <div className="absolute top-20 right-20 w-20 h-14">
+          <Image src="/images/map/deco-cloud.png" alt="Cloud" fill className="object-contain" />
+        </div>
+        <div className="absolute bottom-20 left-1/4 w-16 h-20">
+          <Image src="/images/map/deco-tree.png" alt="Tree" fill className="object-contain" />
+        </div>
+        <div className="absolute bottom-30 right-1/3 w-16 h-20">
+          <Image src="/images/map/deco-tree.png" alt="Tree" fill className="object-contain" />
+        </div>
       </div>
 
       {/* Paths between regions */}
@@ -134,11 +143,17 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
                   <div
                     className={`
                       relative w-16 h-16 rounded-full flex items-center justify-center
-                      text-3xl shadow-lg border-4
+                      text-3xl shadow-lg border-4 overflow-hidden
                       ${current ? 'border-eric-gold bg-white' : 'border-white/50 bg-white/80'}
                     `}
                   >
-                    {region.icon}
+                    {region.imageUrl ? (
+                      <div className="relative w-12 h-12">
+                        <Image src={region.imageUrl} alt={region.name} fill className="object-contain" />
+                      </div>
+                    ) : (
+                      region.icon
+                    )}
                   </div>
 
                   <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
@@ -153,12 +168,18 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
                 <div
                   className={`
                     w-14 h-14 rounded-full flex items-center justify-center
-                    text-2xl shadow-lg border-4
+                    text-2xl shadow-lg border-4 overflow-hidden
                     ${unlocked ? 'border-white/50 bg-white/60' : 'border-gray-400 bg-gray-300'}
                     ${!unlocked ? 'grayscale opacity-50' : ''}
                   `}
                 >
-                  {unlocked ? region.icon : '🔒'}
+                  {unlocked && region.imageUrl ? (
+                    <div className="relative w-10 h-10">
+                      <Image src={region.imageUrl} alt={region.name} fill className="object-contain" />
+                    </div>
+                  ) : (
+                    unlocked ? region.icon : '🔒'
+                  )}
                 </div>
                 <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
                   <span className="text-xs font-medium text-gray-500 bg-white/60 px-2 py-0.5 rounded">

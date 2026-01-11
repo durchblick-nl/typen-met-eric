@@ -16,7 +16,7 @@ export default function Home() {
           {/* Eric Image */}
           <div className="mb-4">
             <Image
-              src="/images/eric/eric-happy.svg"
+              src="/images/eric/eric-happy.png"
               alt="Eric de draak"
               width={150}
               height={150}

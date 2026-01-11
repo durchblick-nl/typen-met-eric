@@ -12,11 +12,11 @@ interface EricProps {
 }
 
 const MOOD_IMAGES: Record<EricMood, string> = {
-  happy: '/images/eric/eric-happy.svg',
-  encouraging: '/images/eric/eric-encouraging.svg',
-  thinking: '/images/eric/eric-thinking.svg',
-  celebrating: '/images/eric/eric-celebrating.svg',
-  worried: '/images/eric/eric-worried.svg',
+  happy: '/images/eric/eric-happy.png',
+  encouraging: '/images/eric/eric-encouraging.png',
+  thinking: '/images/eric/eric-thinking.png',
+  celebrating: '/images/eric/eric-celebrating.png',
+  worried: '/images/eric/eric-worried.png',
 };
 
 const MOOD_EMOJIS: Record<EricMood, string> = {

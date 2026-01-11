@@ -13,6 +13,7 @@ export interface Region {
   name: string;
   description: string;
   icon: string;
+  imageUrl?: string; // Path to the new high-res icon image
   color: string;
   position: { x: number; y: number };
   lessons: Lesson[];
@@ -25,6 +26,7 @@ export const REGIONS: Region[] = [
     name: "Eric's Grot",
     description: 'Hier begint je avontuur met Eric',
     icon: '🐉',
+    imageUrl: '/images/map/icon-grot.png',
     color: 'bg-eric-green',
     position: { x: 50, y: 85 },
     requiredLessons: 0,
@@ -52,6 +54,7 @@ export const REGIONS: Region[] = [
     name: 'Het Startdorp',
     description: 'Leer de thuisrij: A S D F J K L ;',
     icon: '🏠',
+    imageUrl: '/images/map/icon-dorp.png',
     color: 'bg-lettoria-dorp',
     position: { x: 50, y: 70 },
     requiredLessons: 1,
@@ -125,6 +128,7 @@ export const REGIONS: Region[] = [
     name: 'De Velden van Vingervlugheid',
     description: 'Leer de bovenste rij: Q W E R T Y U I O P',
     icon: '🌾',
+    imageUrl: '/images/map/icon-velden.png',
     color: 'bg-lettoria-velden',
     position: { x: 30, y: 50 },
     requiredLessons: 6,
@@ -160,6 +164,7 @@ export const REGIONS: Region[] = [
     name: 'Het Fluisterwoud',
     description: 'Leer de onderste rij: Z X C V B N M',
     icon: '🌲',
+    imageUrl: '/images/map/icon-woud.png',
     color: 'bg-lettoria-woud',
     position: { x: 25, y: 30 },
     requiredLessons: 12,
@@ -170,6 +175,7 @@ export const REGIONS: Region[] = [
     name: 'De Toppen van Taal',
     description: 'Leer cijfers en symbolen',
     icon: '⛰️',
+    imageUrl: '/images/map/icon-toppen.png',
     color: 'bg-lettoria-toppen',
     position: { x: 50, y: 15 },
     requiredLessons: 18,
@@ -180,6 +186,7 @@ export const REGIONS: Region[] = [
     name: 'De Zee van Snelheid',
     description: 'Oefen je snelheid met games',
     icon: '🌊',
+    imageUrl: '/images/map/icon-zee.png',
     color: 'bg-lettoria-zee',
     position: { x: 75, y: 50 },
     requiredLessons: 22,
@@ -190,6 +197,7 @@ export const REGIONS: Region[] = [
     name: 'Kasteel Compleet',
     description: 'Beheers alle letters en red Lettoria!',
     icon: '🏰',
+    imageUrl: '/images/map/icon-kasteel.png',
     color: 'bg-lettoria-kasteel',
     position: { x: 75, y: 20 },
     requiredLessons: 28,
