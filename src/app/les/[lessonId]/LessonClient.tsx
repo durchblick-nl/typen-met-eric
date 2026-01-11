@@ -129,9 +129,22 @@ export function LessonClient({ lessonId }: LessonClientProps) {
             &larr; {region.name}
           </Link>
 
-          <h1 className="text-xl font-bold text-eric-green">
-            Les {lessonId + 1}: {lesson.title}
-          </h1>
+          <div className="text-center">
+            {region.imageUrl ? (
+              <Image
+                src={region.imageUrl}
+                alt={region.name}
+                width={40}
+                height={40}
+                className="mx-auto mb-1"
+              />
+            ) : (
+              <span className="text-2xl">{region.icon}</span>
+            )}
+            <h1 className="text-xl font-bold text-eric-green">
+              Les {lessonId + 1}: {lesson.title}
+            </h1>
+          </div>
 
           <div className="text-sm text-gray-500">
             {exerciseIndex + 1} / {lesson.exercises.length}
@@ -248,7 +261,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               </div>
 
               <div className="flex justify-center">
-                <VirtualKeyboard showFingerHints={true} />
+                <VirtualKeyboard showFingerHints={true} lessonId={lessonId} />
               </div>
             </motion.div>
           )}

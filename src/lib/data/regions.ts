@@ -37,7 +37,7 @@ export const REGIONS: Region[] = [
         title: 'Kennismaking met Eric',
         description: 'Leer Eric kennen en ontdek de thuisrij',
         newKeys: ['f', 'j'],
-        exercises: ['fff', 'jjj', 'fjfj', 'fjfjfj'],
+        exercises: ['fff', 'jjj', 'fjfj', 'jfjf', 'ffjj', 'jjff', 'fjfjfj', 'jfjfjf', 'fffjjj', 'jjjfff'],
         storyIntro: `Welkom, jonge held! Ik ben Eric, een draak uit Lettoria.
           Ooit was ik sterk en kon ik vuur spuwen, maar toen de magie verdween...
           verloor ik mijn krachten. Wil jij me helpen de magie terug te brengen?
@@ -66,7 +66,7 @@ export const REGIONS: Region[] = [
         title: 'De Bakker en de Wachter',
         description: 'Leer de letters A en ;',
         newKeys: ['a', ';'],
-        exercises: ['aaa', ';;;', 'a;a;', 'fa;j', 'af;j'],
+        exercises: ['aaa', ';;;', 'a;a;', ';a;a', 'fa;j', 'af;j', 'ja;f', 'faja', 'fjfj', 'a;fj'],
         storyIntro: `Welkom in het Startdorp! Kijk hoe grijs alles is...
           Daar was ooit de bakkerij van meneer Adriaan.
           En aan de andere kant woont de nachtwachter met zijn magische lantaarn.
@@ -81,7 +81,7 @@ export const REGIONS: Region[] = [
         title: 'De Smid en de Lantaarnmaker',
         description: 'Leer de letters S en L',
         newKeys: ['s', 'l'],
-        exercises: ['sss', 'lll', 'slsl', 'asdf', 'jkl;'],
+        exercises: ['sss', 'lll', 'slsl', 'lsls', 'sal', 'las', 'als', 'sla', 'fjfj', 'a;fj'],
         storyIntro: `De smid kon vroeger de mooiste zwaarden maken.
           En de lantaarnmaker zorgde voor licht in heel het dorp.
           Met S en L kunnen ze weer aan het werk!`,
@@ -94,7 +94,7 @@ export const REGIONS: Region[] = [
         title: 'De Dokter en de Klokkenmaker',
         description: 'Leer de letters D en K',
         newKeys: ['d', 'k'],
-        exercises: ['ddd', 'kkk', 'dkdk', 'asdf', 'jkl;', 'sad', 'lak'],
+        exercises: ['ddd', 'kkk', 'dkdk', 'kdkd', 'sad', 'lak', 'dal', 'klas', 'fjfj', 'asdf jkl;'],
         storyIntro: `Dokter Daan hielp iedereen die ziek was.
           En klokkenmaker Karel zorgde dat niemand te laat kwam.
           Breng D en K terug naar het dorp!`,
@@ -107,7 +107,7 @@ export const REGIONS: Region[] = [
         title: 'De Visser en de Juwelier',
         description: 'Oefen met F en J - je wijsvingers!',
         newKeys: [],
-        exercises: ['fjfj', 'asdf jkl;', 'alfa', 'jaks', 'flaks'],
+        exercises: ['fjfj', 'jfjf', 'faja', 'jafs', 'alfa', 'jaks', 'flaks', 'slafs', 'asdf jkl;', 'fjfj fjfj'],
         storyIntro: `De visser en de juwelier waren beste vrienden.
           De een ving vis, de ander maakte sieraden.
           Laten we F en J nog eens extra oefenen!`,
@@ -120,7 +120,7 @@ export const REGIONS: Region[] = [
         title: 'De Marktplaats',
         description: 'Leer de spatiebalk gebruiken',
         newKeys: [' '],
-        exercises: ['as df', 'jk l;', 'a s d f', 'das jak', 'al das'],
+        exercises: ['f j', 'a ;', 's l', 'd k', 'as df', 'jk l;', 'das jak', 'al sal', 'fjfj fjfj', 'asdf jkl;'],
         storyIntro: `De marktplaats was het hart van het dorp.
           Hier kwamen alle dorpelingen samen.
           Met de SPATIE maak je ruimte tussen woorden!`,
@@ -144,7 +144,7 @@ export const REGIONS: Region[] = [
         title: 'De Boer en de Imker',
         description: 'Leer de letters E en I',
         newKeys: ['e', 'i'],
-        exercises: ['eee', 'iii', 'eiei', 'def', 'jik', 'sie', 'lei'],
+        exercises: ['eee', 'iii', 'eiei', 'ieie', 'def', 'jik', 'sie', 'lei', 'asdf jkl;', 'de jas'],
         storyIntro: `De gouden korenvelden liggen er verlaten bij.
           Boer Erik en imker Iris wachten op de terugkeer van de magie.
           E en I brengen het land weer tot leven!`,
@@ -157,7 +157,7 @@ export const REGIONS: Region[] = [
         title: 'De Molenaar en de Uil',
         description: 'Leer de letters R en U',
         newKeys: ['r', 'u'],
-        exercises: ['rrr', 'uuu', 'ruru', 'red', 'juk', 'reis', 'deur'],
+        exercises: ['rrr', 'uuu', 'ruru', 'urur', 'red', 'juk', 'reis', 'deur', 'fjfj', 'de reis'],
         storyIntro: `De oude molen staat stil zonder wind.
           En de wijze uil kan niet meer praten.
           R en U brengen beweging en wijsheid terug!`,
@@ -182,7 +182,7 @@ export const REGIONS: Region[] = [
         title: 'De Tovenaar en de Nachtegaal',
         description: 'Leer de letters Z en M',
         newKeys: ['z', 'm'],
-        exercises: ['zzz', 'mmm', 'zmzm', 'zam', 'mes', 'zelf', 'muziek'],
+        exercises: ['zzz', 'mmm', 'zmzm', 'mzmz', 'zam', 'mes', 'zelf', 'muziek', 'fjfj', 'de reis'],
         storyIntro: `Het Fluisterwoud is donker en stil geworden.
           Tovenaar Zeno heeft zijn spreukboek verloren.
           En de nachtegaal Mira kan niet meer zingen.
@@ -196,7 +196,7 @@ export const REGIONS: Region[] = [
         title: 'De Heks en de Nimf',
         description: 'Leer de letters X en N',
         newKeys: ['x', 'n'],
-        exercises: ['xxx', 'nnn', 'xnxn', 'nex', 'mix', 'nam', 'been'],
+        exercises: ['xxx', 'nnn', 'xnxn', 'nxnx', 'nex', 'mix', 'nam', 'been', 'fjfj', 'mes zelf'],
         storyIntro: `Dieper in het woud woont heks Xandra.
           En nimf Nina danst tussen de bomen.
           X en N geven hen hun krachten terug!`,
@@ -209,7 +209,7 @@ export const REGIONS: Region[] = [
         title: 'De Centaur en de Vos',
         description: 'Leer de letters C en V',
         newKeys: ['c', 'v'],
-        exercises: ['ccc', 'vvv', 'cvcv', 'cel', 'vel', 'vlees', 'circus'],
+        exercises: ['ccc', 'vvv', 'cvcv', 'vcvc', 'cel', 'vel', 'vlees', 'circus', 'fjfj', 'mix nam'],
         storyIntro: `Centaur Carlo bewaakt het woud al eeuwen.
           En slimme vos Victor kent alle geheime paden.
           C en V maken het woud weer veilig!`,
@@ -222,7 +222,7 @@ export const REGIONS: Region[] = [
         title: 'De Beer en het Bos',
         description: 'Leer de letter B',
         newKeys: ['b'],
-        exercises: ['bbb', 'bab', 'beb', 'been', 'bier', 'boek', 'bloem'],
+        exercises: ['bbb', 'bab', 'beb', 'been', 'bier', 'boek', 'bloem', 'bruin', 'fjfj', 'cel vel'],
         storyIntro: `Beer Bruno slaapt al veel te lang.
           Het bos mist zijn beschermer.
           B wekt de beer en het hele woud!`,
@@ -247,7 +247,7 @@ export const REGIONS: Region[] = [
         title: 'De Eerste Bergbeklimmer',
         description: 'Leer de cijfers 1, 2 en 3',
         newKeys: ['1', '2', '3'],
-        exercises: ['111', '222', '333', '123', '321', '12', '23', '31'],
+        exercises: ['111', '222', '333', '123', '321', '12', '23', '31', 'fjfj', 'boek bloem'],
         storyIntro: `De Toppen van Taal rijzen hoog boven Lettoria uit.
           Hier woonden ooit de Tellermeester en zijn leerlingen.
           Met 1, 2 en 3 begin je de klim naar de top!`,
@@ -260,7 +260,7 @@ export const REGIONS: Region[] = [
         title: 'De Kristalgrot',
         description: 'Leer de cijfers 4, 5 en 6',
         newKeys: ['4', '5', '6'],
-        exercises: ['444', '555', '666', '456', '654', '45', '56', '64'],
+        exercises: ['444', '555', '666', '456', '654', '45', '56', '64', '123', 'bruin beer'],
         storyIntro: `Halverwege de berg ligt een kristalgrot.
           Hier bewaarde de Tellermeester zijn rekenboeken.
           4, 5 en 6 verlichten de grot!`,
@@ -273,7 +273,7 @@ export const REGIONS: Region[] = [
         title: 'De Wolkenweg',
         description: 'Leer de cijfers 7, 8 en 9',
         newKeys: ['7', '8', '9'],
-        exercises: ['777', '888', '999', '789', '987', '78', '89', '97'],
+        exercises: ['777', '888', '999', '789', '987', '78', '89', '97', '456', 'circus vlees'],
         storyIntro: `Boven de wolken ligt een magische weg.
           Alleen met de juiste cijfers kun je verder.
           7, 8 en 9 openen de poort naar de top!`,
@@ -286,7 +286,7 @@ export const REGIONS: Region[] = [
         title: 'De Top Bereikt',
         description: 'Leer 0 en oefen alle cijfers',
         newKeys: ['0'],
-        exercises: ['000', '10', '20', '100', '1234', '5678', '90', '2024'],
+        exercises: ['000', '10', '20', '100', '1234', '5678', '90', '2024', '789', 'de reis deur'],
         storyIntro: `De top is in zicht! Maar er ontbreekt nog één cijfer.
           De nul - het begin en het einde van alles.
           Met 0 bereik je de hoogste top!`,

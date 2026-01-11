@@ -4,6 +4,7 @@ import { useProgressStore } from '@/lib/stores/progressStore';
 import { getRegionById } from '@/lib/data/regions';
 import { Eric } from '@/components/eric';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 interface RegioClientProps {
@@ -42,7 +43,17 @@ export function RegioClient({ regionId }: RegioClientProps) {
           </Link>
 
           <div className="text-center">
-            <span className="text-4xl">{region.icon}</span>
+            {region.imageUrl ? (
+              <Image
+                src={region.imageUrl}
+                alt={region.name}
+                width={64}
+                height={64}
+                className="mx-auto mb-1"
+              />
+            ) : (
+              <span className="text-4xl">{region.icon}</span>
+            )}
             <h1 className="text-2xl font-bold text-eric-green">{region.name}</h1>
           </div>
 
