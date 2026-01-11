@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Metadata } from 'next';
+import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'Over Lettoria',
@@ -287,22 +288,7 @@ export default function OverPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 bg-gray-100 border-t">
-        <div className="max-w-4xl mx-auto text-center text-sm text-gray-600">
-          <div className="flex justify-center gap-6 mb-4">
-            <Link href="/" className="hover:text-eric-green transition-colors">
-              Home
-            </Link>
-            <Link href="/kaart" className="hover:text-eric-green transition-colors">
-              Wereldkaart
-            </Link>
-            <Link href="/oefenen" className="hover:text-eric-green transition-colors">
-              Snel oefenen
-            </Link>
-          </div>
-          <p className="text-gray-500">Lettoria - Gratis typecursus voor kinderen</p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

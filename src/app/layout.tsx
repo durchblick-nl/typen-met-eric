@@ -3,6 +3,7 @@ import "./globals.css";
 import { MagicCursor } from "@/components/ui/MagicCursor";
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://lettoria.nl'),
   title: {
     default: "Lettoria - Gratis typecursus voor kinderen",
     template: "%s | Lettoria",

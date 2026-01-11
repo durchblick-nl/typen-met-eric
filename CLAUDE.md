@@ -4,20 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Typen met Eric** (Type with Eric) is a children's typing tutor PWA for ages 8-12. A young dragon named Eric guides children through learning to type while exploring the magical world of Lettoria. Each lesson restores magic to different regions of the world.
+**Lettoria** is a free children's typing tutor PWA for ages 8-12. A young dragon named Eric guides children through learning to type while exploring the magical world of Lettoria. Each lesson restores magic to different regions of the world.
 
-Primary language: Dutch (with German and English planned)
+- **Domain:** https://lettoria.nl
+- **Primary language:** Dutch (with German and English planned)
+- **Price:** 100% Free, no registration required, no data collection
 
 ## Tech Stack
 
 - **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
-- **Animations:** Framer Motion + Lottie
+- **Animations:** Framer Motion
 - **State:** Zustand
-- **Auth/DB/Storage:** Supabase (Auth, PostgreSQL, Storage)
-- **ORM:** Prisma (planned)
-- **Email:** Resend (planned)
 - **Hosting:** Cloudflare Pages
 - **Repository:** GitHub
 
@@ -35,104 +34,106 @@ npm run pages:build  # Build for Cloudflare Pages
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   ├── layout.tsx          # Root layout
-│   ├── page.tsx            # Landing page
+│   ├── layout.tsx          # Root layout with SEO meta tags
+│   ├── page.tsx            # Landing page (marketing)
 │   ├── globals.css         # Global styles with Tailwind
+│   ├── robots.ts           # SEO robots.txt
+│   ├── sitemap.ts          # SEO sitemap.xml
 │   ├── kaart/              # World map page
 │   ├── oefenen/            # Quick practice page
-│   ├── les/[id]/           # Lesson pages
-│   └── regio/[id]/         # Region detail pages
+│   ├── over/               # About page (for parents)
+│   ├── impressum/          # Legal/colofon page
+│   ├── les/[lessonId]/     # Lesson pages
+│   └── regio/[regionId]/   # Region detail pages
 ├── components/
 │   ├── eric/Eric.tsx       # Eric character with mood animations
 │   ├── keyboard/           # Virtual keyboard with finger guides
 │   ├── map/WorldMap.tsx    # Interactive world map
-│   └── typing/             # Typing exercise components
+│   ├── typing/             # Typing exercise components
+│   ├── ui/Sparkles.tsx     # Animated sparkles effect
+│   └── Footer.tsx          # Shared footer component
 └── lib/
-    ├── data/regions.ts     # Region and lesson definitions
+    ├── data/regions.ts     # Region and lesson definitions (23 lessons)
     └── stores/             # Zustand state management
         ├── typingStore.ts  # Typing engine state
         └── progressStore.ts # Player progress persistence
 
+scripts/
+└── generate-images.ts      # Imagen 3 image generation script
+
 public/images/
-├── eric/                   # Eric character images (PNG)
-│   ├── eric-happy.png
-│   ├── eric-encouraging.png
-│   ├── eric-thinking.png
-│   ├── eric-celebrating.png
-│   └── eric-worried.png
+├── eric/                   # Eric character images (PNG, optimized)
 ├── map/                    # World map assets (PNG)
-│   ├── icon-grot.png       # Region icons
-│   ├── icon-dorp.png
-│   ├── icon-velden.png
-│   ├── icon-woud.png
-│   ├── icon-toppen.png
-│   ├── icon-zee.png
-│   ├── icon-kasteel.png
-│   ├── deco-cloud.png      # Map decorations
-│   └── deco-tree.png
-└── posters/
-    └── eric-hero.png       # Hero image
+├── stories/                # Story illustrations per lesson
+└── posters/                # Marketing images
 ```
-
-## Planning Documents
-
-- `typen-met-eric-plan.md` - Complete project specification including database schema, UI designs, lesson structure
-- `canva/` - Design assets and AI image prompts for Eric the dragon character
 
 ## Key Concepts
 
 ### World Structure (Lettoria)
-The game world has 7 regions unlocked progressively:
-1. Eric's Grot (Tutorial)
-2. Het Startdorp (Home Row: ASDF JKL;)
-3. De Velden (Top Row: QWERTYUIOP)
-4. Het Fluisterwoud (Bottom Row: ZXCVBNM)
-5. De Toppen (Numbers & Symbols)
-6. De Zee (Speed Games)
-7. Kasteel Compleet (Mastery)
+The game world has 7 regions with 23 lessons total:
+1. **Eric's Grot** (1 lesson) - Tutorial, F and J keys
+2. **Het Startdorp** (5 lessons) - Home Row: ASDF JKL;
+3. **De Velden** (2 lessons) - Top Row: E, I, R, U
+4. **Het Fluisterwoud** (4 lessons) - Bottom Row: ZXCVBNM
+5. **De Toppen** (4 lessons) - Numbers: 1234567890
+6. **De Zee** (4 lessons) - Speed challenges
+7. **Kasteel Compleet** (3 lessons) - Mastery tests
 
 ### Eric the Dragon
-- Grows with player progress (baby → teen → adult)
-- Gains abilities: fire breathing at level 10, flying at level 20
-- Colors: Emerald green (#2D7D46), gold accents (#FFD700), amber eyes (#FF6B35)
 - 5 mood states: happy, encouraging, thinking, celebrating, worried
-- Images stored as PNG in `public/images/eric/`
+- Growth stages: baby, teen, adult (images available)
+- Colors: Emerald green (#2D7D46), gold accents (#FFD700)
+- Images stored as optimized PNG in `public/images/eric/`
 
-### Image Assets
-- **Eric images**: PNG format with transparent backgrounds
-- **Map icons**: High-resolution PNG icons for each region (`icon-*.png`)
-- **Map decorations**: Cloud and tree decorations for visual polish
-- **Region interface**: Uses optional `imageUrl` property for custom icons
+### Privacy First
+- No registration required
+- No email collection
+- No tracking or analytics
+- Progress stored locally in browser (localStorage)
+- No personal data ever transmitted
 
-### Gamification
-- 6 gem types (one per region)
-- 1-3 stars per lesson based on accuracy
-- Daily streaks with rewards
-- Achievements system
+### SEO
+- Full meta tags (Open Graph, Twitter Cards)
+- JSON-LD structured data (WebApplication, Course)
+- Dynamic sitemap.xml and robots.txt
+- Canonical URL: https://lettoria.nl
 
 ## Completed
 
 - [x] Next.js 15 project with TypeScript and Tailwind CSS
-- [x] Typing engine with WPM/accuracy tracking (Zustand store)
+- [x] Typing engine with WPM/accuracy tracking
 - [x] Virtual keyboard with finger position guides
 - [x] Eric character component with 5 mood states
 - [x] World map with 7 regions and animated paths
-- [x] Story-driven lessons (Grot, Dorp, Velden regions)
+- [x] All 23 lessons with stories and images
 - [x] Progress persistence with localStorage
-- [x] Cloudflare Pages deployment (static export)
-- [x] PNG image assets for Eric and map regions
+- [x] Cloudflare Pages deployment
+- [x] SEO optimization (meta tags, JSON-LD, sitemap)
+- [x] Marketing homepage with animations
+- [x] About page for parents (/over)
+- [x] Legal/impressum page (/impressum)
+- [x] Image optimization (compressed PNGs)
 
 ## Next Steps
 
-1. Set up Supabase project and configure environment variables
-2. Implement Prisma schema from `typen-met-eric-plan.md` section 4.2
-3. Add lessons for remaining regions (Woud, Toppen, Zee, Kasteel)
-4. Implement user authentication and cloud progress sync
-5. Add gamification features (gems, achievements, streaks)
+1. Add gamification features (gems, achievements, streaks)
+2. Implement certificate/diploma generation
+3. Add sound effects and background music (optional)
+4. Multi-language support (German, English)
+5. PWA offline support with service worker
 
 ## Deployment
 
 - Push to GitHub triggers automatic deployment via Cloudflare Pages
 - Build command: `npm run build`
 - Output directory: `out`
-- URL: https://typen-met-eric.pages.dev
+- Production URL: https://lettoria.nl
+- Staging URL: https://typen-met-eric.pages.dev
+
+## Image Generation
+
+Use `scripts/generate-images.ts` with Google Imagen 3:
+```bash
+GEMINI_API_KEY=xxx npx ts-node scripts/generate-images.ts --generate
+```
