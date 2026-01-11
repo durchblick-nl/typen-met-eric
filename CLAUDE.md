@@ -53,7 +53,7 @@ src/
 │   ├── ui/Sparkles.tsx     # Animated sparkles effect
 │   └── Footer.tsx          # Shared footer component
 └── lib/
-    ├── data/regions.ts     # Region and lesson definitions (23 lessons)
+    ├── data/regions.ts     # Region and lesson definitions (26 lessons)
     └── stores/             # Zustand state management
         ├── typingStore.ts  # Typing engine state
         └── progressStore.ts # Player progress persistence
@@ -71,14 +71,19 @@ public/images/
 ## Key Concepts
 
 ### World Structure (Lettoria)
-The game world has 7 regions with 23 lessons total:
+The game world has 7 regions with 26 lessons total:
 1. **Eric's Grot** (1 lesson) - Tutorial, F and J keys
-2. **Het Startdorp** (5 lessons) - Home Row: ASDF JKL;
-3. **De Velden** (2 lessons) - Top Row: E, I, R, U
-4. **Het Fluisterwoud** (4 lessons) - Bottom Row: ZXCVBNM
+2. **Het Startdorp** (5 lessons) - Home Row: ASDFGHJKL; + Space
+3. **De Velden** (5 lessons) - Top Row: E, I, R, U, T, Y, O, P, Q, W
+4. **Het Fluisterwoud** (4 lessons) - Bottom Row: Z, M, X, N, C, V, B + Punctuation (. ,)
 5. **De Toppen** (4 lessons) - Numbers: 1234567890
 6. **De Zee** (4 lessons) - Speed challenges
 7. **Kasteel Compleet** (3 lessons) - Mastery tests
+
+### Progression System
+- Players must achieve **3 stars (95%+ accuracy)** to unlock the next lesson
+- Lessons with less than 3 stars show "Herhalen" (repeat) button
+- Stars: 1 star (<85%), 2 stars (85-94%), 3 stars (95%+)
 
 ### Eric the Dragon
 - 5 mood states: happy, encouraging, thinking, celebrating, worried
@@ -103,10 +108,10 @@ The game world has 7 regions with 23 lessons total:
 
 - [x] Next.js 15 project with TypeScript and Tailwind CSS
 - [x] Typing engine with WPM/accuracy tracking
-- [x] Virtual keyboard with finger position guides
+- [x] Virtual keyboard with finger position guides and hand illustrations
 - [x] Eric character component with 5 mood states
 - [x] World map with 7 regions and animated paths
-- [x] All 23 lessons with stories and images
+- [x] All 26 lessons with stories and images
 - [x] Progress persistence with localStorage
 - [x] Cloudflare Pages deployment
 - [x] SEO optimization (meta tags, JSON-LD, sitemap)
@@ -114,14 +119,19 @@ The game world has 7 regions with 23 lessons total:
 - [x] About page for parents (/over)
 - [x] Legal/impressum page (/impressum)
 - [x] Image optimization (compressed PNGs)
+- [x] 3-star progression system (95%+ accuracy required)
+- [x] Punctuation lessons (. and ,)
+- [x] Number row on virtual keyboard
+- [x] Keyboard shortcuts (Enter, Escape) throughout app
 
 ## Next Steps
 
-1. Add gamification features (gems, achievements, streaks)
-2. Implement certificate/diploma generation
-3. Add sound effects and background music (optional)
-4. Multi-language support (German, English)
-5. PWA offline support with service worker
+1. **Uppercase letters** - Add Shift key lessons (see docs/plan-grossbuchstaben.md)
+2. Add gamification features (gems, achievements, streaks)
+3. Implement certificate/diploma generation
+4. Add sound effects and background music (optional)
+5. Multi-language support (German, English)
+6. PWA offline support with service worker
 
 ## Deployment
 
