@@ -77,5 +77,6 @@ The game world has 7 regions unlocked progressively:
 ## Deployment
 
 - Push to GitHub triggers automatic deployment via Cloudflare Pages
-- Build command: `npx @cloudflare/next-on-pages`
-- Output directory: `.vercel/output/static`
+- Build command: `npm run build`
+- Output directory: `out`
+- URL: https://typen-met-eric.pages.dev
