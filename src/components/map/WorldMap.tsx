@@ -18,22 +18,19 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
   };
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto aspect-[4/3] bg-gradient-to-b from-lettoria-toppen/30 via-lettoria-velden/20 to-lettoria-zee/30 rounded-3xl overflow-hidden shadow-2xl border-4 border-eric-gold/50">
-      {/* Background decorations */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-10 left-10 w-24 h-16">
-          <Image src="/images/map/deco-cloud.png" alt="Cloud" fill className="object-contain" />
-        </div>
-        <div className="absolute top-20 right-20 w-20 h-14">
-          <Image src="/images/map/deco-cloud.png" alt="Cloud" fill className="object-contain" />
-        </div>
-        <div className="absolute bottom-20 left-1/4 w-16 h-20">
-          <Image src="/images/map/deco-tree.png" alt="Tree" fill className="object-contain" />
-        </div>
-        <div className="absolute bottom-30 right-1/3 w-16 h-20">
-          <Image src="/images/map/deco-tree.png" alt="Tree" fill className="object-contain" />
-        </div>
+    <div className="relative w-full max-w-4xl mx-auto aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-eric-gold/50">
+      {/* Map Background */}
+      <div className="absolute inset-0">
+        <Image
+          src="/images/map/world-map-bg.png"
+          alt="Map of Lettoria"
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
+      {/* Background decorations */}
+
 
       {/* Paths between regions */}
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { Sparkles } from '@/components/ui/Sparkles';
 
 type EricMood = 'happy' | 'encouraging' | 'thinking' | 'celebrating' | 'worried';
 
@@ -40,7 +41,7 @@ export function Eric({ mood = 'happy', message, size = 'medium' }: EricProps) {
     <div className="flex items-end gap-4">
       {/* Eric the Dragon */}
       <motion.div
-        className="select-none"
+        className="relative select-none"
         animate={{
           y: [0, -5, 0],
         }}
@@ -50,6 +51,17 @@ export function Eric({ mood = 'happy', message, size = 'medium' }: EricProps) {
           ease: 'easeInOut',
         }}
       >
+        {/* Magical Sparkles for positive moods */}
+        {(mood === 'happy' || mood === 'celebrating' || mood === 'encouraging' || mood === 'thinking') && (
+          <div className="absolute inset-0 -z-10 scale-150">
+            <Sparkles
+              color={mood === 'celebrating' ? '#FFD700' : '#A8D5A2'}
+              count={mood === 'celebrating' ? 8 : 3}
+              overflow
+            />
+          </div>
+        )}
+
         <Image
           src={MOOD_IMAGES[mood]}
           alt={`Eric de draak - ${mood}`}

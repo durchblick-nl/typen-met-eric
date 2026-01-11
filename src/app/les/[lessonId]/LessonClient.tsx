@@ -7,6 +7,7 @@ import { getLessonById } from '@/lib/data/regions';
 import { TypingArea, VirtualKeyboard, LiveStats } from '@/components/typing';
 import { Eric } from '@/components/eric';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -124,6 +125,23 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               <div className="mb-8">
                 <Eric mood="thinking" size="large" />
               </div>
+
+              {lesson.storyImageUrl && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mb-6 rounded-xl overflow-hidden shadow-md max-w-lg mx-auto border-4 border-white transform rotate-1"
+                >
+                  <div className="relative aspect-[4/3] w-full">
+                    <Image
+                      src={lesson.storyImageUrl}
+                      alt="Story Illustration"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </motion.div>
+              )}
 
               <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-eric-gold/30 max-w-2xl mx-auto mb-8">
                 <p className="text-lg text-gray-700 whitespace-pre-line leading-relaxed">

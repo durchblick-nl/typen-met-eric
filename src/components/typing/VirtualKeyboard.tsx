@@ -54,7 +54,7 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey }: Virtua
   const currentKey = highlightKey || targetText[currentIndex]?.toLowerCase() || '';
 
   return (
-    <div className="bg-gray-800 rounded-2xl p-4 shadow-xl">
+    <div className="bg-gray-800/95 backdrop-blur rounded-2xl p-4 shadow-xl border border-gray-700 box-glow">
       {/* Main keyboard rows */}
       {KEYBOARD_ROWS.map((row, rowIndex) => (
         <div key={rowIndex} className="flex justify-center gap-1 mb-1">

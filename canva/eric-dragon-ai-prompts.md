@@ -1,5 +1,27 @@
 # Eric de Draak – AI Image Prompts
 
+## Status
+
+**Afgerond:**
+- [x] Eric karakterimages (5 mood states) - PNG formaat in `public/images/eric/`
+  - `eric-happy.png` - Standaard blije Eric
+  - `eric-encouraging.png` - Aanmoedigende pose
+  - `eric-thinking.png` - Nadenkend
+  - `eric-celebrating.png` - Feestelijk
+  - `eric-worried.png` - Bezorgd
+- [x] Regio-iconen voor wereldkaart - PNG formaat in `public/images/map/`
+  - `icon-grot.png`, `icon-dorp.png`, `icon-velden.png`, `icon-woud.png`
+  - `icon-toppen.png`, `icon-zee.png`, `icon-kasteel.png`
+- [x] Kaartdecoraties - `deco-cloud.png`, `deco-tree.png`
+- [x] Hero poster - `public/images/posters/eric-hero.png`
+
+**Nog te maken:**
+- [ ] Eric evolutie-versies (baby, tiener, volwassen)
+- [ ] Eric bij toetsenbord pose
+- [ ] Animaties (Lottie)
+
+---
+
 ## Karakter Beschrijving
 
 **Eric** is een jonge, vriendelijke draak:

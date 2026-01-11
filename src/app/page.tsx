@@ -12,7 +12,8 @@ export default function Home() {
           Ontdek de magie, letter voor letter
         </p>
 
-        <div className="bg-white/90 rounded-2xl p-6 md:p-8 shadow-xl border-2 border-eric-gold">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-xl border-2 border-eric-gold box-glow relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-tr from-eric-gold/5 via-transparent to-eric-green/5 pointer-events-none" />
           {/* Eric Image */}
           <div className="mb-4">
             <Image

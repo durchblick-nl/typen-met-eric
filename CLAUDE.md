@@ -33,10 +33,45 @@ npm run pages:build  # Build for Cloudflare Pages
 ## Project Structure
 
 ```
-src/app/             # Next.js App Router pages
-  layout.tsx         # Root layout
-  page.tsx           # Landing page
-  globals.css        # Global styles with Tailwind
+src/
+├── app/                    # Next.js App Router pages
+│   ├── layout.tsx          # Root layout
+│   ├── page.tsx            # Landing page
+│   ├── globals.css         # Global styles with Tailwind
+│   ├── kaart/              # World map page
+│   ├── oefenen/            # Quick practice page
+│   ├── les/[id]/           # Lesson pages
+│   └── regio/[id]/         # Region detail pages
+├── components/
+│   ├── eric/Eric.tsx       # Eric character with mood animations
+│   ├── keyboard/           # Virtual keyboard with finger guides
+│   ├── map/WorldMap.tsx    # Interactive world map
+│   └── typing/             # Typing exercise components
+└── lib/
+    ├── data/regions.ts     # Region and lesson definitions
+    └── stores/             # Zustand state management
+        ├── typingStore.ts  # Typing engine state
+        └── progressStore.ts # Player progress persistence
+
+public/images/
+├── eric/                   # Eric character images (PNG)
+│   ├── eric-happy.png
+│   ├── eric-encouraging.png
+│   ├── eric-thinking.png
+│   ├── eric-celebrating.png
+│   └── eric-worried.png
+├── map/                    # World map assets (PNG)
+│   ├── icon-grot.png       # Region icons
+│   ├── icon-dorp.png
+│   ├── icon-velden.png
+│   ├── icon-woud.png
+│   ├── icon-toppen.png
+│   ├── icon-zee.png
+│   ├── icon-kasteel.png
+│   ├── deco-cloud.png      # Map decorations
+│   └── deco-tree.png
+└── posters/
+    └── eric-hero.png       # Hero image
 ```
 
 ## Planning Documents
@@ -60,6 +95,14 @@ The game world has 7 regions unlocked progressively:
 - Grows with player progress (baby → teen → adult)
 - Gains abilities: fire breathing at level 10, flying at level 20
 - Colors: Emerald green (#2D7D46), gold accents (#FFD700), amber eyes (#FF6B35)
+- 5 mood states: happy, encouraging, thinking, celebrating, worried
+- Images stored as PNG in `public/images/eric/`
+
+### Image Assets
+- **Eric images**: PNG format with transparent backgrounds
+- **Map icons**: High-resolution PNG icons for each region (`icon-*.png`)
+- **Map decorations**: Cloud and tree decorations for visual polish
+- **Region interface**: Uses optional `imageUrl` property for custom icons
 
 ### Gamification
 - 6 gem types (one per region)
@@ -67,12 +110,25 @@ The game world has 7 regions unlocked progressively:
 - Daily streaks with rewards
 - Achievements system
 
+## Completed
+
+- [x] Next.js 15 project with TypeScript and Tailwind CSS
+- [x] Typing engine with WPM/accuracy tracking (Zustand store)
+- [x] Virtual keyboard with finger position guides
+- [x] Eric character component with 5 mood states
+- [x] World map with 7 regions and animated paths
+- [x] Story-driven lessons (Grot, Dorp, Velden regions)
+- [x] Progress persistence with localStorage
+- [x] Cloudflare Pages deployment (static export)
+- [x] PNG image assets for Eric and map regions
+
 ## Next Steps
 
 1. Set up Supabase project and configure environment variables
 2. Implement Prisma schema from `typen-met-eric-plan.md` section 4.2
-3. Build the typing engine components
-4. Create the world map and lesson flow
+3. Add lessons for remaining regions (Woud, Toppen, Zee, Kasteel)
+4. Implement user authentication and cloud progress sync
+5. Add gamification features (gems, achievements, streaks)
 
 ## Deployment
 

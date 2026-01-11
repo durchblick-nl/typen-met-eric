@@ -6,4 +6,15 @@
 
 body {
   font-family: 'Nunito', sans-serif;
+  cursor: none; /* Hide default cursor to use MagicCursor */
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .box-glow {
+    box-shadow: 0 0 15px currentColor;
+  }
 }

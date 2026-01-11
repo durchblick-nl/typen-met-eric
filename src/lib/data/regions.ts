@@ -6,6 +6,7 @@ export interface Lesson {
   exercises: string[];
   storyIntro: string;
   storyOutro: string;
+  storyImageUrl?: string;
 }
 
 export interface Region {
@@ -43,6 +44,7 @@ export const REGIONS: Region[] = [
 
           Plaats je wijsvingers op de F en J toetsen. Voel je de kleine bultjes?
           Daar horen je vingers thuis!`,
+        storyImageUrl: '/images/stories/lesson_0_eric_sad_1768160662712.png', // Lesson 0
         storyOutro: `Geweldig! Je hebt je eerste letters geleerd!
           Ik voel al een klein beetje warmte terugkomen.
           Samen gaan we Lettoria redden!`,
@@ -69,6 +71,7 @@ export const REGIONS: Region[] = [
           Daar was ooit de bakkerij van meneer Adriaan.
           En aan de andere kant woont de nachtwachter met zijn magische lantaarn.
           Kun jij de A en de ; terugbrengen?`,
+        storyImageUrl: '/images/stories/lesson_1_village_grey_1768160678072.png',
         storyOutro: `De bakkerij krijgt zijn kleuren terug!
           "Mijn oven brandt weer!" roept de bakker blij.
           En kijk, de lantaarn van de wachter flikkert weer!`,
@@ -82,6 +85,7 @@ export const REGIONS: Region[] = [
         storyIntro: `De smid kon vroeger de mooiste zwaarden maken.
           En de lantaarnmaker zorgde voor licht in heel het dorp.
           Met S en L kunnen ze weer aan het werk!`,
+        storyImageUrl: '/images/stories/lesson_2_blacksmith_1768160691836.png',
         storyOutro: `Het geluid van de hamer klinkt weer door het dorp!
           En overal gaan de lantaarns aan. Prachtig!`,
       },
@@ -94,6 +98,7 @@ export const REGIONS: Region[] = [
         storyIntro: `Dokter Daan hielp iedereen die ziek was.
           En klokkenmaker Karel zorgde dat niemand te laat kwam.
           Breng D en K terug naar het dorp!`,
+        storyImageUrl: '/images/stories/lesson_3_doctor_clockmaker_1768160712543.png',
         storyOutro: `De dokter opent zijn praktijk weer!
           En hoor je dat? De dorpsklok slaat weer!`,
       },
@@ -106,6 +111,7 @@ export const REGIONS: Region[] = [
         storyIntro: `De visser en de juwelier waren beste vrienden.
           De een ving vis, de ander maakte sieraden.
           Laten we F en J nog eens extra oefenen!`,
+        storyImageUrl: '/images/stories/lesson_4_fisherman_jeweler_1768160725625.png',
         storyOutro: `De visser gooit zijn net uit en de juwelier polijst zijn eerste edelsteen!
           Het dorp komt tot leven!`,
       },
