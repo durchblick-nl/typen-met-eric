@@ -47,6 +47,9 @@ src/
 │   └── regio/[regionId]/   # Region detail pages
 ├── components/
 │   ├── eric/Eric.tsx       # Eric character with mood animations
+│   ├── game/               # Bonus mini-games
+│   │   ├── Crystal.tsx     # Falling crystal component
+│   │   └── CrystalGame.tsx # Crystal collection game (3-star reward)
 │   ├── keyboard/           # Virtual keyboard with finger guides
 │   ├── map/WorldMap.tsx    # Interactive world map
 │   ├── typing/             # Typing exercise components
@@ -123,6 +126,9 @@ The game world has 7 regions with 26 lessons total:
 - [x] Punctuation lessons (. and ,)
 - [x] Number row on virtual keyboard
 - [x] Keyboard shortcuts (Enter, Escape) throughout app
+- [x] Space character shown as ␣ symbol for clarity
+- [x] JetBrains Mono font for better letter distinction (especially 'l' vs '1')
+- [x] Crystal bonus game after 3-star lessons (collect 30 crystals by typing)
 
 ## Next Steps
 
