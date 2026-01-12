@@ -33,6 +33,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["Nunito", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
     },
   },

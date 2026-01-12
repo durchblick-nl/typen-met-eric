@@ -45,8 +45,8 @@ export function TypingArea() {
             className += 'text-gray-400';
           }
 
-          // Handle space display
-          const displayChar = char === ' ' ? '\u00A0' : char;
+          // Handle space display - show visible symbol ␣
+          const displayChar = char === ' ' ? '␣' : char;
 
           return (
             <span key={index} className={className}>

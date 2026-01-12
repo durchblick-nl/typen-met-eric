@@ -12,8 +12,23 @@ import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { KeyboardHint, KeyboardHintDark } from '@/components/ui/KeyboardHint';
+import { CrystalGame } from '@/components/game/CrystalGame';
+import { REGIONS } from '@/lib/data/regions';
 
-type LessonPhase = 'intro' | 'exercise' | 'outro' | 'complete';
+type LessonPhase = 'intro' | 'exercise' | 'outro' | 'game' | 'complete';
+
+// Get all letters learned up to and including a specific lesson
+function getAvailableLetters(lessonId: number): string[] {
+  const letters: string[] = [];
+  for (const region of REGIONS) {
+    for (const lesson of region.lessons) {
+      if (lesson.id <= lessonId) {
+        letters.push(...lesson.newKeys.filter(k => k !== ' '));
+      }
+    }
+  }
+  return [...new Set(letters)]; // Remove duplicates
+}
 
 interface LessonClientProps {
   lessonId: number;
@@ -83,6 +98,19 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
   const isLastLesson = lessonId >= getTotalLessons() - 1;
 
+  const handleStartGame = () => {
+    setPhase('game');
+  };
+
+  const handleGameComplete = () => {
+    // After game, go to next lesson or back to region
+    if (!isLastLesson) {
+      router.push(`/les/${lessonId + 1}`);
+    } else {
+      router.push('/kaart');
+    }
+  };
+
   const handleBackToRegion = useCallback(() => {
     if (isLastLesson) {
       router.push('/kaart');
@@ -109,8 +137,8 @@ export function LessonClient({ lessonId }: LessonClientProps) {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger during exercise phase (user is typing)
-      if (phase === 'exercise') return;
+      // Don't trigger during exercise or game phase (user is typing)
+      if (phase === 'exercise' || phase === 'game') return;
 
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -119,10 +147,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
         } else if (phase === 'outro') {
           handleContinue();
         } else if (phase === 'complete') {
-          // Only go to next lesson if 3 stars, otherwise retry
-          if (stars >= 3 && !isLastLesson) {
-            handleNextLesson();
-          } else if (stars < 3) {
+          // Start bonus game if 3 stars, otherwise retry
+          if (stars >= 3) {
+            handleStartGame();
+          } else {
             handleRetry();
           }
         }
@@ -312,6 +340,23 @@ export function LessonClient({ lessonId }: LessonClientProps) {
             </motion.div>
           )}
 
+          {/* Game Phase - Bonus crystal game for 3 stars */}
+          {phase === 'game' && (
+            <motion.div
+              key="game"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50"
+            >
+              <CrystalGame
+                availableLetters={getAvailableLetters(lessonId)}
+                onComplete={handleGameComplete}
+                targetCount={30}
+              />
+            </motion.div>
+          )}
+
           {/* Complete Phase */}
           {phase === 'complete' && (
             <motion.div
@@ -390,15 +435,13 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                     <KeyboardHint keyName="↵" />
                   </button>
                 ) : (
-                  !isLastLesson && (
-                    <button
-                      onClick={handleNextLesson}
-                      className="inline-flex items-center px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-semibold transition-colors"
-                    >
-                      Volgende les
-                      <KeyboardHint keyName="↵" />
-                    </button>
-                  )
+                  <button
+                    onClick={handleStartGame}
+                    className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold transition-colors"
+                  >
+                    Bonusspel!
+                    <KeyboardHint keyName="↵" />
+                  </button>
                 )}
               </div>
             </motion.div>
