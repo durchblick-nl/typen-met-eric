@@ -34,19 +34,23 @@ npm run pages:build  # Build for Cloudflare Pages
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   ├── layout.tsx          # Root layout with SEO meta tags
+│   ├── layout.tsx          # Root layout with SEO meta tags & favicon
 │   ├── page.tsx            # Landing page (marketing)
 │   ├── globals.css         # Global styles with Tailwind
 │   ├── robots.ts           # SEO robots.txt
-│   ├── sitemap.ts          # SEO sitemap.xml
+│   ├── sitemap.ts          # SEO sitemap.xml (all 39 pages)
 │   ├── kaart/              # World map page
 │   ├── oefenen/            # Quick practice page
 │   ├── over/               # About page (for parents)
 │   ├── impressum/          # Legal/colofon page
+│   ├── diploma/            # Diploma page (PDF generation)
 │   ├── les/[lessonId]/     # Lesson pages
 │   └── regio/[regionId]/   # Region detail pages
 ├── components/
 │   ├── eric/Eric.tsx       # Eric character with mood animations
+│   ├── diploma/            # Diploma components
+│   │   ├── DiplomaDocument.tsx  # PDF document (@react-pdf/renderer)
+│   │   └── DiplomaPreview.tsx   # HTML preview component
 │   ├── game/               # Bonus mini-games
 │   │   ├── Crystal.tsx     # Falling crystal component
 │   │   └── CrystalGame.tsx # Crystal collection game (3-star reward)
@@ -64,11 +68,16 @@ src/
 scripts/
 └── generate-images.ts      # Imagen 3 image generation script
 
-public/images/
-├── eric/                   # Eric character images (PNG, optimized)
-├── map/                    # World map assets (PNG)
-├── stories/                # Story illustrations per lesson
-└── posters/                # Marketing images
+public/
+├── favicon.ico             # Eric dragon favicon
+├── apple-touch-icon.png    # iOS icon (180x180)
+├── icon-*.png              # Various icon sizes (16, 32, 48, 192, 512)
+└── images/
+    ├── eric/               # Eric character images (PNG, optimized)
+    ├── map/                # World map assets (PNG)
+    ├── stories/            # Story illustrations per lesson
+    ├── diploma/            # Diploma assets (seal, stars, region icons)
+    └── posters/            # Marketing images
 ```
 
 ## Key Concepts
@@ -104,8 +113,10 @@ The game world has 7 regions with 26 lessons total:
 ### SEO
 - Full meta tags (Open Graph, Twitter Cards)
 - JSON-LD structured data (WebApplication, Course)
-- Dynamic sitemap.xml and robots.txt
+- Dynamic sitemap.xml with all 39 pages (main, lessons, regions)
+- robots.txt with sitemap reference
 - Canonical URL: https://lettoria.nl
+- Eric dragon favicon (all sizes for browsers and PWA)
 
 ## Completed
 
@@ -117,7 +128,7 @@ The game world has 7 regions with 26 lessons total:
 - [x] All 26 lessons with stories and images
 - [x] Progress persistence with localStorage
 - [x] Cloudflare Pages deployment
-- [x] SEO optimization (meta tags, JSON-LD, sitemap)
+- [x] SEO optimization (meta tags, JSON-LD, sitemap with all pages)
 - [x] Marketing homepage with animations
 - [x] About page for parents (/over)
 - [x] Legal/impressum page (/impressum)
@@ -129,15 +140,17 @@ The game world has 7 regions with 26 lessons total:
 - [x] Space character shown as ␣ symbol for clarity
 - [x] JetBrains Mono font for better letter distinction (especially 'l' vs '1')
 - [x] Crystal bonus game after 3-star lessons (collect 30 crystals by typing)
+- [x] Diploma/certificate generation (PDF download with @react-pdf/renderer)
+- [x] Eric dragon favicon (all sizes including apple-touch-icon)
+- [x] Full sitemap with all 39 pages (main, 26 lessons, 7 regions, diploma, impressum)
 
 ## Next Steps
 
 1. **Uppercase letters** - Add Shift key lessons (see docs/plan-grossbuchstaben.md)
 2. Add gamification features (gems, achievements, streaks)
-3. Implement certificate/diploma generation
-4. Add sound effects and background music (optional)
-5. Multi-language support (German, English)
-6. PWA offline support with service worker
+3. Add sound effects and background music (optional)
+4. Multi-language support (German, English)
+5. PWA offline support with service worker
 
 ## Deployment
 
