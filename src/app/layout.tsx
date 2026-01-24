@@ -8,6 +8,20 @@ export const metadata: Metadata = {
     default: "Lettoria - Gratis typecursus voor kinderen",
     template: "%s | Lettoria",
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/icon-16.png', type: 'image/png', sizes: '16x16' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180' },
+    ],
+    other: [
+      { rel: 'icon', url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { rel: 'icon', url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+  },
   description:
     "Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers in de magische wereld van Lettoria. Geen registratie, geen kosten, geen data opslag. Spelenderwijs leren typen met Eric de draak.",
   keywords: [
