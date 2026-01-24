@@ -249,7 +249,7 @@ export default function Home() {
               { step: "1", title: "Start Direct", desc: "Geen gedoe met accounts. Klik op start en je avontuur begint meteen." },
               { step: "2", title: "Ontdek de Wereld", desc: "Reis door 7 unieke regio's, van het Diepe Woud tot de Hoge Toppen." },
               { step: "3", title: "Volg het Verhaal", desc: "Elke les begint met een verhaaltje. Help Eric magische problemen op te lossen." },
-              { step: "4", title: "Word Meester", desc: "Na 23 lessen typ je blind en ontvang je jouw officiële diploma!" }
+              { step: "4", title: "Word Meester", desc: "Na 26 lessen typ je blind en ontvang je jouw officiële diploma!" }
             ].map((item, idx) => (
               <motion.div
                 key={idx}
@@ -269,6 +269,48 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Diploma Section */}
+      <section className="py-16 md:py-20 px-4 bg-perkament">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col md:flex-row items-center gap-8 md:gap-12"
+          >
+            <div className="flex-shrink-0">
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Image
+                  src="/images/diploma/lettoria_seal.png"
+                  alt="Lettoria Typmeester Siegel"
+                  width={180}
+                  height={180}
+                  className="drop-shadow-xl"
+                />
+              </motion.div>
+            </div>
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                Verdien je <span className="text-eric-green">Diploma</span>
+              </h2>
+              <p className="text-gray-600 text-lg mb-6">
+                Na het voltooien van alle 26 lessen met 3 sterren ontvang je een officieel
+                Lettoria Typmeester diploma. Een prachtige beloning voor al je harde werk!
+              </p>
+              <Link
+                href="/diploma"
+                className="inline-flex items-center text-eric-green font-bold hover:underline"
+              >
+                Bekijk je diploma voortgang →
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 

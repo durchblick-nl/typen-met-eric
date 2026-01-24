@@ -16,6 +16,9 @@ export function Footer() {
                     <Link href="/oefenen" className="hover:text-eric-green transition-colors">
                         Snel oefenen
                     </Link>
+                    <Link href="/diploma" className="hover:text-eric-green transition-colors">
+                        Diploma
+                    </Link>
                     <Link href="/impressum" className="hover:text-eric-green transition-colors">
                         Colofon
                     </Link>

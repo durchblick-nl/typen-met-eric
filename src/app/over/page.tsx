@@ -238,7 +238,7 @@ export default function OverPage() {
               <div>
                 <h3 className="font-bold text-gray-800 mb-2">Hoe lang duurt de cursus?</h3>
                 <p className="text-gray-600 text-sm">
-                  Lettoria heeft 23 lessen verdeeld over 7 regio&apos;s. De meeste kinderen kunnen in
+                  Lettoria heeft 26 lessen verdeeld over 7 regio&apos;s. De meeste kinderen kunnen in
                   10-15 weken de cursus afronden met 15-20 minuten oefenen per dag.
                 </p>
               </div>

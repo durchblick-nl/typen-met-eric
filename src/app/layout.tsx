@@ -99,7 +99,7 @@ const jsonLdCourse = {
   "@type": "Course",
   name: "Gratis typecursus voor kinderen",
   description:
-    "Leer blind typen met 10 vingers in de magische wereld van Lettoria. 23 lessen van thuisrij tot meesterschap.",
+    "Leer blind typen met 10 vingers in de magische wereld van Lettoria. 26 lessen van thuisrij tot meesterschap.",
   provider: {
     "@type": "Organization",
     name: "Lettoria",
@@ -112,7 +112,7 @@ const jsonLdCourse = {
     educationalRole: "student",
   },
   teaches: "Blind typen met 10 vingers",
-  numberOfLessons: 23,
+  numberOfLessons: 26,
 };
 
 export default function RootLayout({

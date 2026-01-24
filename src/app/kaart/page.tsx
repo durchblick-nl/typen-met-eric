@@ -4,11 +4,21 @@ import { WorldMap } from '@/components/map';
 import { useProgressStore } from '@/lib/stores/progressStore';
 import { Eric } from '@/components/eric';
 import Link from 'next/link';
+import Image from 'next/image';
+
+const TOTAL_LESSONS = 26;
 
 export default function KaartPage() {
-  const { completedLessons, currentLesson, totalStars, currentStreak } = useProgressStore();
+  const { completedLessons, currentLesson, totalStars, currentStreak, lessonStars } = useProgressStore();
+
+  // Check if all lessons completed with 3 stars
+  const threeStarLessons = Object.values(lessonStars).filter(stars => stars >= 3).length;
+  const canGetDiploma = threeStarLessons >= TOTAL_LESSONS;
 
   const getEricMessage = () => {
+    if (canGetDiploma) {
+      return 'Ongelooflijk! Je hebt ALLE lessen met 3 sterren voltooid! Haal je diploma op!';
+    }
     if (completedLessons.length === 0) {
       return 'Welkom in Lettoria! Klik op mijn grot om te beginnen!';
     }
@@ -70,14 +80,53 @@ export default function KaartPage() {
         <div className="mt-8 max-w-md mx-auto">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
             <span>Voortgang</span>
-            <span>{completedLessons.length} lessen voltooid</span>
+            <span>{completedLessons.length} / {TOTAL_LESSONS} lessen voltooid</span>
           </div>
           <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-eric-green to-eric-gold transition-all duration-500"
-              style={{ width: `${Math.min(100, (completedLessons.length / 30) * 100)}%` }}
+              style={{ width: `${Math.min(100, (completedLessons.length / TOTAL_LESSONS) * 100)}%` }}
             />
           </div>
+        </div>
+
+        {/* Diploma section - shows when completed or as teaser */}
+        <div className="mt-8 max-w-md mx-auto">
+          {canGetDiploma ? (
+            <Link
+              href="/diploma"
+              className="flex items-center gap-4 bg-gradient-to-r from-eric-green to-eric-gold p-4 rounded-2xl text-white hover:scale-[1.02] transition-transform shadow-lg"
+            >
+              <Image
+                src="/images/diploma/lettoria_seal.png"
+                alt="Diploma"
+                width={60}
+                height={60}
+                className="flex-shrink-0"
+              />
+              <div>
+                <div className="font-bold text-lg">Je diploma is klaar!</div>
+                <div className="text-white/90 text-sm">Klik hier om je diploma te downloaden</div>
+              </div>
+            </Link>
+          ) : (
+            <Link
+              href="/diploma"
+              className="flex items-center gap-4 bg-white p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-200"
+            >
+              <Image
+                src="/images/diploma/lettoria_seal.png"
+                alt="Diploma"
+                width={50}
+                height={50}
+                className="flex-shrink-0 opacity-50"
+              />
+              <div>
+                <div className="font-bold text-gray-700">Diploma</div>
+                <div className="text-gray-500 text-sm">{threeStarLessons} / {TOTAL_LESSONS} lessen met 3 sterren</div>
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </main>
