@@ -34,7 +34,15 @@ export function Footer() {
 
                 <div className="flex flex-col gap-2">
                     <p className="text-gray-400 text-xs">
-                        © {currentYear} Lettoria / Durchblick Consultancy BV
+                        © {currentYear} Lettoria /{' '}
+                        <a
+                            href="https://www.treehouse.ch"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-eric-green transition-colors"
+                        >
+                            Durchblick Consultancy BV
+                        </a>
                     </p>
                     <p className="text-gray-400 text-xs">Gemaakt met ❤️ voor alle kinderen.</p>
                 </div>
