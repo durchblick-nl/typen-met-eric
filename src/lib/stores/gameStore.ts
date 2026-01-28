@@ -33,9 +33,9 @@ export const GAME_CONFIG = {
   goldMultiplier: 2,
 
   // Stars (score thresholds)
-  star1Threshold: 5000,
-  star2Threshold: 15000,
-  star3Threshold: 30000,
+  star1Threshold: 2000,
+  star2Threshold: 5000,
+  star3Threshold: 10000,
 } as const;
 
 export type ComboTier = typeof COMBO_TIERS[number];
