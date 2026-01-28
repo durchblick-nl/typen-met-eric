@@ -56,13 +56,23 @@ interface GameState {
   hasShield: boolean;
   isSlowMo: boolean;
 
+  // Session stats (for achievements)
+  feverCount: number;
+  maxCombo: number;
+  crystalsCollected: number;
+  powerupsCollected: string[];
+
   // Persistent progression
   highScores: Record<string, number>; // lessonId -> highScore
   totalGems: number;
   totalScore: number;
+  gamesPlayed: number;
+  unlockedAchievements: string[];
+  newlyUnlockedAchievement: string | null; // For popup display
 
   // Actions
   resetGame: () => void;
+  clearNewAchievement: () => void;
   hitCrystal: (scoreMultiplier?: number, feverBonus?: number) => void;
   missedCrystal: () => void;
   wrongKey: () => void;
@@ -72,7 +82,7 @@ interface GameState {
   activatePowerUp: (type: PowerUpType) => void;
   tickPowerUp: (deltaMs: number) => void;
   useShield: () => boolean; // Returns true if shield was used
-  endGame: (lessonId: string) => { newHighScore: boolean; gemsEarned: number; stars: number };
+  endGame: (lessonId: string) => { newHighScore: boolean; gemsEarned: number; stars: number; newAchievements: string[] };
 
   // Getters
   getCurrentComboTier: () => ComboTier;
@@ -97,10 +107,19 @@ export const useGameStore = create<GameState>()(
       hasShield: false,
       isSlowMo: false,
 
+      // Session stats
+      feverCount: 0,
+      maxCombo: 0,
+      crystalsCollected: 0,
+      powerupsCollected: [],
+
       // Persistent state
       highScores: {},
       totalGems: 0,
       totalScore: 0,
+      gamesPlayed: 0,
+      unlockedAchievements: [],
+      newlyUnlockedAchievement: null,
 
       resetGame: () => set({
         energy: GAME_CONFIG.startEnergy,
@@ -114,7 +133,14 @@ export const useGameStore = create<GameState>()(
         powerUpTimeLeft: 0,
         hasShield: false,
         isSlowMo: false,
+        // Reset session stats
+        feverCount: 0,
+        maxCombo: 0,
+        crystalsCollected: 0,
+        powerupsCollected: [],
       }),
+
+      clearNewAchievement: () => set({ newlyUnlockedAchievement: null }),
 
       hitCrystal: (scoreMultiplier = 1, feverBonus = 0) => set((state) => {
         const comboMultiplier = get().getScoreMultiplier();
@@ -125,9 +151,13 @@ export const useGameStore = create<GameState>()(
         const baseFeverGain = 3 + (comboTier.multiplier * 2);
         const totalFeverGain = baseFeverGain + feverBonus;
 
+        const newCombo = state.combo + 1;
+
         return {
           score: state.score + earnedPoints,
-          combo: state.combo + 1,
+          combo: newCombo,
+          maxCombo: Math.max(state.maxCombo, newCombo),
+          crystalsCollected: state.crystalsCollected + 1,
           energy: Math.min(GAME_CONFIG.maxEnergy, state.energy + GAME_CONFIG.energyPerHit),
           feverMeter: state.isFeverMode ? state.feverMeter : Math.min(100, state.feverMeter + totalFeverGain),
         };
@@ -182,11 +212,12 @@ export const useGameStore = create<GameState>()(
         };
       }),
 
-      activateFever: () => set({
+      activateFever: () => set((state) => ({
         isFeverMode: true,
         feverTimeLeft: GAME_CONFIG.feverDuration,
         feverMeter: 0,
-      }),
+        feverCount: state.feverCount + 1,
+      })),
 
       tickFever: (deltaMs) => set((state) => {
         if (!state.isFeverMode) return state;
@@ -202,16 +233,17 @@ export const useGameStore = create<GameState>()(
         return { feverTimeLeft: newTimeLeft };
       }),
 
-      activatePowerUp: (type) => set(() => {
+      activatePowerUp: (type) => set((state) => {
+        const newPowerups = type ? [...state.powerupsCollected, type] : state.powerupsCollected;
+
         if (type === 'shield') {
-          return { hasShield: true, activePowerUp: 'shield', powerUpTimeLeft: 0 };
+          return { hasShield: true, activePowerUp: 'shield', powerUpTimeLeft: 0, powerupsCollected: newPowerups };
         }
         if (type === 'slowmo') {
-          return { isSlowMo: true, activePowerUp: 'slowmo', powerUpTimeLeft: 5000 }; // 5 seconds
+          return { isSlowMo: true, activePowerUp: 'slowmo', powerUpTimeLeft: 5000, powerupsCollected: newPowerups };
         }
         if (type === 'magnet') {
-          // Magnet is instant, no duration
-          return { activePowerUp: null, powerUpTimeLeft: 0 };
+          return { activePowerUp: null, powerUpTimeLeft: 0, powerupsCollected: newPowerups };
         }
         return {};
       }),
@@ -251,20 +283,64 @@ export const useGameStore = create<GameState>()(
         if (state.score >= GAME_CONFIG.star2Threshold) stars = 2;
         if (state.score >= GAME_CONFIG.star3Threshold) stars = 3;
 
-        // Calculate gems earned
+        // Check achievements
+        const newAchievements: string[] = [];
+        const checkAchievement = (id: string, condition: boolean) => {
+          if (condition && !state.unlockedAchievements.includes(id)) {
+            newAchievements.push(id);
+          }
+        };
+
+        // Combo achievements
+        checkAchievement('combo_5', state.maxCombo >= 5);
+        checkAchievement('combo_10', state.maxCombo >= 10);
+        checkAchievement('combo_20', state.maxCombo >= 20);
+        checkAchievement('combo_50', state.maxCombo >= 50);
+
+        // Fever achievements
+        checkAchievement('fever_first', state.feverCount >= 1);
+        checkAchievement('fever_3', state.feverCount >= 3);
+
+        // Score achievements
+        checkAchievement('score_5000', state.score >= 5000);
+        checkAchievement('score_10000', state.score >= 10000);
+        checkAchievement('score_25000', state.score >= 25000);
+
+        // Perfect game (no wrong keys)
+        checkAchievement('perfect', state.wrongKeyCount === 0 && state.crystalsCollected >= 10);
+
+        // Power-up achievements
+        checkAchievement('shield_first', state.powerupsCollected.includes('shield'));
+        checkAchievement('magnet_first', state.powerupsCollected.includes('magnet'));
+
+        // Calculate achievement gem rewards
+        const achievementGems = newAchievements.length > 0 ? newAchievements.reduce((sum) => sum + 25, 0) : 0;
+
+        // Calculate base gems earned
         let gemsEarned = Math.floor(state.score / 1000);
         if (newHighScore) gemsEarned += 5;
         if (stars === 3) gemsEarned += 10;
+        gemsEarned += achievementGems;
+
+        const newGamesPlayed = state.gamesPlayed + 1;
+        const newTotalScore = state.totalScore + state.score;
+
+        // Milestone achievements (check with new totals)
+        checkAchievement('total_100000', newTotalScore >= 100000);
+        checkAchievement('games_10', newGamesPlayed >= 10);
 
         set((s) => ({
           highScores: newHighScore
             ? { ...s.highScores, [lessonId]: state.score }
             : s.highScores,
           totalGems: s.totalGems + gemsEarned,
-          totalScore: s.totalScore + state.score,
+          totalScore: newTotalScore,
+          gamesPlayed: newGamesPlayed,
+          unlockedAchievements: [...s.unlockedAchievements, ...newAchievements],
+          newlyUnlockedAchievement: newAchievements.length > 0 ? newAchievements[0] : null,
         }));
 
-        return { newHighScore, gemsEarned, stars };
+        return { newHighScore, gemsEarned, stars, newAchievements };
       },
 
       getCurrentComboTier: () => {
@@ -291,6 +367,8 @@ export const useGameStore = create<GameState>()(
         highScores: state.highScores,
         totalGems: state.totalGems,
         totalScore: state.totalScore,
+        gamesPlayed: state.gamesPlayed,
+        unlockedAchievements: state.unlockedAchievements,
       }),
     }
   )

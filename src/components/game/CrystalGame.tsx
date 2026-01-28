@@ -9,6 +9,7 @@ import { Sparkles } from '@/components/ui/Sparkles';
 import { ArcadeBackground } from './ArcadeBackground';
 import { GameHUD } from './GameHUD';
 import { ScorePopup } from './ScorePopup';
+import { AchievementPopup } from './AchievementPopup';
 import { useGameStore, GAME_CONFIG } from '@/lib/stores/gameStore';
 import { CrystalType, getRandomCrystalType, getCrystalConfig, getRandomNormalColor } from '@/lib/data/crystalTypes';
 
@@ -65,6 +66,7 @@ export function CrystalGame({
     isSlowMo,
     hasShield,
     activePowerUp,
+    newlyUnlockedAchievement,
     resetGame,
     hitCrystal,
     missedCrystal,
@@ -76,6 +78,7 @@ export function CrystalGame({
     tickPowerUp,
     endGame,
     getCurrentComboTier,
+    clearNewAchievement,
   } = useGameStore();
 
   // Check if player is frozen (ice crystal effect)
@@ -716,6 +719,16 @@ export function CrystalGame({
           <Sparkles color="#FFD700" count={20} />
         </div>
       )}
+
+      {/* Achievement popup */}
+      <AnimatePresence>
+        {newlyUnlockedAchievement && (
+          <AchievementPopup
+            achievementId={newlyUnlockedAchievement}
+            onClose={clearNewAchievement}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

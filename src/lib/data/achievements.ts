@@ -1,0 +1,158 @@
+// Achievement definitions for Crystal Chaos
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  gemReward: number;
+  condition: AchievementCondition;
+  secret?: boolean; // Hidden until unlocked
+}
+
+export type AchievementCondition =
+  | { type: 'combo'; value: number }
+  | { type: 'fever_count'; value: number }
+  | { type: 'score'; value: number }
+  | { type: 'perfect_game' } // No mistakes
+  | { type: 'total_score'; value: number }
+  | { type: 'games_played'; value: number }
+  | { type: 'crystals_collected'; value: number }
+  | { type: 'powerup_collected'; powerup: string }
+  | { type: 'bomb_avoided'; value: number };
+
+export const ACHIEVEMENTS: Achievement[] = [
+  // Combo achievements
+  {
+    id: 'combo_5',
+    name: 'Erste Schritte',
+    description: '5er Combo erreichen',
+    icon: '🔥',
+    gemReward: 10,
+    condition: { type: 'combo', value: 5 },
+  },
+  {
+    id: 'combo_10',
+    name: 'Auf Touren',
+    description: '10er Combo erreichen',
+    icon: '🔥',
+    gemReward: 25,
+    condition: { type: 'combo', value: 10 },
+  },
+  {
+    id: 'combo_20',
+    name: 'Unstoppbar',
+    description: '20er Combo erreichen',
+    icon: '💪',
+    gemReward: 50,
+    condition: { type: 'combo', value: 20 },
+  },
+  {
+    id: 'combo_50',
+    name: 'LEGENDE',
+    description: '50er Combo erreichen',
+    icon: '👑',
+    gemReward: 200,
+    condition: { type: 'combo', value: 50 },
+  },
+
+  // Fever achievements
+  {
+    id: 'fever_first',
+    name: 'Erste Hitze',
+    description: 'Ersten Fieber-Modus erreichen',
+    icon: '🌡️',
+    gemReward: 15,
+    condition: { type: 'fever_count', value: 1 },
+  },
+  {
+    id: 'fever_3',
+    name: 'Brennend heiß',
+    description: '3x Fieber in einem Spiel',
+    icon: '🔥',
+    gemReward: 75,
+    condition: { type: 'fever_count', value: 3 },
+  },
+
+  // Score achievements
+  {
+    id: 'score_5000',
+    name: 'Erstes Gold',
+    description: '5.000 Punkte in einem Spiel',
+    icon: '⭐',
+    gemReward: 15,
+    condition: { type: 'score', value: 5000 },
+  },
+  {
+    id: 'score_10000',
+    name: 'Kristallmeister',
+    description: '10.000 Punkte in einem Spiel',
+    icon: '💎',
+    gemReward: 50,
+    condition: { type: 'score', value: 10000 },
+  },
+  {
+    id: 'score_25000',
+    name: 'Highflyer',
+    description: '25.000 Punkte in einem Spiel',
+    icon: '🚀',
+    gemReward: 100,
+    condition: { type: 'score', value: 25000 },
+  },
+
+  // Precision
+  {
+    id: 'perfect',
+    name: 'Scharfschütze',
+    description: 'Spiel ohne Fehler beenden',
+    icon: '🎯',
+    gemReward: 100,
+    condition: { type: 'perfect_game' },
+  },
+
+  // Power-ups
+  {
+    id: 'shield_first',
+    name: 'Beschützer',
+    description: 'Ersten Schild einsammeln',
+    icon: '🛡️',
+    gemReward: 10,
+    condition: { type: 'powerup_collected', powerup: 'shield' },
+  },
+  {
+    id: 'magnet_first',
+    name: 'Magnet-Meister',
+    description: 'Ersten Magnet einsammeln',
+    icon: '🧲',
+    gemReward: 20,
+    condition: { type: 'powerup_collected', powerup: 'magnet' },
+  },
+
+  // Milestones
+  {
+    id: 'total_100000',
+    name: 'Punktesammler',
+    description: '100.000 Punkte insgesamt',
+    icon: '📊',
+    gemReward: 150,
+    condition: { type: 'total_score', value: 100000 },
+  },
+  {
+    id: 'games_10',
+    name: 'Stammgast',
+    description: '10 Spiele gespielt',
+    icon: '🎮',
+    gemReward: 50,
+    condition: { type: 'games_played', value: 10 },
+  },
+];
+
+// Get achievement by ID
+export function getAchievement(id: string): Achievement | undefined {
+  return ACHIEVEMENTS.find(a => a.id === id);
+}
+
+// Get all achievements for a specific condition type
+export function getAchievementsByType(type: AchievementCondition['type']): Achievement[] {
+  return ACHIEVEMENTS.filter(a => a.condition.type === type);
+}

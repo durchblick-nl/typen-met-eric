@@ -17,6 +17,7 @@ export function GameHUD({ lessonId }: GameHUDProps) {
     isFeverMode,
     feverTimeLeft,
     highScores,
+    totalGems,
     getCurrentComboTier,
     getScoreMultiplier,
   } = useGameStore();
@@ -125,8 +126,19 @@ export function GameHUD({ lessonId }: GameHUDProps) {
             </div>
           </div>
 
-          {/* Right side: Score + Combo */}
+          {/* Right side: Gems + Score + Combo */}
           <div className="text-right">
+            {/* Gems display */}
+            <div className="flex items-center justify-end gap-1 mb-2">
+              <span className="text-lg">💎</span>
+              <span
+                className="font-mono font-bold text-purple-300"
+                style={{ textShadow: '0 0 10px currentColor' }}
+              >
+                {totalGems.toLocaleString()}
+              </span>
+            </div>
+
             {/* Score display - LED style */}
             <div className="bg-black/70 rounded-lg px-4 py-2 border border-cyan-500/30"
               style={{ boxShadow: '0 0 20px rgba(6, 182, 212, 0.3), inset 0 0 20px rgba(0,0,0,0.5)' }}>
