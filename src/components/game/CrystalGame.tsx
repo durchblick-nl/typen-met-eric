@@ -232,13 +232,20 @@ export function CrystalGame({
 
       if (type === 'magnet') {
         // Collect ALL crystals on screen (except bombs)
-        setCrystals(prev => {
-          prev.filter(c => c.crystalType !== 'bomb').forEach(c => {
+        // First get the crystals to collect, then update state separately
+        const crystalsToCollect = crystals.filter(c => c.crystalType !== 'bomb' && c.id !== id);
+
+        // Remove collected crystals from state
+        setCrystals(prev => prev.filter(c => c.crystalType === 'bomb'));
+
+        // Score each collected crystal (delayed to avoid setState during render)
+        setTimeout(() => {
+          crystalsToCollect.forEach(c => {
             const cfg = getCrystalConfig(c.crystalType);
             hitCrystal(cfg.scoreMultiplier, cfg.feverBonus);
           });
-          return prev.filter(c => c.crystalType === 'bomb');
-        });
+        }, 0);
+
         setEricMessage('MAGNET! Alles eingesammelt!');
       } else if (type === 'shield') {
         setEricMessage('Schild aktiviert!');
