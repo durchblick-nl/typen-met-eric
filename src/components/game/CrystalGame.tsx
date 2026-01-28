@@ -49,6 +49,7 @@ export function CrystalGame({
   const [frozenUntil, setFrozenUntil] = useState(0); // Ice crystal freeze effect
   const [scorePopups, setScorePopups] = useState<ScorePopupData[]>([]);
   const [screenFlash, setScreenFlash] = useState<string | null>(null); // Flash color
+  const [isInitialized, setIsInitialized] = useState(false); // Prevent premature win check
 
   const crystalIdRef = useRef(0);
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -138,6 +139,9 @@ export function CrystalGame({
   // Reset game on mount
   useEffect(() => {
     resetGame();
+    // Small delay to ensure state is reset before enabling win checks
+    const timer = setTimeout(() => setIsInitialized(true), 100);
+    return () => clearTimeout(timer);
   }, [resetGame]);
 
   // Check for fever activation
@@ -194,8 +198,10 @@ export function CrystalGame({
     }
   }, [energy, gameState, endGame, lessonId]);
 
-  // Check for 3-star completion
+  // Check for 3-star completion (only after game is initialized)
   useEffect(() => {
+    if (!isInitialized) return; // Don't check until game is properly reset
+
     if (score >= GAME_CONFIG.star3Threshold && gameState === 'playing') {
       setGameState('complete');
       const result = endGame(lessonId);
@@ -209,7 +215,7 @@ export function CrystalGame({
 
       setTimeout(onComplete, 3000);
     }
-  }, [score, gameState, endGame, lessonId, onComplete]);
+  }, [score, gameState, endGame, lessonId, onComplete, isInitialized]);
 
   // Spawn a new crystal
   const spawnCrystal = useCallback(() => {
@@ -441,14 +447,18 @@ export function CrystalGame({
 
   // Restart game
   const handleRestart = () => {
+    setIsInitialized(false); // Prevent premature win check
     resetGame();
     setCrystals([]);
+    setScorePopups([]);
     setGameState('playing');
     setGameResult(null);
     setEricMood('happy');
     setEricMessage('Vang de kristallen!');
     setFrozenUntil(0);
     crystalIdRef.current = 0;
+    // Re-enable win checks after reset
+    setTimeout(() => setIsInitialized(true), 100);
   };
 
   return (
