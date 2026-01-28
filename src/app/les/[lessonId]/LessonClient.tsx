@@ -350,9 +350,9 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               className="fixed inset-0 z-50"
             >
               <CrystalGame
+                lessonId={String(lessonId)}
                 availableLetters={getAvailableLetters(lessonId)}
                 onComplete={handleGameComplete}
-                targetCount={30}
               />
             </motion.div>
           )}
