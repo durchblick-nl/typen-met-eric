@@ -8,8 +8,18 @@ import { useKeyboard } from '@/lib/hooks/useKeyboard';
 import { Sparkles } from '@/components/ui/Sparkles';
 import { ArcadeBackground } from './ArcadeBackground';
 import { GameHUD } from './GameHUD';
+import { ScorePopup } from './ScorePopup';
 import { useGameStore, GAME_CONFIG } from '@/lib/stores/gameStore';
 import { CrystalType, getRandomCrystalType, getCrystalConfig, getRandomNormalColor } from '@/lib/data/crystalTypes';
+
+interface ScorePopupData {
+  id: string;
+  score: number;
+  x: number;
+  y: number;
+  color: string;
+  isSpecial: boolean;
+}
 
 interface CrystalData {
   id: string;
@@ -37,6 +47,8 @@ export function CrystalGame({
   const [gameState, setGameState] = useState<'playing' | 'gameover' | 'complete'>('playing');
   const [gameResult, setGameResult] = useState<{ newHighScore: boolean; gemsEarned: number; stars: number } | null>(null);
   const [frozenUntil, setFrozenUntil] = useState(0); // Ice crystal freeze effect
+  const [scorePopups, setScorePopups] = useState<ScorePopupData[]>([]);
+  const [screenFlash, setScreenFlash] = useState<string | null>(null); // Flash color
 
   const crystalIdRef = useRef(0);
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -99,6 +111,29 @@ export function CrystalGame({
     if (isFrozen) duration *= 2;
     return duration;
   }, [score, isFeverMode, isSlowMo, isFrozen]);
+
+  // Show score popup
+  const showScorePopup = useCallback((x: number, earnedScore: number, color: string, isSpecial: boolean) => {
+    const popupId = `popup-${Date.now()}-${Math.random()}`;
+    setScorePopups(prev => [...prev, {
+      id: popupId,
+      score: earnedScore,
+      x,
+      y: 200,
+      color,
+      isSpecial,
+    }]);
+    // Remove popup after animation
+    setTimeout(() => {
+      setScorePopups(prev => prev.filter(p => p.id !== popupId));
+    }, 1000);
+  }, []);
+
+  // Show screen flash
+  const showScreenFlash = useCallback((color: string) => {
+    setScreenFlash(color);
+    setTimeout(() => setScreenFlash(null), 150);
+  }, []);
 
   // Reset game on mount
   useEffect(() => {
@@ -211,6 +246,10 @@ export function CrystalGame({
 
   // Handle crystal collection
   const handleCollect = useCallback((id: string, type: CrystalType) => {
+    // Get crystal position before removing
+    const crystal = crystals.find(c => c.id === id);
+    const crystalX = crystal?.x || 50;
+
     setCrystals(prev => prev.filter(c => c.id !== id));
 
     const config = getCrystalConfig(type);
@@ -218,6 +257,7 @@ export function CrystalGame({
     // Handle bombs (player shouldn't collect these!)
     if (type === 'bomb') {
       hitBomb();
+      showScreenFlash('#ef4444'); // Red flash
       setEricMood('worried');
       setEricMessage('BOOM! Nicht die Bombe!');
       setTimeout(() => {
@@ -229,10 +269,10 @@ export function CrystalGame({
     // Handle power-ups
     if (type === 'shield' || type === 'slowmo' || type === 'magnet') {
       activatePowerUp(type);
+      showScreenFlash(config.glowColor); // Power-up color flash
 
       if (type === 'magnet') {
         // Collect ALL crystals on screen (except bombs)
-        // First get the crystals to collect, then update state separately
         const crystalsToCollect = crystals.filter(c => c.crystalType !== 'bomb' && c.id !== id);
 
         // Remove collected crystals from state
@@ -240,10 +280,16 @@ export function CrystalGame({
 
         // Score each collected crystal (delayed to avoid setState during render)
         setTimeout(() => {
+          let totalScore = 0;
           crystalsToCollect.forEach(c => {
             const cfg = getCrystalConfig(c.crystalType);
+            const multiplier = getCurrentComboTier().multiplier * (isFeverMode ? 2 : 1);
+            totalScore += Math.round(GAME_CONFIG.baseScore * cfg.scoreMultiplier * multiplier);
             hitCrystal(cfg.scoreMultiplier, cfg.feverBonus);
           });
+          if (totalScore > 0) {
+            showScorePopup(50, totalScore, '#ec4899', true);
+          }
         }, 0);
 
         setEricMessage('MAGNET! Alles eingesammelt!');
@@ -258,6 +304,19 @@ export function CrystalGame({
         if (gameState === 'playing') setEricMood('encouraging');
       }, 1500);
       return;
+    }
+
+    // Calculate score for popup
+    const multiplier = getCurrentComboTier().multiplier * (isFeverMode ? 2 : 1);
+    const earnedScore = Math.round(GAME_CONFIG.baseScore * config.scoreMultiplier * multiplier);
+
+    // Show score popup
+    const isSpecial = type === 'gold' || type === 'rainbow';
+    showScorePopup(crystalX, earnedScore, config.glowColor, isSpecial);
+
+    // Screen flash for special crystals
+    if (isSpecial) {
+      showScreenFlash(config.glowColor);
     }
 
     // Normal crystal collection
@@ -396,6 +455,34 @@ export function CrystalGame({
     <div className="fixed inset-0 overflow-hidden">
       {/* Arcade Background with Parallax */}
       <ArcadeBackground isFeverMode={isFeverMode} intensity={intensity} />
+
+      {/* Screen flash effect */}
+      <AnimatePresence>
+        {screenFlash && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-50"
+            style={{ backgroundColor: screenFlash }}
+            initial={{ opacity: 0.6 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Score popups */}
+      <AnimatePresence>
+        {scorePopups.map(popup => (
+          <ScorePopup
+            key={popup.id}
+            score={popup.score}
+            x={popup.x}
+            y={popup.y}
+            color={popup.color}
+            isSpecial={popup.isSpecial}
+          />
+        ))}
+      </AnimatePresence>
 
       {/* Frozen overlay */}
       <AnimatePresence>
