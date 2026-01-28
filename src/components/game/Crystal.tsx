@@ -3,26 +3,17 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Sparkles } from '@/components/ui/Sparkles';
-
-// Crystal colors matching Lettoria regions
-const CRYSTAL_COLORS = [
-  'from-yellow-300 to-amber-500',      // Gold (Grot)
-  'from-amber-200 to-orange-300',      // Warm (Dorp)
-  'from-yellow-200 to-yellow-400',     // Gelb (Velden)
-  'from-emerald-400 to-green-600',     // Groen (Woud)
-  'from-cyan-300 to-teal-400',         // Cyan (Toppen)
-  'from-blue-400 to-blue-600',         // Blauw (Zee)
-  'from-purple-400 to-violet-600',     // Paars (Kasteel)
-];
+import { CrystalType, getCrystalConfig, getRandomNormalColor } from '@/lib/data/crystalTypes';
 
 interface CrystalProps {
   id: string;
   letter: string;
   x: number;              // 0-100% horizontal position
   duration: number;       // Fall duration in seconds
-  onCollect: (id: string) => void;
-  onMiss: (id: string) => void;
-  colorIndex?: number;
+  crystalType: CrystalType;
+  colorClass?: string;    // Override color for normal crystals
+  onCollect: (id: string, type: CrystalType) => void;
+  onMiss: (id: string, type: CrystalType) => void;
 }
 
 export function Crystal({
@@ -30,105 +21,220 @@ export function Crystal({
   letter,
   x,
   duration,
+  crystalType,
+  colorClass,
   onCollect,
   onMiss,
-  colorIndex = 0
 }: CrystalProps) {
   const [collected, setCollected] = useState(false);
-  const color = CRYSTAL_COLORS[colorIndex % CRYSTAL_COLORS.length];
+  const config = getCrystalConfig(crystalType);
+
+  // Use provided color or get from config
+  const gradientClass = colorClass || (
+    crystalType === 'normal'
+      ? getRandomNormalColor()
+      : config.colors[0]
+  );
 
   const handleCollect = () => {
     if (collected) return;
     setCollected(true);
-    onCollect(id);
+    onCollect(id, crystalType);
   };
 
-  // Expose collect method via data attribute for parent to call
-  if (typeof window !== 'undefined') {
-    const element = document.querySelector(`[data-crystal-id="${id}"]`);
-    if (element) {
-      (element as HTMLElement).dataset.collect = handleCollect.toString();
-    }
-  }
+  // Determine if this is a special crystal
+  const isDanger = config.special === 'danger';
+  const isPowerup = config.special === 'powerup';
+  const isSpecial = crystalType !== 'normal';
 
   return (
     <motion.div
       data-crystal-id={id}
       data-letter={letter}
+      data-type={crystalType}
       className="absolute z-10"
       style={{ left: `${x}%`, transform: 'translateX(-50%)' }}
-      initial={{ y: -80 }}
+      initial={{ y: -100 }}
       animate={collected ? {
-        scale: [1, 1.5, 0],
+        scale: [1, 1.8, 0],
         opacity: [1, 1, 0],
-        y: 0
+        y: 0,
       } : {
-        y: 'calc(100vh + 80px)'
+        y: 'calc(100vh + 100px)',
       }}
       transition={collected ? {
-        duration: 0.4,
-        ease: 'easeOut'
+        duration: 0.5,
+        ease: 'easeOut',
       } : {
         duration: duration,
-        ease: 'linear'
+        ease: 'linear',
       }}
       onAnimationComplete={() => {
         if (!collected) {
-          onMiss(id);
+          onMiss(id, crystalType);
         }
       }}
     >
-      {/* Crystal hexagon shape */}
-      <div className="relative">
+      {/* Crystal container with animations */}
+      <motion.div
+        className="relative"
+        animate={isSpecial ? {
+          scale: [1, 1.1, 1],
+          rotate: crystalType === 'rainbow' ? [0, 5, -5, 0] : 0,
+        } : {}}
+        transition={{
+          duration: crystalType === 'rainbow' ? 0.5 : 1,
+          repeat: Infinity,
+          repeatType: 'reverse',
+        }}
+      >
+        {/* Main crystal hexagon */}
         <div
           className={`
-            w-16 h-20 flex items-center justify-center
-            bg-gradient-to-br ${color}
-            shadow-lg shadow-current/30
-            transition-transform hover:scale-110
+            w-16 h-20 flex items-center justify-center relative
+            bg-gradient-to-br ${gradientClass}
+            shadow-lg
+            ${isDanger ? 'animate-pulse' : ''}
+            ${isPowerup ? 'ring-2 ring-white/50 ring-offset-2 ring-offset-transparent' : ''}
           `}
           style={{
             clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+            boxShadow: `0 0 20px ${config.glowColor}40, 0 0 40px ${config.glowColor}20`,
           }}
         >
-          {/* Inner glow */}
+          {/* Inner highlight */}
           <div
-            className="absolute inset-2 bg-white/40"
+            className="absolute inset-2 bg-white/30"
             style={{
               clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
             }}
           />
 
-          {/* Letter - dark color with white outline for readability */}
-          <span
-            className="relative z-10 font-mono text-2xl font-bold text-gray-900"
-            style={{
-              textShadow: '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 0 2px 4px rgba(0,0,0,0.3)'
-            }}
-          >
-            {letter}
-          </span>
+          {/* Rainbow animation overlay */}
+          {crystalType === 'rainbow' && (
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                background: 'linear-gradient(45deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ef4444)',
+                backgroundSize: '400% 400%',
+              }}
+              animate={{
+                backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'linear',
+              }}
+            />
+          )}
+
+          {/* Bomb tick animation */}
+          {crystalType === 'bomb' && (
+            <motion.div
+              className="absolute inset-0 bg-red-500/50"
+              style={{
+                clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+              }}
+              animate={{
+                opacity: [0, 0.5, 0],
+              }}
+              transition={{
+                duration: 0.5,
+                repeat: Infinity,
+              }}
+            />
+          )}
+
+          {/* Letter or Icon */}
+          <div className="relative z-10 flex flex-col items-center">
+            {config.icon && (
+              <span className="text-lg leading-none mb-0.5">{config.icon}</span>
+            )}
+            <span
+              className={`
+                font-mono text-xl font-bold
+                ${isDanger ? 'text-red-200' : 'text-gray-900'}
+              `}
+              style={{
+                textShadow: isDanger
+                  ? '0 0 10px rgba(239,68,68,0.8)'
+                  : '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white',
+              }}
+            >
+              {letter}
+            </span>
+          </div>
         </div>
 
-        {/* Sparkle effect when collected */}
-        {collected && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Sparkles color="#FFD700" count={8} />
-          </div>
-        )}
-
-        {/* Glow effect */}
+        {/* Outer glow effect */}
         <div
           className={`
-            absolute inset-0 -z-10 blur-md opacity-50
-            bg-gradient-to-br ${color}
+            absolute inset-0 -z-10 blur-md
+            bg-gradient-to-br ${gradientClass}
           `}
           style={{
             clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-            transform: 'scale(1.2)',
+            transform: 'scale(1.3)',
+            opacity: isSpecial ? 0.7 : 0.4,
           }}
         />
-      </div>
+
+        {/* Sparkle effect for special crystals */}
+        {(crystalType === 'gold' || crystalType === 'rainbow' || isPowerup) && !collected && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Sparkles color={config.glowColor} count={4} />
+          </div>
+        )}
+
+        {/* Collection explosion effect */}
+        {collected && (
+          <>
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              initial={{ scale: 1, opacity: 1 }}
+              animate={{ scale: 3, opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div
+                className="w-full h-full rounded-full"
+                style={{
+                  background: `radial-gradient(circle, ${config.glowColor} 0%, transparent 70%)`,
+                }}
+              />
+            </motion.div>
+            <Sparkles color={config.glowColor} count={12} />
+          </>
+        )}
+
+        {/* Ice crystal snowflakes */}
+        {crystalType === 'ice' && !collected && (
+          <>
+            {[...Array(3)].map((_, i) => (
+              <motion.span
+                key={i}
+                className="absolute text-xs text-white/60"
+                style={{
+                  left: `${20 + i * 30}%`,
+                  top: '-10px',
+                }}
+                animate={{
+                  y: [0, 30],
+                  opacity: [0.8, 0],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  delay: i * 0.5,
+                }}
+              >
+                ❄
+              </motion.span>
+            ))}
+          </>
+        )}
+      </motion.div>
     </motion.div>
   );
 }

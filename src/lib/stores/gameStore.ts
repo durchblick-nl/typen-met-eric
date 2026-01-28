@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// Power-up types
+export type PowerUpType = 'shield' | 'slowmo' | 'magnet' | null;
+
 // Combo thresholds and multipliers
 export const COMBO_TIERS = [
   { threshold: 0, multiplier: 1, name: null },
@@ -47,6 +50,12 @@ interface GameState {
   feverTimeLeft: number;
   wrongKeyCount: number;
 
+  // Power-ups
+  activePowerUp: PowerUpType;
+  powerUpTimeLeft: number;
+  hasShield: boolean;
+  isSlowMo: boolean;
+
   // Persistent progression
   highScores: Record<string, number>; // lessonId -> highScore
   totalGems: number;
@@ -54,11 +63,15 @@ interface GameState {
 
   // Actions
   resetGame: () => void;
-  hitCrystal: (points?: number) => void;
+  hitCrystal: (scoreMultiplier?: number, feverBonus?: number) => void;
   missedCrystal: () => void;
   wrongKey: () => void;
+  hitBomb: () => void;
   activateFever: () => void;
   tickFever: (deltaMs: number) => void;
+  activatePowerUp: (type: PowerUpType) => void;
+  tickPowerUp: (deltaMs: number) => void;
+  useShield: () => boolean; // Returns true if shield was used
   endGame: (lessonId: string) => { newHighScore: boolean; gemsEarned: number; stars: number };
 
   // Getters
@@ -78,6 +91,12 @@ export const useGameStore = create<GameState>()(
       feverTimeLeft: 0,
       wrongKeyCount: 0,
 
+      // Power-ups
+      activePowerUp: null,
+      powerUpTimeLeft: 0,
+      hasShield: false,
+      isSlowMo: false,
+
       // Persistent state
       highScores: {},
       totalGems: 0,
@@ -91,45 +110,75 @@ export const useGameStore = create<GameState>()(
         isFeverMode: false,
         feverTimeLeft: 0,
         wrongKeyCount: 0,
+        activePowerUp: null,
+        powerUpTimeLeft: 0,
+        hasShield: false,
+        isSlowMo: false,
       }),
 
-      hitCrystal: (bonusPoints = 0) => set((state) => {
-        const multiplier = get().getScoreMultiplier();
-        const basePoints = GAME_CONFIG.baseScore + bonusPoints;
-        const earnedPoints = basePoints * multiplier;
+      hitCrystal: (scoreMultiplier = 1, feverBonus = 0) => set((state) => {
+        const comboMultiplier = get().getScoreMultiplier();
+        const earnedPoints = Math.round(GAME_CONFIG.baseScore * scoreMultiplier * comboMultiplier);
 
         // Fever meter fills faster with higher combos
         const comboTier = get().getCurrentComboTier();
-        const feverGain = 3 + (comboTier.multiplier * 2);
+        const baseFeverGain = 3 + (comboTier.multiplier * 2);
+        const totalFeverGain = baseFeverGain + feverBonus;
 
         return {
           score: state.score + earnedPoints,
           combo: state.combo + 1,
           energy: Math.min(GAME_CONFIG.maxEnergy, state.energy + GAME_CONFIG.energyPerHit),
-          feverMeter: state.isFeverMode ? state.feverMeter : Math.min(100, state.feverMeter + feverGain),
+          feverMeter: state.isFeverMode ? state.feverMeter : Math.min(100, state.feverMeter + totalFeverGain),
         };
       }),
 
       missedCrystal: () => set((state) => {
+        // Shield protects from miss penalty
+        if (state.hasShield) {
+          return { hasShield: false, activePowerUp: null };
+        }
+
         const energyLoss = state.isFeverMode
           ? GAME_CONFIG.energyLostOnMiss * GAME_CONFIG.feverEnergyLossReduction
           : GAME_CONFIG.energyLostOnMiss;
 
         return {
-          combo: 0, // Reset combo on miss
+          combo: 0,
           energy: Math.max(0, state.energy - energyLoss),
         };
       }),
 
       wrongKey: () => set((state) => {
+        // Shield protects from wrong key penalty
+        if (state.hasShield) {
+          return { hasShield: false, activePowerUp: null };
+        }
+
         const energyLoss = state.isFeverMode
           ? GAME_CONFIG.energyLostOnWrongKey * GAME_CONFIG.feverEnergyLossReduction
           : GAME_CONFIG.energyLostOnWrongKey;
 
         return {
-          combo: 0, // Reset combo on wrong key
+          combo: 0,
           energy: Math.max(0, state.energy - energyLoss),
           wrongKeyCount: state.wrongKeyCount + 1,
+        };
+      }),
+
+      hitBomb: () => set((state) => {
+        // Shield protects from bomb
+        if (state.hasShield) {
+          return { hasShield: false, activePowerUp: null };
+        }
+
+        const energyLoss = state.isFeverMode
+          ? GAME_CONFIG.energyLostOnBomb * GAME_CONFIG.feverEnergyLossReduction
+          : GAME_CONFIG.energyLostOnBomb;
+
+        return {
+          combo: 0,
+          energy: Math.max(0, state.energy - energyLoss),
         };
       }),
 
@@ -152,6 +201,44 @@ export const useGameStore = create<GameState>()(
 
         return { feverTimeLeft: newTimeLeft };
       }),
+
+      activatePowerUp: (type) => set(() => {
+        if (type === 'shield') {
+          return { hasShield: true, activePowerUp: 'shield', powerUpTimeLeft: 0 };
+        }
+        if (type === 'slowmo') {
+          return { isSlowMo: true, activePowerUp: 'slowmo', powerUpTimeLeft: 5000 }; // 5 seconds
+        }
+        if (type === 'magnet') {
+          // Magnet is instant, no duration
+          return { activePowerUp: null, powerUpTimeLeft: 0 };
+        }
+        return {};
+      }),
+
+      tickPowerUp: (deltaMs) => set((state) => {
+        if (!state.isSlowMo || state.powerUpTimeLeft <= 0) return state;
+
+        const newTimeLeft = state.powerUpTimeLeft - deltaMs;
+        if (newTimeLeft <= 0) {
+          return {
+            isSlowMo: false,
+            activePowerUp: null,
+            powerUpTimeLeft: 0,
+          };
+        }
+
+        return { powerUpTimeLeft: newTimeLeft };
+      }),
+
+      useShield: () => {
+        const state = get();
+        if (state.hasShield) {
+          set({ hasShield: false, activePowerUp: null });
+          return true;
+        }
+        return false;
+      },
 
       endGame: (lessonId) => {
         const state = get();

@@ -9,13 +9,15 @@ import { Sparkles } from '@/components/ui/Sparkles';
 import { ArcadeBackground } from './ArcadeBackground';
 import { GameHUD } from './GameHUD';
 import { useGameStore, GAME_CONFIG } from '@/lib/stores/gameStore';
+import { CrystalType, getRandomCrystalType, getCrystalConfig, getRandomNormalColor } from '@/lib/data/crystalTypes';
 
 interface CrystalData {
   id: string;
   letter: string;
   x: number;
   duration: number;
-  colorIndex: number;
+  crystalType: CrystalType;
+  colorClass?: string;
 }
 
 interface CrystalGameProps {
@@ -34,10 +36,12 @@ export function CrystalGame({
   const [ericMessage, setEricMessage] = useState('Vang de kristallen!');
   const [gameState, setGameState] = useState<'playing' | 'gameover' | 'complete'>('playing');
   const [gameResult, setGameResult] = useState<{ newHighScore: boolean; gemsEarned: number; stars: number } | null>(null);
+  const [frozenUntil, setFrozenUntil] = useState(0); // Ice crystal freeze effect
 
   const crystalIdRef = useRef(0);
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const feverIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const powerUpIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     energy,
@@ -45,39 +49,56 @@ export function CrystalGame({
     combo,
     isFeverMode,
     feverMeter,
+    isSlowMo,
+    hasShield,
+    activePowerUp,
     resetGame,
     hitCrystal,
     missedCrystal,
     wrongKey,
+    hitBomb,
     activateFever,
     tickFever,
+    activatePowerUp,
+    tickPowerUp,
     endGame,
     getCurrentComboTier,
   } = useGameStore();
+
+  // Check if player is frozen (ice crystal effect)
+  const isFrozen = Date.now() < frozenUntil;
 
   // Calculate intensity for visual effects (0-1)
   const intensity = Math.min(1, (combo / 30) + (isFeverMode ? 0.5 : 0));
 
   // Calculate difficulty based on progress
   const getMaxCrystals = useCallback(() => {
-    if (score >= 20000) return 4;
-    if (score >= 10000) return 3;
-    if (score >= 5000) return 2;
-    return 1;
+    if (score >= 20000) return 5;
+    if (score >= 10000) return 4;
+    if (score >= 5000) return 3;
+    return 2;
   }, [score]);
 
   const getSpawnInterval = useCallback(() => {
-    const base = isFeverMode ? 800 : 1500;
+    let base = isFeverMode ? 800 : 1500;
     const reduction = Math.min(500, Math.floor(score / 5000) * 100);
-    return base - reduction;
-  }, [score, isFeverMode]);
+    base = base - reduction;
+    // Slow-mo power-up increases interval
+    if (isSlowMo) base *= 1.5;
+    return Math.max(500, base);
+  }, [score, isFeverMode, isSlowMo]);
 
   const getFallDuration = useCallback(() => {
-    if (isFeverMode) return 3;
-    if (score >= 20000) return 4;
-    if (score >= 10000) return 5;
-    return 6;
-  }, [score, isFeverMode]);
+    let duration = 6;
+    if (isFeverMode) duration = 4;
+    else if (score >= 20000) duration = 4;
+    else if (score >= 10000) duration = 5;
+    // Slow-mo power-up increases fall duration
+    if (isSlowMo) duration *= 1.5;
+    // Frozen state slows everything
+    if (isFrozen) duration *= 2;
+    return duration;
+  }, [score, isFeverMode, isSlowMo, isFrozen]);
 
   // Reset game on mount
   useEffect(() => {
@@ -107,6 +128,21 @@ export function CrystalGame({
       };
     }
   }, [isFeverMode, tickFever, gameState]);
+
+  // Power-up timer
+  useEffect(() => {
+    if (isSlowMo && gameState === 'playing') {
+      powerUpIntervalRef.current = setInterval(() => {
+        tickPowerUp(100);
+      }, 100);
+
+      return () => {
+        if (powerUpIntervalRef.current) {
+          clearInterval(powerUpIntervalRef.current);
+        }
+      };
+    }
+  }, [isSlowMo, tickPowerUp, gameState]);
 
   // Check for game over (energy depleted)
   useEffect(() => {
@@ -144,13 +180,28 @@ export function CrystalGame({
   const spawnCrystal = useCallback(() => {
     if (gameState !== 'playing') return;
 
-    const letter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
+    const crystalType = getRandomCrystalType();
+    const config = getCrystalConfig(crystalType);
+
+    // For bombs, use a different (wrong) letter
+    let letter: string;
+    if (crystalType === 'bomb') {
+      // Pick a random letter NOT in availableLetters
+      const allLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+      const unusedLetters = allLetters.filter(l => !availableLetters.map(a => a.toLowerCase()).includes(l));
+      letter = unusedLetters.length > 0
+        ? unusedLetters[Math.floor(Math.random() * unusedLetters.length)]
+        : availableLetters[Math.floor(Math.random() * availableLetters.length)];
+    } else {
+      letter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
+    }
+
     const x = 10 + Math.random() * 80;
     const id = `crystal-${crystalIdRef.current++}`;
-    const colorIndex = Math.floor(Math.random() * 7);
     const duration = getFallDuration();
+    const colorClass = crystalType === 'normal' ? getRandomNormalColor() : undefined;
 
-    const newCrystal: CrystalData = { id, letter, x, duration, colorIndex };
+    const newCrystal: CrystalData = { id, letter, x, duration, crystalType, colorClass };
 
     setCrystals(prev => {
       if (prev.length >= getMaxCrystals()) return prev;
@@ -159,29 +210,98 @@ export function CrystalGame({
   }, [availableLetters, gameState, getMaxCrystals, getFallDuration]);
 
   // Handle crystal collection
-  const handleCollect = useCallback((id: string) => {
+  const handleCollect = useCallback((id: string, type: CrystalType) => {
     setCrystals(prev => prev.filter(c => c.id !== id));
-    hitCrystal();
 
-    // Update Eric's mood based on combo
-    const comboTier = getCurrentComboTier();
-    if (comboTier.multiplier >= 5) {
-      setEricMood('celebrating');
-      setEricMessage('MEGA! Unglaublich!');
-    } else if (comboTier.multiplier >= 3) {
-      setEricMood('celebrating');
-      const messages = ['Super!', 'Fantastisch!', 'Weiter so!'];
-      setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
-    } else {
-      setEricMood('encouraging');
-      const messages = ['Mooi!', 'Ja!', 'Top!', 'Yes!'];
-      setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
+    const config = getCrystalConfig(type);
+
+    // Handle bombs (player shouldn't collect these!)
+    if (type === 'bomb') {
+      hitBomb();
+      setEricMood('worried');
+      setEricMessage('BOOM! Nicht die Bombe!');
+      setTimeout(() => {
+        if (gameState === 'playing') setEricMood('encouraging');
+      }, 1500);
+      return;
     }
-  }, [hitCrystal, getCurrentComboTier]);
+
+    // Handle power-ups
+    if (type === 'shield' || type === 'slowmo' || type === 'magnet') {
+      activatePowerUp(type);
+
+      if (type === 'magnet') {
+        // Collect ALL crystals on screen (except bombs)
+        setCrystals(prev => {
+          prev.filter(c => c.crystalType !== 'bomb').forEach(c => {
+            const cfg = getCrystalConfig(c.crystalType);
+            hitCrystal(cfg.scoreMultiplier, cfg.feverBonus);
+          });
+          return prev.filter(c => c.crystalType === 'bomb');
+        });
+        setEricMessage('MAGNET! Alles eingesammelt!');
+      } else if (type === 'shield') {
+        setEricMessage('Schild aktiviert!');
+      } else if (type === 'slowmo') {
+        setEricMessage('Zeitlupe!');
+      }
+
+      setEricMood('celebrating');
+      setTimeout(() => {
+        if (gameState === 'playing') setEricMood('encouraging');
+      }, 1500);
+      return;
+    }
+
+    // Normal crystal collection
+    hitCrystal(config.scoreMultiplier, config.feverBonus);
+
+    // Special messages for special crystals
+    if (type === 'gold') {
+      setEricMood('celebrating');
+      setEricMessage('GOLD! Doppelte Punkte!');
+    } else if (type === 'rainbow') {
+      setEricMood('celebrating');
+      setEricMessage('REGENBOGEN! Fieber-Boost!');
+    } else {
+      // Update Eric's mood based on combo
+      const comboTier = getCurrentComboTier();
+      if (comboTier.multiplier >= 5) {
+        setEricMood('celebrating');
+        setEricMessage('MEGA! Unglaublich!');
+      } else if (comboTier.multiplier >= 3) {
+        setEricMood('celebrating');
+        const messages = ['Super!', 'Fantastisch!', 'Weiter so!'];
+        setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
+      } else {
+        setEricMood('encouraging');
+        const messages = ['Mooi!', 'Ja!', 'Top!', 'Yes!'];
+        setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
+      }
+    }
+  }, [hitCrystal, hitBomb, activatePowerUp, getCurrentComboTier, gameState]);
 
   // Handle missed crystal
-  const handleMiss = useCallback((id: string) => {
+  const handleMiss = useCallback((id: string, type: CrystalType) => {
     setCrystals(prev => prev.filter(c => c.id !== id));
+
+    // Bombs are good to miss!
+    if (type === 'bomb') {
+      return; // No penalty for missing bombs
+    }
+
+    // Ice crystal freeze effect
+    if (type === 'ice') {
+      setFrozenUntil(Date.now() + 3000); // Freeze for 3 seconds
+      setEricMood('worried');
+      setEricMessage('Eingefroren!');
+      setTimeout(() => {
+        if (gameState === 'playing') setEricMood('encouraging');
+        setEricMessage('Wieder aufgetaut!');
+      }, 3000);
+      return;
+    }
+
     missedCrystal();
     setEricMood('worried');
     setEricMessage('Oje, verpasst!');
@@ -196,17 +316,18 @@ export function CrystalGame({
   const handleWrongKey = useCallback(() => {
     wrongKey();
     setEricMood('worried');
-    setEricMessage('Falsche Taste!');
+    setEricMessage(hasShield ? 'Schild hat geschützt!' : 'Falsche Taste!');
     setTimeout(() => {
       if (gameState === 'playing') {
         setEricMood('encouraging');
       }
     }, 800);
-  }, [wrongKey, gameState]);
+  }, [wrongKey, gameState, hasShield]);
 
   // Keyboard handler
   const handleKeyPress = useCallback((key: string) => {
     if (gameState !== 'playing') return;
+    if (isFrozen) return; // Can't type while frozen
 
     const lowerKey = key.toLowerCase();
 
@@ -214,17 +335,19 @@ export function CrystalGame({
     const matchingCrystal = crystals.find(c => c.letter.toLowerCase() === lowerKey);
 
     if (matchingCrystal) {
-      handleCollect(matchingCrystal.id);
-    } else if (availableLetters.map(l => l.toLowerCase()).includes(lowerKey)) {
-      // Wrong key but valid letter - penalize
-      handleWrongKey();
+      handleCollect(matchingCrystal.id, matchingCrystal.crystalType);
+    } else {
+      // Check if it's a valid letter we're watching
+      if (availableLetters.map(l => l.toLowerCase()).includes(lowerKey)) {
+        handleWrongKey();
+      }
     }
-  }, [gameState, crystals, availableLetters, handleCollect, handleWrongKey]);
+  }, [gameState, crystals, availableLetters, handleCollect, handleWrongKey, isFrozen]);
 
   useKeyboard({
     onKeyPress: handleKeyPress,
     enabled: gameState === 'playing',
-    allowedKeys: availableLetters.map(l => l.toLowerCase()),
+    allowedKeys: [...availableLetters.map(l => l.toLowerCase()), ...crystals.map(c => c.letter.toLowerCase())],
   });
 
   // Spawn crystals periodically
@@ -258,6 +381,7 @@ export function CrystalGame({
     setGameResult(null);
     setEricMood('happy');
     setEricMessage('Vang de kristallen!');
+    setFrozenUntil(0);
     crystalIdRef.current = 0;
   };
 
@@ -266,8 +390,68 @@ export function CrystalGame({
       {/* Arcade Background with Parallax */}
       <ArcadeBackground isFeverMode={isFeverMode} intensity={intensity} />
 
+      {/* Frozen overlay */}
+      <AnimatePresence>
+        {isFrozen && (
+          <motion.div
+            className="absolute inset-0 z-25 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              background: 'radial-gradient(circle, rgba(125,211,252,0.3) 0%, rgba(125,211,252,0.5) 100%)',
+            }}
+          >
+            {/* Floating snowflakes */}
+            {[...Array(20)].map((_, i) => (
+              <motion.span
+                key={i}
+                className="absolute text-2xl text-white/70"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  y: [0, 20, 0],
+                  rotate: [0, 180, 360],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 2 + Math.random(),
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                }}
+              >
+                ❄️
+              </motion.span>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Game HUD */}
       <GameHUD lessonId={lessonId} />
+
+      {/* Active power-up indicator */}
+      <AnimatePresence>
+        {activePowerUp && activePowerUp !== 'magnet' && (
+          <motion.div
+            className="absolute top-24 left-4 z-20 bg-black/70 rounded-lg px-4 py-2 border border-purple-500/50"
+            initial={{ x: -100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">
+                {activePowerUp === 'shield' ? '🛡️' : '⏱️'}
+              </span>
+              <span className="text-white font-bold">
+                {activePowerUp === 'shield' ? 'Schild aktiv' : 'Zeitlupe'}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Crystals */}
       <AnimatePresence>
