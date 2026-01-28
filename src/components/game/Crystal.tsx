@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Sparkles } from '@/components/ui/Sparkles';
-import { CrystalType, getCrystalConfig, getRandomNormalColor } from '@/lib/data/crystalTypes';
+import { CrystalType, getCrystalConfig } from '@/lib/data/crystalTypes';
 
 interface CrystalProps {
   id: string;
@@ -29,18 +29,8 @@ export function Crystal({
   const [collected, setCollected] = useState(false);
   const config = getCrystalConfig(crystalType);
 
-  // Use provided color or get from config
-  const gradientClass = colorClass || (
-    crystalType === 'normal'
-      ? getRandomNormalColor()
-      : config.colors[0]
-  );
-
-  const handleCollect = () => {
-    if (collected) return;
-    setCollected(true);
-    onCollect(id, crystalType);
-  };
+  // Use provided color or get from config (colorClass is always set for normal crystals)
+  const gradientClass = colorClass || config.colors[0];
 
   // Determine if this is a special crystal
   const isDanger = config.special === 'danger';

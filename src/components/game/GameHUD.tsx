@@ -94,9 +94,9 @@ export function GameHUD({ lessonId }: GameHUDProps) {
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ duration: 0.3, repeat: Infinity }}
                   >
-                    FIEBER!
+                    KOORTS!
                   </motion.span>
-                ) : 'FIEBER'}
+                ) : 'KOORTS'}
                 {isFeverMode && (
                   <span className="text-white/80">
                     {Math.ceil(feverTimeLeft / 1000)}s

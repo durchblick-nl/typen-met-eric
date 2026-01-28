@@ -26,8 +26,8 @@ export interface CrystalTypeConfig {
 export const CRYSTAL_TYPES: Record<CrystalType, CrystalTypeConfig> = {
   normal: {
     type: 'normal',
-    name: 'Kristall',
-    description: 'Ein normaler Kristall',
+    name: 'Kristal',
+    description: 'Een normaal kristal',
     spawnWeight: 70,
     colors: [
       'from-cyan-300 to-cyan-500',
@@ -44,8 +44,8 @@ export const CRYSTAL_TYPES: Record<CrystalType, CrystalTypeConfig> = {
   },
   gold: {
     type: 'gold',
-    name: 'Gold Kristall',
-    description: 'Doppelte Punkte!',
+    name: 'Gouden Kristal',
+    description: 'Dubbele punten!',
     spawnWeight: 12,
     colors: ['from-yellow-300 via-amber-400 to-yellow-500'],
     glowColor: '#fbbf24',
@@ -55,8 +55,8 @@ export const CRYSTAL_TYPES: Record<CrystalType, CrystalTypeConfig> = {
   },
   rainbow: {
     type: 'rainbow',
-    name: 'Regenbogen Kristall',
-    description: 'Füllt den Fieber-Balken!',
+    name: 'Regenboog Kristal',
+    description: 'Vult de koortsbalk!',
     spawnWeight: 5,
     colors: ['from-red-400 via-yellow-400 via-green-400 via-blue-400 to-purple-400'],
     glowColor: '#a855f7',
@@ -66,8 +66,8 @@ export const CRYSTAL_TYPES: Record<CrystalType, CrystalTypeConfig> = {
   },
   bomb: {
     type: 'bomb',
-    name: 'Bombe',
-    description: 'Nicht tippen! Falscher Buchstabe.',
+    name: 'Bom',
+    description: 'Niet typen! Verkeerde letter.',
     spawnWeight: 7,
     colors: ['from-gray-700 via-red-900 to-gray-800'],
     glowColor: '#ef4444',
@@ -78,8 +78,8 @@ export const CRYSTAL_TYPES: Record<CrystalType, CrystalTypeConfig> = {
   },
   ice: {
     type: 'ice',
-    name: 'Eis Kristall',
-    description: 'Verpasst = Slowdown!',
+    name: 'IJs Kristal',
+    description: 'Gemist = Bevroren!',
     spawnWeight: 4,
     colors: ['from-sky-200 via-cyan-300 to-sky-400'],
     glowColor: '#7dd3fc',
@@ -91,7 +91,7 @@ export const CRYSTAL_TYPES: Record<CrystalType, CrystalTypeConfig> = {
   shield: {
     type: 'shield',
     name: 'Schild',
-    description: 'Nächster Fehler kostet keine Energie',
+    description: 'Volgende fout kost geen energie',
     spawnWeight: 2,
     colors: ['from-blue-400 via-blue-500 to-indigo-600'],
     glowColor: '#3b82f6',
@@ -102,8 +102,8 @@ export const CRYSTAL_TYPES: Record<CrystalType, CrystalTypeConfig> = {
   },
   slowmo: {
     type: 'slowmo',
-    name: 'Zeitlupe',
-    description: '5 Sekunden langsamer',
+    name: 'Slow-mo',
+    description: '5 seconden langzamer',
     spawnWeight: 2,
     colors: ['from-violet-400 via-purple-500 to-violet-600'],
     glowColor: '#8b5cf6',
@@ -114,8 +114,8 @@ export const CRYSTAL_TYPES: Record<CrystalType, CrystalTypeConfig> = {
   },
   magnet: {
     type: 'magnet',
-    name: 'Magnet',
-    description: 'Sammelt alle Kristalle!',
+    name: 'Magneet',
+    description: 'Verzamelt alle kristallen!',
     spawnWeight: 1,
     colors: ['from-pink-400 via-rose-500 to-pink-600'],
     glowColor: '#ec4899',

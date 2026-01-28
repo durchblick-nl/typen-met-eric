@@ -39,7 +39,7 @@ export function AchievementPopup({ achievementId, onClose }: AchievementPopupPro
           transition={{ delay: 0.2 }}
         >
           <div className="text-yellow-400 text-sm font-bold tracking-widest mb-1">
-            ACHIEVEMENT FREIGESCHALTET!
+            ACHIEVEMENT ONTGRENDELD!
           </div>
         </motion.div>
 
@@ -92,7 +92,7 @@ export function AchievementPopup({ achievementId, onClose }: AchievementPopupPro
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          Tippe zum Schließen
+          Tik om te sluiten
         </motion.p>
       </motion.div>
     </motion.div>

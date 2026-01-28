@@ -7,9 +7,9 @@ export type PowerUpType = 'shield' | 'slowmo' | 'magnet' | null;
 // Combo thresholds and multipliers
 export const COMBO_TIERS = [
   { threshold: 0, multiplier: 1, name: null },
-  { threshold: 5, multiplier: 2, name: 'Nice!' },
+  { threshold: 5, multiplier: 2, name: 'Mooi!' },
   { threshold: 10, multiplier: 3, name: 'Super!' },
-  { threshold: 20, multiplier: 4, name: 'Awesome!' },
+  { threshold: 20, multiplier: 4, name: 'Geweldig!' },
   { threshold: 30, multiplier: 5, name: 'MEGA!' },
 ] as const;
 
@@ -68,11 +68,11 @@ interface GameState {
   totalScore: number;
   gamesPlayed: number;
   unlockedAchievements: string[];
-  newlyUnlockedAchievement: string | null; // For popup display
+  achievementQueue: string[]; // Queue for popup display (multiple achievements)
 
   // Actions
   resetGame: () => void;
-  clearNewAchievement: () => void;
+  popAchievementQueue: () => void; // Remove first from queue
   hitCrystal: (scoreMultiplier?: number, feverBonus?: number) => void;
   missedCrystal: () => void;
   wrongKey: () => void;
@@ -119,7 +119,7 @@ export const useGameStore = create<GameState>()(
       totalScore: 0,
       gamesPlayed: 0,
       unlockedAchievements: [],
-      newlyUnlockedAchievement: null,
+      achievementQueue: [],
 
       resetGame: () => set({
         energy: GAME_CONFIG.startEnergy,
@@ -140,7 +140,9 @@ export const useGameStore = create<GameState>()(
         powerupsCollected: [],
       }),
 
-      clearNewAchievement: () => set({ newlyUnlockedAchievement: null }),
+      popAchievementQueue: () => set((state) => ({
+        achievementQueue: state.achievementQueue.slice(1),
+      })),
 
       hitCrystal: (scoreMultiplier = 1, feverBonus = 0) => set((state) => {
         const comboMultiplier = get().getScoreMultiplier();
@@ -337,7 +339,7 @@ export const useGameStore = create<GameState>()(
           totalScore: newTotalScore,
           gamesPlayed: newGamesPlayed,
           unlockedAchievements: [...s.unlockedAchievements, ...newAchievements],
-          newlyUnlockedAchievement: newAchievements.length > 0 ? newAchievements[0] : null,
+          achievementQueue: [...s.achievementQueue, ...newAchievements],
         }));
 
         return { newHighScore, gemsEarned, stars, newAchievements };
