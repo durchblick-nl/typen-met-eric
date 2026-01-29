@@ -41,7 +41,8 @@ export function LessonClient({ lessonId }: LessonClientProps) {
     setTargetText,
     isComplete: exerciseComplete,
     accuracy,
-    wpm,
+    typedChars,
+    errors,
     reset: resetTyping,
   } = useTypingStore();
 
@@ -49,6 +50,11 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
   const [phase, setPhase] = useState<LessonPhase>('intro');
   const [exerciseIndex, setExerciseIndex] = useState(0);
+
+  // Cumulative stats across all exercises in the lesson
+  const [cumulativeCorrect, setCumulativeCorrect] = useState(0);
+  const [cumulativeTotal, setCumulativeTotal] = useState(0);
+  const [lastProcessedExercise, setLastProcessedExercise] = useState(-1);
 
   const lessonData = getLessonById(lessonId);
 
@@ -68,26 +74,51 @@ export function LessonClient({ lessonId }: LessonClientProps) {
     }
   }, [phase, exerciseIndex, currentExercise, setTargetText, resetTyping]);
 
-  // Handle exercise completion
+  // Handle exercise completion - accumulate stats
   useEffect(() => {
-    if (exerciseComplete && phase === 'exercise') {
+    // Prevent processing the same exercise twice (avoids infinite loop)
+    if (exerciseComplete && phase === 'exercise' && exerciseIndex !== lastProcessedExercise) {
+      // Mark this exercise as processed
+      setLastProcessedExercise(exerciseIndex);
+
+      // Add current exercise stats to cumulative totals
+      const exerciseCorrect = typedChars.length - errors.length;
+      const exerciseTotal = typedChars.length;
+
+      setCumulativeCorrect(prev => prev + exerciseCorrect);
+      setCumulativeTotal(prev => prev + exerciseTotal);
+
       if (isLastExercise) {
-        // Calculate stars based on accuracy
-        const stars = accuracy >= 95 ? 3 : accuracy >= 85 ? 2 : 1;
+        // Calculate stars based on CUMULATIVE accuracy (use current values + this exercise)
+        const newCumulativeCorrect = cumulativeCorrect + exerciseCorrect;
+        const newCumulativeTotal = cumulativeTotal + exerciseTotal;
+        const finalAccuracy = newCumulativeTotal > 0
+          ? Math.round((newCumulativeCorrect / newCumulativeTotal) * 100)
+          : 100;
+        const stars = finalAccuracy >= 95 ? 3 : finalAccuracy >= 85 ? 2 : 1;
         completeLesson(lessonId, stars);
         setPhase('outro');
-      } else {
-        // Short delay then next exercise
-        const timer = setTimeout(() => {
-          setExerciseIndex((i) => i + 1);
-          resetTyping();
-        }, 1000);
-        return () => clearTimeout(timer);
       }
     }
-  }, [exerciseComplete, phase, isLastExercise, accuracy, lessonId, completeLesson, resetTyping]);
+  }, [exerciseComplete, phase, isLastExercise, exerciseIndex, lastProcessedExercise, typedChars, errors, cumulativeCorrect, cumulativeTotal, lessonId, completeLesson]);
+
+  // Handle transition to next exercise (separate effect to avoid timer cleanup issues)
+  useEffect(() => {
+    // When an exercise was just processed and it's not the last one, move to next
+    if (lastProcessedExercise === exerciseIndex && !isLastExercise && phase === 'exercise') {
+      const timer = setTimeout(() => {
+        setExerciseIndex((i) => i + 1);
+        resetTyping();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastProcessedExercise, exerciseIndex, isLastExercise, phase, resetTyping]);
 
   const handleStartExercise = () => {
+    // Reset cumulative stats for new lesson attempt
+    setCumulativeCorrect(0);
+    setCumulativeTotal(0);
+    setLastProcessedExercise(-1);
     setPhase('exercise');
     setExerciseIndex(0);
   };
@@ -127,12 +158,19 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
   const handleRetry = useCallback(() => {
     resetTyping();
+    // Reset cumulative stats for retry
+    setCumulativeCorrect(0);
+    setCumulativeTotal(0);
+    setLastProcessedExercise(-1);
     setPhase('intro');
     setExerciseIndex(0);
   }, [resetTyping]);
 
-  // Calculate stars
-  const stars = accuracy >= 95 ? 3 : accuracy >= 85 ? 2 : 1;
+  // Calculate cumulative accuracy and stars
+  const cumulativeAccuracy = cumulativeTotal > 0
+    ? Math.round((cumulativeCorrect / cumulativeTotal) * 100)
+    : accuracy; // Fallback to current accuracy if no cumulative data yet
+  const stars = cumulativeAccuracy >= 95 ? 3 : cumulativeAccuracy >= 85 ? 2 : 1;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -394,16 +432,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                   ))}
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-3xl font-bold text-eric-green">{wpm}</div>
-                    <div className="text-sm text-gray-500">WPM</div>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold text-eric-green">{accuracy}%</div>
-                    <div className="text-sm text-gray-500">Nauwkeurig</div>
-                  </div>
+                {/* Stats - only show accuracy (WPM doesn't make sense across multiple exercises) */}
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-eric-green">{cumulativeAccuracy}%</div>
+                  <div className="text-sm text-gray-500">Nauwkeurig</div>
                 </div>
 
                 {/* Encouragement for retry */}

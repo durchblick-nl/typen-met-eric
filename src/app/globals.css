@@ -6,7 +6,6 @@
 
 body {
   font-family: 'Nunito', sans-serif;
-  cursor: none; /* Hide default cursor to use MagicCursor */
 }
 
 @layer utilities {

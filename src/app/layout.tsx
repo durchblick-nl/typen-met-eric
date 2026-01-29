@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { MagicCursor } from "@/components/ui/MagicCursor";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lettoria.nl'),
@@ -149,7 +148,6 @@ export default function RootLayout({
       </head>
       <body className="bg-perkament min-h-screen">
         {children}
-        <MagicCursor />
       </body>
     </html>
   );
