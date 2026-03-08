@@ -19,13 +19,13 @@ export default function KaartPage() {
     if (canGetDiploma) {
       return 'Ongelooflijk! Je hebt ALLE lessen met 3 sterren voltooid! Haal je diploma op!';
     }
-    if (completedLessons.length === 0) {
+    if (threeStarLessons === 0) {
       return 'Welkom in Lettoria! Klik op mijn grot om te beginnen!';
     }
-    if (completedLessons.length < 3) {
+    if (threeStarLessons < 3) {
       return 'Goed bezig! Ga verder met het Startdorp!';
     }
-    if (completedLessons.length < 6) {
+    if (threeStarLessons < 6) {
       return 'Je leert snel! Nog even en het dorp is gered!';
     }
     return 'Geweldig! Je bent een echte held van Lettoria!';
@@ -72,7 +72,7 @@ export default function KaartPage() {
 
         {/* World Map */}
         <WorldMap
-          completedLessons={completedLessons.length}
+          perfectLessons={threeStarLessons}
           currentLesson={currentLesson}
         />
 

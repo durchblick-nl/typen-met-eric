@@ -17,16 +17,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Styling:** Tailwind CSS
 - **Animations:** Framer Motion
 - **State:** Zustand
-- **Hosting:** Cloudflare Pages
+- **Hosting:** Coolify (self-hosted)
 - **Repository:** GitHub
 
 ## Commands
 
 ```bash
 npm run dev          # Start development server
-npm run build        # Build for production
+npm run build        # Build for production (static export to out/)
 npm run lint         # Run ESLint
-npm run pages:build  # Build for Cloudflare Pages
 ```
 
 ## Project Structure
@@ -127,7 +126,7 @@ The game world has 7 regions with 26 lessons total:
 - [x] World map with 7 regions and animated paths
 - [x] All 26 lessons with stories and images
 - [x] Progress persistence with localStorage
-- [x] Cloudflare Pages deployment
+- [x] Coolify deployment (self-hosted)
 - [x] SEO optimization (meta tags, JSON-LD, sitemap with all pages)
 - [x] Marketing homepage with animations
 - [x] About page for parents (/over)
@@ -154,11 +153,13 @@ The game world has 7 regions with 26 lessons total:
 
 ## Deployment
 
-- Push to GitHub triggers automatic deployment via Cloudflare Pages
+- Push to GitHub triggers automatic deployment via Coolify
+- Install command: `npm ci`
 - Build command: `npm run build`
+- Start command: `npx serve out -l 80`
 - Output directory: `out`
 - Production URL: https://lettoria.nl
-- Staging URL: https://typen-met-eric.pages.dev
+- Staging URL: https://typen.treehouse.ch
 
 ## Image Generation
 

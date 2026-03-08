@@ -6,12 +6,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 interface WorldMapProps {
-  completedLessons: number;
+  perfectLessons: number;
   currentLesson: number;
 }
 
-export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
-  const isRegionUnlocked = (region: Region) => completedLessons >= region.requiredLessons;
+export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
+  const isRegionUnlocked = (region: Region) => perfectLessons >= region.requiredLessons;
   const isRegionCurrent = (region: Region) => {
     const nextLesson = region.lessons.find((l) => l.id === currentLesson);
     return nextLesson !== undefined;
@@ -41,7 +41,7 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={completedLessons >= 1 ? 1 : 0.3}
+          opacity={perfectLessons >= 1 ? 1 : 0.3}
         />
         {/* Dorp to Velden */}
         <path
@@ -50,7 +50,7 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={completedLessons >= 6 ? 1 : 0.3}
+          opacity={perfectLessons >= 6 ? 1 : 0.3}
         />
         {/* Dorp to Zee */}
         <path
@@ -59,7 +59,7 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={completedLessons >= 22 ? 1 : 0.3}
+          opacity={perfectLessons >= 22 ? 1 : 0.3}
         />
         {/* Velden to Woud */}
         <path
@@ -68,7 +68,7 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={completedLessons >= 12 ? 1 : 0.3}
+          opacity={perfectLessons >= 12 ? 1 : 0.3}
         />
         {/* Woud to Toppen */}
         <path
@@ -77,7 +77,7 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={completedLessons >= 18 ? 1 : 0.3}
+          opacity={perfectLessons >= 18 ? 1 : 0.3}
         />
         {/* Toppen to Kasteel */}
         <path
@@ -86,7 +86,7 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={completedLessons >= 28 ? 1 : 0.3}
+          opacity={perfectLessons >= 28 ? 1 : 0.3}
         />
         {/* Zee to Kasteel */}
         <path
@@ -95,7 +95,7 @@ export function WorldMap({ completedLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={completedLessons >= 28 ? 1 : 0.3}
+          opacity={perfectLessons >= 28 ? 1 : 0.3}
         />
       </svg>
 
