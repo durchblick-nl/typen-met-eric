@@ -438,8 +438,7 @@ BACKEND
 ├── Database: Supabase PostgreSQL
 ├── Storage: Supabase Storage (avatars, assets)
 ├── E-mail: Resend
-├── Hosting: Vercel
-└── CDN: Cloudflare (voor assets)
+└── Hosting: Coolify (self-hosted)
 
 ASSETS
 ├── Illustraties: SVG + Lottie JSON

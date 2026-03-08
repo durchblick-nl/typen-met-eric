@@ -32,11 +32,26 @@ export const GAME_CONFIG = {
   baseScore: 100,
   goldMultiplier: 2,
 
-  // Stars (score thresholds)
-  star1Threshold: 2000,
-  star2Threshold: 5000,
-  star3Threshold: 10000,
+  // Stars (score thresholds) — tuned for race game with combos + distance scoring
+  star1Threshold: 5000,
+  star2Threshold: 15000,
+  star3Threshold: 30000,
 } as const;
+
+function getLessonNumber(lessonId: string): number {
+  const match = lessonId.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
+export function getLessonScoreThresholds(lessonId: string) {
+  const lessonNum = getLessonNumber(lessonId);
+  const star3 = Math.min(30000, 18000 + lessonNum * 450);
+  return {
+    star1: Math.round(star3 / 6),
+    star2: Math.round(star3 / 2),
+    star3,
+  };
+}
 
 export type ComboTier = typeof COMBO_TIERS[number];
 
@@ -49,6 +64,8 @@ interface GameState {
   isFeverMode: boolean;
   feverTimeLeft: number;
   wrongKeyCount: number;
+  missedCount: number;
+  bombHitCount: number;
 
   // Power-ups
   activePowerUp: PowerUpType;
@@ -73,6 +90,7 @@ interface GameState {
   // Actions
   resetGame: () => void;
   popAchievementQueue: () => void; // Remove first from queue
+  addScore: (points: number) => void;
   hitCrystal: (scoreMultiplier?: number, feverBonus?: number) => void;
   missedCrystal: () => void;
   wrongKey: () => void;
@@ -100,6 +118,8 @@ export const useGameStore = create<GameState>()(
       isFeverMode: false,
       feverTimeLeft: 0,
       wrongKeyCount: 0,
+      missedCount: 0,
+      bombHitCount: 0,
 
       // Power-ups
       activePowerUp: null,
@@ -129,6 +149,8 @@ export const useGameStore = create<GameState>()(
         isFeverMode: false,
         feverTimeLeft: 0,
         wrongKeyCount: 0,
+        missedCount: 0,
+        bombHitCount: 0,
         activePowerUp: null,
         powerUpTimeLeft: 0,
         hasShield: false,
@@ -142,6 +164,10 @@ export const useGameStore = create<GameState>()(
 
       popAchievementQueue: () => set((state) => ({
         achievementQueue: state.achievementQueue.slice(1),
+      })),
+
+      addScore: (points) => set((state) => ({
+        score: state.score + points,
       })),
 
       hitCrystal: (scoreMultiplier = 1, feverBonus = 0) => set((state) => {
@@ -178,6 +204,7 @@ export const useGameStore = create<GameState>()(
         return {
           combo: 0,
           energy: Math.max(0, state.energy - energyLoss),
+          missedCount: state.missedCount + 1,
         };
       }),
 
@@ -211,6 +238,7 @@ export const useGameStore = create<GameState>()(
         return {
           combo: 0,
           energy: Math.max(0, state.energy - energyLoss),
+          bombHitCount: state.bombHitCount + 1,
         };
       }),
 
@@ -279,11 +307,13 @@ export const useGameStore = create<GameState>()(
         const previousHighScore = state.highScores[lessonId] || 0;
         const newHighScore = state.score > previousHighScore;
 
+        const thresholds = getLessonScoreThresholds(lessonId);
+
         // Calculate stars
         let stars = 0;
-        if (state.score >= GAME_CONFIG.star1Threshold) stars = 1;
-        if (state.score >= GAME_CONFIG.star2Threshold) stars = 2;
-        if (state.score >= GAME_CONFIG.star3Threshold) stars = 3;
+        if (state.score >= thresholds.star1) stars = 1;
+        if (state.score >= thresholds.star2) stars = 2;
+        if (state.score >= thresholds.star3) stars = 3;
 
         // Check achievements
         const newAchievements: string[] = [];

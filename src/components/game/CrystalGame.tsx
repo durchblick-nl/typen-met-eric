@@ -1,18 +1,28 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type PointerEvent as ReactPointerEvent, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crystal } from './Crystal';
+import { RaceObstacle } from './RaceObstacle';
+import { RacePlayer, PlayerState } from './RacePlayer';
+import { AbilityBar } from './AbilityBar';
 import { Eric } from '@/components/eric/Eric';
 import { useKeyboard } from '@/lib/hooks/useKeyboard';
 import { useGameSounds } from '@/lib/hooks/useGameSounds';
 import { Sparkles } from '@/components/ui/Sparkles';
-import { ArcadeBackground } from './ArcadeBackground';
+import { LaneRunnerBackground } from './LaneRunnerBackground';
 import { GameHUD } from './GameHUD';
 import { ScorePopup } from './ScorePopup';
 import { AchievementPopup } from './AchievementPopup';
-import { useGameStore, GAME_CONFIG } from '@/lib/stores/gameStore';
-import { CrystalType, getRandomCrystalType, getCrystalConfig, getRandomNormalColor } from '@/lib/data/crystalTypes';
+import { HitZone, HitResult } from './HitZone';
+import { ParticleCanvas, ParticleCanvasHandle } from './ParticleCanvas';
+import { CameraShake } from './CameraShake';
+import { useGameStore, GAME_CONFIG, getLessonScoreThresholds } from '@/lib/stores/gameStore';
+import {
+  getRaceConfig,
+  LANE_POSITIONS,
+  LANE_COUNT,
+  ObstacleType,
+} from '@/lib/data/raceAbilities';
 
 interface ScorePopupData {
   id: string;
@@ -23,13 +33,14 @@ interface ScorePopupData {
   isSpecial: boolean;
 }
 
-interface CrystalData {
+interface ObstacleData {
   id: string;
-  letter: string;
-  x: number;
+  lane: number;
+  type: ObstacleType;
+  letter?: string;
   duration: number;
-  crystalType: CrystalType;
-  colorClass?: string;
+  spawnAt: number;
+  destroyed: boolean;
 }
 
 interface CrystalGameProps {
@@ -38,54 +49,89 @@ interface CrystalGameProps {
   onComplete: () => void;
 }
 
+const LANE_LABELS = ['links', 'midden', 'rechts'] as const;
+
 export function CrystalGame({
   lessonId,
   availableLetters,
   onComplete,
 }: CrystalGameProps) {
-  const [crystals, setCrystals] = useState<CrystalData[]>([]);
+  // Race config: splits letters into abilities vs obstacle letters
+  const raceConfig = useRef(getRaceConfig(availableLetters, lessonId));
+
+  // Player state
+  const [playerLane, setPlayerLane] = useState(1); // start in middle
+  const [playerState, setPlayerState] = useState<PlayerState>('running');
+
+  // Obstacle state
+  const [obstacles, setObstacles] = useState<ObstacleData[]>([]);
+
+  // Speed modifiers
+  const [speedMultiplier, setSpeedMultiplier] = useState(1);
+  const [isSprinting, setIsSprinting] = useState(false);
+  const [isSlowing, setIsSlowing] = useState(false);
+  // Refs so timed callbacks always read the latest value without stale closures
+  const isSprintingRef = useRef(false);
+  const isSlowingRef = useRef(false);
+
+  // Ability cooldowns (key -> timestamp when ready)
+  const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
+  const [activeAbility, setActiveAbility] = useState<string | null>(null);
+
+  // UI state
   const [ericMood, setEricMood] = useState<'happy' | 'encouraging' | 'celebrating' | 'worried'>('happy');
-  const [ericMessage, setEricMessage] = useState('Vang de kristallen!');
+  const [ericMessage, setEricMessage] = useState('Klaar voor de race!');
   const [gameState, setGameState] = useState<'intro' | 'playing' | 'paused' | 'gameover' | 'complete'>('intro');
   const [gameResult, setGameResult] = useState<{ newHighScore: boolean; gemsEarned: number; stars: number } | null>(null);
-  const [frozenUntil, setFrozenUntil] = useState(0); // Ice crystal freeze effect
   const [scorePopups, setScorePopups] = useState<ScorePopupData[]>([]);
-  const [screenFlash, setScreenFlash] = useState<string | null>(null); // Flash color
-  const [isInitialized, setIsInitialized] = useState(false); // Prevent premature win check
+  const [screenFlash, setScreenFlash] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const crystalIdRef = useRef(0);
+  // Visual feedback
+  const [hitResult, setHitResult] = useState<HitResult>(null);
+  const [shakeIntensity, setShakeIntensity] = useState(0);
+  const [zoomPulse, setZoomPulse] = useState(false);
+
+  // Refs
+  const obstacleIdRef = useRef(0);
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const feverIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const powerUpIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const prevComboTierRef = useRef(0);
   const wasFeverModeRef = useRef(false);
   const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
+  const particleRef = useRef<ParticleCanvasHandle>(null);
+  const playerStateTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const gameStartTimeRef = useRef<number>(0);
+  const gameFinalizedRef = useRef(false);
+  const completeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const spawnWaveRef = useRef<() => void>(() => {});
+  const getSpawnIntervalRef = useRef<() => number>(() => 1800);
 
+  // Game store
   const {
     energy,
     score,
     combo,
     isFeverMode,
     feverMeter,
-    isSlowMo,
-    hasShield,
-    activePowerUp,
+    wrongKeyCount,
+    missedCount,
+    bombHitCount,
     achievementQueue,
     resetGame,
+    addScore,
     hitCrystal,
     missedCrystal,
     wrongKey,
     hitBomb,
     activateFever,
     tickFever,
-    activatePowerUp,
-    tickPowerUp,
     endGame,
     getCurrentComboTier,
     popAchievementQueue,
   } = useGameStore();
 
-  // Sound effects
+  // Sounds
   const {
     soundEnabled,
     musicEnabled,
@@ -109,42 +155,12 @@ export function CrystalGame({
     playAchievement,
   } = useGameSounds();
 
-  // Check if player is frozen (ice crystal effect)
-  const isFrozen = Date.now() < frozenUntil;
-
-  // Calculate intensity for visual effects (0-1)
   const intensity = Math.min(1, (combo / 30) + (isFeverMode ? 0.5 : 0));
+  const scoreTargets = getLessonScoreThresholds(lessonId);
+  const isAssistMode = energy <= 35 || bombHitCount >= 2 || (wrongKeyCount + missedCount) >= 8;
 
-  // Calculate difficulty based on progress
-  const getMaxCrystals = useCallback(() => {
-    if (score >= 20000) return 5;
-    if (score >= 10000) return 4;
-    if (score >= 5000) return 3;
-    return 2;
-  }, [score]);
+  // --- Helpers ---
 
-  const getSpawnInterval = useCallback(() => {
-    let base = isFeverMode ? 800 : 1500;
-    const reduction = Math.min(500, Math.floor(score / 5000) * 100);
-    base = base - reduction;
-    // Slow-mo power-up increases interval
-    if (isSlowMo) base *= 1.5;
-    return Math.max(500, base);
-  }, [score, isFeverMode, isSlowMo]);
-
-  const getFallDuration = useCallback(() => {
-    let duration = 6;
-    if (isFeverMode) duration = 4;
-    else if (score >= 20000) duration = 4;
-    else if (score >= 10000) duration = 5;
-    // Slow-mo power-up increases fall duration
-    if (isSlowMo) duration *= 1.5;
-    // Frozen state slows everything
-    if (isFrozen) duration *= 2;
-    return duration;
-  }, [score, isFeverMode, isSlowMo, isFrozen]);
-
-  // Tracked setTimeout to prevent memory leaks
   const safeTimeout = useCallback((fn: () => void, ms: number) => {
     const id = setTimeout(() => {
       timeoutsRef.current.delete(id);
@@ -154,97 +170,585 @@ export function CrystalGame({
     return id;
   }, []);
 
-  // Show score popup
+  const triggerHitResult = useCallback((result: HitResult) => {
+    setHitResult(result);
+    safeTimeout(() => setHitResult(null), 300);
+  }, [safeTimeout]);
+
+  const triggerShake = useCallback((intensity: number, durationMs: number = 300) => {
+    setShakeIntensity(intensity);
+    safeTimeout(() => setShakeIntensity(0), durationMs);
+  }, [safeTimeout]);
+
+  const triggerZoomPulse = useCallback(() => {
+    setZoomPulse(true);
+    safeTimeout(() => setZoomPulse(false), 200);
+  }, [safeTimeout]);
+
   const showScorePopup = useCallback((x: number, earnedScore: number, color: string, isSpecial: boolean) => {
     const popupId = `popup-${Date.now()}-${Math.random()}`;
     setScorePopups(prev => [...prev, {
-      id: popupId,
-      score: earnedScore,
-      x,
-      y: 200,
-      color,
-      isSpecial,
+      id: popupId, score: earnedScore, x,
+      y: typeof window !== 'undefined' ? window.innerHeight * 0.82 : 500,
+      color, isSpecial,
     }]);
-    // Remove popup after animation
     safeTimeout(() => {
       setScorePopups(prev => prev.filter(p => p.id !== popupId));
     }, 1000);
   }, [safeTimeout]);
 
-  // Show screen flash
   const showScreenFlash = useCallback((color: string) => {
     setScreenFlash(color);
     safeTimeout(() => setScreenFlash(null), 150);
   }, [safeTimeout]);
 
-  // Reset game on mount (but don't start yet - show intro first)
+  const blockTouchPointer = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, []);
+
+  const blockTouchEvent = useCallback((e: ReactTouchEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const burstAtLane = useCallback((lane: number, color: string, count: number) => {
+    const x = LANE_POSITIONS[lane] ?? 50;
+    const y = typeof window !== 'undefined' ? window.innerHeight * 0.85 : 500;
+    particleRef.current?.burst(x, y, color, count);
+  }, []);
+
+  const getObstacleProgress = useCallback((obstacle: ObstacleData) => {
+    const elapsed = Date.now() - obstacle.spawnAt;
+    const total = Math.max(1, obstacle.duration * 1000);
+    return Math.max(0, Math.min(1, elapsed / total));
+  }, []);
+
+  // Set player state with auto-reset
+  const setPlayerStateTemporary = useCallback((state: PlayerState, durationMs: number) => {
+    if (playerStateTimerRef.current) clearTimeout(playerStateTimerRef.current);
+    setPlayerState(state);
+    playerStateTimerRef.current = setTimeout(() => {
+      setPlayerState(isSprintingRef.current ? 'sprinting' : 'running');
+    }, durationMs);
+  }, []);
+
+  // Flash an ability as active
+  const flashAbility = useCallback((key: string) => {
+    setActiveAbility(key);
+    safeTimeout(() => setActiveAbility(null), 400);
+  }, [safeTimeout]);
+
+  // --- Spawn system ---
+
+  const getGameAge = useCallback(() => {
+    return gameStartTimeRef.current > 0 ? (Date.now() - gameStartTimeRef.current) / 1000 : 0;
+  }, []);
+
+  const getBaseDuration = useCallback(() => {
+    const age = getGameAge();
+    let duration = age < 6 ? 6 : 5;
+    if (isFeverMode) duration = 3.4;
+    else if (score >= 15000) duration = 3.9;
+    else if (score >= 8000) duration = 4.3;
+    else if (score >= 3000) duration = 4.7;
+    // Speed modifiers
+    if (isSlowing) duration *= 1.5;
+    if (isSprinting) duration *= 0.7;
+    if (isAssistMode) duration *= 1.18;
+    return duration;
+  }, [score, isFeverMode, isSlowing, isSprinting, getGameAge, isAssistMode]);
+
+  const getSpawnInterval = useCallback(() => {
+    const age = getGameAge();
+    let base = isFeverMode ? 1100 : age < 6 ? 2400 : 1800;
+    const reduction = Math.min(400, Math.floor(score / 3000) * 60);
+    base = base - reduction;
+    if (isAssistMode) base += 260;
+    return Math.max(800, base);
+  }, [score, isFeverMode, getGameAge, isAssistMode]);
+
+  const spawnWave = useCallback(() => {
+    if (gameState !== 'playing') return;
+
+    const { obstacleLetters } = raceConfig.current;
+    const duration = getBaseDuration();
+    const age = getGameAge();
+    const isSafeStart = age < 4;
+    const isTutorialLetters = age >= 4 && age < 8;
+    const isTutorialMix = age >= 8 && age < 12;
+
+    // Wave size: start with 1, ramp up to 2-3
+    const maxWaveSize = isAssistMode ? 2 : 3;
+    const waveSize = age < 3 ? 1 : Math.min(maxWaveSize, 2 + Math.floor(score / 5000));
+    const usedLanes = new Set<number>();
+    const newObstacles: ObstacleData[] = [];
+
+    for (let i = 0; i < waveSize; i++) {
+      const availableLanes = [0, 1, 2].filter(l => !usedLanes.has(l));
+      if (availableLanes.length === 0) break;
+      const lane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
+      usedLanes.add(lane);
+
+      const roll = Math.random() * 100;
+      let type: ObstacleType;
+      let letter: string | undefined;
+
+      if (isSafeStart) {
+        // Safe start: only gems (no bombs, no hard obstacles)
+        type = 'gem';
+      } else if (isTutorialLetters) {
+        type = 'letter';
+        letter = obstacleLetters.length > 0
+          ? obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)]
+          : undefined;
+        if (!letter) type = 'gem';
+      } else if (isTutorialMix) {
+        if (obstacleLetters.length === 0) {
+          type = roll < (isAssistMode ? 10 : 18) ? 'bomb' : 'gem';
+        } else if (roll < (isAssistMode ? 3 : 5)) {
+          type = 'bomb';
+        } else if (roll < (isAssistMode ? 30 : 25)) {
+          type = 'gem';
+        } else {
+          type = 'letter';
+          letter = obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)];
+        }
+      } else if (obstacleLetters.length === 0) {
+        // No obstacle letters (lesson 0) — bombs and gems, but fewer bombs
+        if (roll < (isAssistMode ? 12 : 22)) {
+          type = 'bomb';
+        } else {
+          type = 'gem';
+        }
+      } else if (roll < (isAssistMode ? 6 : 10)) {
+        type = 'bomb';
+      } else if (roll < (isAssistMode ? 44 : 38)) {
+        type = 'gem';
+      } else if (roll < (isAssistMode ? 50 : 46)) {
+        type = 'gold';
+        letter = obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)];
+      } else if (roll < (isAssistMode ? 54 : 52)) {
+        type = 'ice';
+        letter = obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)];
+      } else {
+        type = 'letter';
+        letter = obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)];
+      }
+
+      // Safety: never put a bomb in the only free lane
+      if (type === 'bomb' && waveSize >= 2 && availableLanes.length === 1) {
+        type = 'gem';
+      }
+
+      newObstacles.push({
+        id: `obs-${obstacleIdRef.current++}`,
+        lane,
+        type,
+        letter,
+        duration: duration + (Math.random() * 0.5 - 0.25),
+        spawnAt: Date.now(),
+        destroyed: false,
+      });
+    }
+
+    setObstacles(prev => {
+      const activeObstacles = prev.filter(o => !o.destroyed);
+      if (activeObstacles.length >= 8) return prev;
+
+      const isTypingObstacle = (obstacle: ObstacleData) =>
+        obstacle.type === 'letter' || obstacle.type === 'gold' || obstacle.type === 'ice';
+
+      const availableSlots = 8 - activeObstacles.length;
+      let typingObstacleCount = activeObstacles.filter(isTypingObstacle).length;
+      const adjustedNew = newObstacles.slice(0, availableSlots).map((obstacle) => {
+        if (isTypingObstacle(obstacle) && typingObstacleCount >= 3) {
+          return { ...obstacle, type: 'gem' as const, letter: undefined };
+        }
+        if (isTypingObstacle(obstacle)) typingObstacleCount += 1;
+        return obstacle;
+      });
+
+      return [...prev, ...adjustedNew];
+    });
+  }, [gameState, score, getBaseDuration, getGameAge, isAssistMode]);
+
+  // --- Collision handling ---
+  // IMPORTANT: side effects (store updates, sounds) are deferred via queueMicrotask
+  // to avoid "Cannot update a component while rendering another" React error.
+
+  const handleObstacleReachEnd = useCallback((obstacleId: string) => {
+    // Read obstacle data synchronously before removing
+    const obstacle = obstacles.find(o => o.id === obstacleId);
+    if (!obstacle || obstacle.destroyed) {
+      setObstacles(prev => prev.filter(o => o.id !== obstacleId));
+      return;
+    }
+
+    // Remove obstacle immediately
+    setObstacles(prev => prev.filter(o => o.id !== obstacleId));
+
+    // Defer all side effects to avoid setState-during-render
+    queueMicrotask(() => {
+      const inPlayerLane = obstacle.lane === playerLane;
+      const isInvincible = playerState === 'jumping' || playerState === 'dashing';
+
+      if (!inPlayerLane) return; // different lane, flies by harmlessly
+
+      if (obstacle.type === 'gem') {
+        hitCrystal(1.5, 3); // Gems worth 150 base + fever bonus
+        playCollect(combo);
+        const gemMultiplier = getCurrentComboTier().multiplier * (isFeverMode ? 2 : 1);
+        showScorePopup(LANE_POSITIONS[obstacle.lane], Math.round(150 * gemMultiplier), '#fbbf24', false);
+        triggerHitResult('hit');
+        burstAtLane(obstacle.lane, '#fbbf24', 15);
+        setEricMood('encouraging');
+        setEricMessage('Munt gepakt!');
+        safeTimeout(() => { if (gameState === 'playing') setEricMood('happy'); }, 800);
+      } else if (obstacle.type === 'bomb') {
+        if (!isInvincible) {
+          hitBomb();
+          playBomb();
+          showScreenFlash('#ef4444');
+          triggerHitResult('bomb');
+          triggerShake(8, 400);
+          burstAtLane(obstacle.lane, '#ef4444', 40);
+          setPlayerStateTemporary('hit', 500);
+          setEricMood('worried');
+          setEricMessage('BOEM! Ontwijk de bom!');
+          safeTimeout(() => { if (gameState === 'playing') setEricMood('encouraging'); }, 1500);
+        }
+      } else if (obstacle.type === 'ice') {
+        if (!isInvincible) {
+          missedCrystal();
+          playMiss();
+          triggerHitResult('miss');
+          setPlayerStateTemporary('hit', 400);
+          setIsSlowing(true);
+          setSpeedMultiplier(0.5);
+          setEricMood('worried');
+          setEricMessage('Bevroren!');
+          safeTimeout(() => {
+            setIsSlowing(false);
+            setSpeedMultiplier(isSprintingRef.current ? 1.5 : 1);
+            if (gameState === 'playing') setEricMood('encouraging');
+            setEricMessage('Weer ontdooid!');
+          }, 2000);
+        }
+      } else {
+        // Letter or gold — collision (not typed in time)
+        if (!isInvincible) {
+          missedCrystal();
+          playMiss();
+          triggerHitResult('miss');
+          setPlayerStateTemporary('hit', 300);
+          setEricMood('worried');
+          setEricMessage('Oeps, gemist!');
+          safeTimeout(() => { if (gameState === 'playing') setEricMood('encouraging'); }, 1000);
+        }
+      }
+    });
+  }, [obstacles, playerLane, playerState, isFeverMode, combo, gameState, hitCrystal, missedCrystal, hitBomb, playCollect, playMiss, playBomb, getCurrentComboTier, showScorePopup, showScreenFlash, triggerHitResult, triggerShake, burstAtLane, setPlayerStateTemporary, safeTimeout]);
+
+  // --- Ability handlers ---
+
+  const handleMoveLeft = useCallback(() => {
+    setPlayerLane(prev => Math.max(0, prev - 1));
+    flashAbility('f');
+  }, [flashAbility]);
+
+  const handleMoveRight = useCallback(() => {
+    setPlayerLane(prev => Math.min(LANE_COUNT - 1, prev + 1));
+    flashAbility('j');
+  }, [flashAbility]);
+
+  const handleDashLeft = useCallback(() => {
+    setPlayerLane(prev => Math.max(0, prev - 1));
+    setPlayerStateTemporary('dashing', 400);
+    flashAbility('d');
+    playPowerUp();
+  }, [setPlayerStateTemporary, flashAbility, playPowerUp]);
+
+  const handleDashRight = useCallback(() => {
+    setPlayerLane(prev => Math.min(LANE_COUNT - 1, prev + 1));
+    setPlayerStateTemporary('dashing', 400);
+    flashAbility('k');
+    playPowerUp();
+  }, [setPlayerStateTemporary, flashAbility, playPowerUp]);
+
+  const handleJump = useCallback(() => {
+    setPlayerStateTemporary('jumping', 600);
+    flashAbility(' ');
+    playPowerUp();
+  }, [setPlayerStateTemporary, flashAbility, playPowerUp]);
+
+  const handleSlow = useCallback(() => {
+    const now = Date.now();
+    if ((cooldowns['s'] || 0) > now) return; // on cooldown
+
+    setIsSlowing(true);
+    setSpeedMultiplier(0.5);
+    flashAbility('s');
+    playPowerUp();
+    setEricMessage('Slow-mo!');
+
+    safeTimeout(() => {
+      setIsSlowing(false);
+      setSpeedMultiplier(isSprintingRef.current ? 1.5 : 1);
+    }, 2000);
+
+    setCooldowns(prev => ({ ...prev, 's': now + 8000 }));
+  }, [cooldowns, flashAbility, playPowerUp, safeTimeout]);
+
+  const handleSprint = useCallback(() => {
+    const now = Date.now();
+    if ((cooldowns['l'] || 0) > now) return; // on cooldown
+
+    setIsSprinting(true);
+    setSpeedMultiplier(1.5);
+    setPlayerState('sprinting');
+    flashAbility('l');
+    playPowerUp();
+    setEricMessage('Snel!');
+
+    safeTimeout(() => {
+      setIsSprinting(false);
+      setSpeedMultiplier(isSlowingRef.current ? 0.5 : 1);
+      setPlayerState('running');
+    }, 2000);
+
+    setCooldowns(prev => ({ ...prev, 'l': now + 8000 }));
+  }, [cooldowns, flashAbility, playPowerUp, safeTimeout]);
+
+  // --- Letter typing (destroy obstacles) ---
+
+  const handleTypeLetter = useCallback((key: string) => {
+    const lowerKey = key.toLowerCase();
+
+    // Find the first matching obstacle (not destroyed)
+    const matchingObstacle = obstacles.find(
+      o => !o.destroyed && o.letter?.toLowerCase() === lowerKey && (o.type === 'letter' || o.type === 'gold' || o.type === 'ice')
+    );
+
+    if (matchingObstacle) {
+      // Destroy the obstacle
+      setObstacles(prev =>
+        prev.map(o => o.id === matchingObstacle.id ? { ...o, destroyed: true } : o)
+      );
+
+      // Clean up destroyed obstacles after animation
+      safeTimeout(() => {
+        setObstacles(prev => prev.filter(o => o.id !== matchingObstacle.id));
+      }, 350);
+
+      // Score
+      const isGold = matchingObstacle.type === 'gold';
+      const scoreMultiplier = isGold ? 2 : 1;
+      const feverBonus = isGold ? 5 : 0;
+      const multiplier = getCurrentComboTier().multiplier * (isFeverMode ? 2 : 1);
+      const earnedScore = Math.round(GAME_CONFIG.baseScore * scoreMultiplier * multiplier);
+
+      hitCrystal(scoreMultiplier, feverBonus);
+      playCollect(combo);
+
+      const obstacleX = LANE_POSITIONS[matchingObstacle.lane] ?? 50;
+      showScorePopup(obstacleX, earnedScore, isGold ? '#fbbf24' : '#06b6d4', isGold);
+      triggerHitResult('hit');
+      burstAtLane(matchingObstacle.lane, isGold ? '#fbbf24' : '#06b6d4', isGold ? 30 : 15);
+
+      if (isGold) {
+        showScreenFlash('#fbbf24');
+        triggerShake(3, 200);
+        setEricMood('celebrating');
+        setEricMessage('GOUD! Dubbele punten!');
+      } else if (matchingObstacle.type === 'ice') {
+        setEricMood('encouraging');
+        setEricMessage('IJs vernietigd!');
+      } else {
+        const comboTier = getCurrentComboTier();
+        if (comboTier.multiplier >= 5) {
+          setEricMood('celebrating');
+          setEricMessage('MEGA! Ongelooflijk!');
+        } else if (comboTier.multiplier >= 3) {
+          setEricMood('celebrating');
+          const messages = ['Super!', 'Fantastisch!', 'Ga zo door!'];
+          setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
+        } else {
+          setEricMood('encouraging');
+          const messages = ['Mooi!', 'Ja!', 'Top!', 'Yes!'];
+          setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
+        }
+      }
+
+      safeTimeout(() => {
+        if (gameState === 'playing') setEricMood('happy');
+      }, 1200);
+    } else {
+      // No matching obstacle — wrong key
+      wrongKey();
+      playWrong();
+      triggerHitResult('miss');
+      setEricMood('worried');
+      setEricMessage('Verkeerde toets!');
+      safeTimeout(() => {
+        if (gameState === 'playing') setEricMood('encouraging');
+      }, 800);
+    }
+  }, [obstacles, isFeverMode, combo, gameState, hitCrystal, wrongKey, getCurrentComboTier, playCollect, playWrong, showScorePopup, showScreenFlash, triggerHitResult, triggerShake, burstAtLane, safeTimeout]);
+
+  // --- Main keyboard handler ---
+
+  const handleKeyPress = useCallback((key: string) => {
+    if (gameState !== 'playing') return;
+
+    const lowerKey = key.toLowerCase();
+    const { abilities } = raceConfig.current;
+
+    // Check if it's an unlocked movement key
+    if (lowerKey in abilities) {
+      const action = abilities[lowerKey].action;
+      switch (action) {
+        case 'move_left': handleMoveLeft(); break;
+        case 'move_right': handleMoveRight(); break;
+        case 'dash_left': handleDashLeft(); break;
+        case 'dash_right': handleDashRight(); break;
+        case 'jump': handleJump(); break;
+        case 'slow': handleSlow(); break;
+        case 'sprint': handleSprint(); break;
+      }
+      return;
+    }
+
+    // Check if it's a letter that could destroy an obstacle
+    const { obstacleLetters } = raceConfig.current;
+    if (obstacleLetters.includes(lowerKey) || obstacles.some(o => o.letter?.toLowerCase() === lowerKey)) {
+      handleTypeLetter(key);
+      return;
+    }
+
+    // Unknown key — ignore silently (don't punish for keys outside the lesson)
+  }, [gameState, obstacles, handleMoveLeft, handleMoveRight, handleDashLeft, handleDashRight, handleJump, handleSlow, handleSprint, handleTypeLetter]);
+
+  // Build allowed keys for useKeyboard
+  const allowedKeys = useRef<string[]>([]);
+  useEffect(() => {
+    const { abilities, obstacleLetters } = raceConfig.current;
+    allowedKeys.current = [
+      ...Object.keys(abilities),
+      ...obstacleLetters,
+    ];
+  }, []);
+
+  useKeyboard({
+    onKeyPress: handleKeyPress,
+    enabled: gameState === 'playing',
+    allowedKeys: allowedKeys.current,
+  });
+
+  // --- Cooldown timer ---
+  const [, forceUpdate] = useState(0);
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    const interval = setInterval(() => forceUpdate(n => n + 1), 500);
+    return () => clearInterval(interval);
+  }, [gameState]);
+
+  // Compute remaining cooldowns for display
+  const displayCooldowns: Record<string, number> = {};
+  const now = Date.now();
+  for (const [key, readyAt] of Object.entries(cooldowns)) {
+    const remaining = readyAt - now;
+    if (remaining > 0) displayCooldowns[key] = remaining;
+  }
+
+  // --- Game lifecycle ---
+
+  // Reset on mount
   useEffect(() => {
     resetGame();
+    raceConfig.current = getRaceConfig(availableLetters, lessonId);
     return () => {
       stopMusic();
-      // Clear all tracked timeouts to prevent memory leaks
+      if (completeTimeoutRef.current) {
+        clearTimeout(completeTimeoutRef.current);
+        completeTimeoutRef.current = null;
+      }
+      if (playerStateTimerRef.current) {
+        clearTimeout(playerStateTimerRef.current);
+        playerStateTimerRef.current = null;
+      }
       timeoutsRef.current.forEach(id => clearTimeout(id));
       timeoutsRef.current.clear();
     };
-  }, [resetGame, stopMusic]);
+  }, [resetGame, stopMusic, availableLetters, lessonId]);
 
-  // Handle Escape key for pause
+  // Escape for pause
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (gameState === 'playing') {
-          setGameState('paused');
-        } else if (gameState === 'paused') {
-          setGameState('playing');
-        }
+        if (gameState === 'playing') setGameState('paused');
+        else if (gameState === 'paused') setGameState('playing');
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState]);
 
-  // Start the game from intro
   const handleStartGame = useCallback(() => {
+    gameStartTimeRef.current = Date.now();
+    gameFinalizedRef.current = false;
     setGameState('playing');
     setIsInitialized(true);
     startMusic();
   }, [startMusic]);
 
-  // Play combo milestone sounds
+  const handleContinueFromComplete = useCallback(() => {
+    if (completeTimeoutRef.current) {
+      clearTimeout(completeTimeoutRef.current);
+      completeTimeoutRef.current = null;
+    }
+    onComplete();
+  }, [onComplete]);
+
+  const finalizeRun = useCallback((nextState: 'gameover' | 'complete') => {
+    if (gameFinalizedRef.current) return null;
+    gameFinalizedRef.current = true;
+    if (spawnIntervalRef.current) clearTimeout(spawnIntervalRef.current);
+    const result = endGame(lessonId);
+    setGameResult(result);
+    setGameState(nextState);
+    return result;
+  }, [endGame, lessonId]);
+
+  // Combo milestone sounds
   useEffect(() => {
     const comboTier = getCurrentComboTier();
     const currentTierIndex = comboTier.multiplier;
-
     if (currentTierIndex > prevComboTierRef.current) {
-      // Tier increased - play sound
       if (currentTierIndex === 2) playComboNice();
       else if (currentTierIndex === 3) playComboSuper();
       else if (currentTierIndex === 4) playComboAwesome();
       else if (currentTierIndex === 5) playComboMega();
+      triggerZoomPulse();
     }
-
     prevComboTierRef.current = currentTierIndex;
-  }, [combo, getCurrentComboTier, playComboNice, playComboSuper, playComboAwesome, playComboMega]);
+  }, [combo, getCurrentComboTier, playComboNice, playComboSuper, playComboAwesome, playComboMega, triggerZoomPulse]);
 
-  // Play fever start/end sounds
+  // Fever sounds
   useEffect(() => {
-    if (isFeverMode && !wasFeverModeRef.current) {
-      playFeverStart();
-    } else if (!isFeverMode && wasFeverModeRef.current) {
-      playFeverEnd();
-    }
+    if (isFeverMode && !wasFeverModeRef.current) playFeverStart();
+    else if (!isFeverMode && wasFeverModeRef.current) playFeverEnd();
     wasFeverModeRef.current = isFeverMode;
   }, [isFeverMode, playFeverStart, playFeverEnd]);
 
-  // Play achievement unlock sound when new achievement added to queue
+  // Achievement sound
   useEffect(() => {
-    if (achievementQueue.length > 0) {
-      playAchievement();
-    }
+    if (achievementQueue.length > 0) playAchievement();
   }, [achievementQueue.length, playAchievement]);
 
-  // Check for fever activation
+  // Fever activation
   useEffect(() => {
     if (feverMeter >= 100 && !isFeverMode && gameState === 'playing') {
       activateFever();
@@ -256,327 +760,249 @@ export function CrystalGame({
   // Fever timer
   useEffect(() => {
     if (isFeverMode && gameState === 'playing') {
-      feverIntervalRef.current = setInterval(() => {
-        tickFever(100);
-      }, 100);
-
-      return () => {
-        if (feverIntervalRef.current) {
-          clearInterval(feverIntervalRef.current);
-        }
-      };
+      feverIntervalRef.current = setInterval(() => tickFever(100), 100);
+      return () => { if (feverIntervalRef.current) clearInterval(feverIntervalRef.current); };
     }
   }, [isFeverMode, tickFever, gameState]);
 
-  // Power-up timer
+  // Distance scoring — steady points for surviving
   useEffect(() => {
-    if (isSlowMo && gameState === 'playing') {
-      powerUpIntervalRef.current = setInterval(() => {
-        tickPowerUp(100);
-      }, 100);
+    if (gameState !== 'playing') return;
+    const interval = setInterval(() => {
+      const basePoints = 5; // 5 points per tick (every 500ms = 10pts/sec)
+      const sprintBonus = isSprinting ? 2 : 0;
+      addScore(basePoints + sprintBonus);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [gameState, isSprinting, addScore]);
 
-      return () => {
-        if (powerUpIntervalRef.current) {
-          clearInterval(powerUpIntervalRef.current);
-        }
-      };
-    }
-  }, [isSlowMo, tickPowerUp, gameState]);
-
-  // Check for game over (energy depleted)
+  // Game over check
   useEffect(() => {
     if (energy <= 0 && gameState === 'playing') {
-      setGameState('gameover');
-      const result = endGame(lessonId);
-      setGameResult(result);
-      playGameOver();
-      setEricMood('worried');
-      setEricMessage('Geen energie meer...');
-
-      if (spawnIntervalRef.current) {
-        clearInterval(spawnIntervalRef.current);
+      const result = finalizeRun('gameover');
+      if (result) {
+        playGameOver();
+        setEricMood('worried');
+        setEricMessage('Geen energie meer...');
       }
     }
-  }, [energy, gameState, endGame, lessonId, playGameOver]);
+  }, [energy, gameState, playGameOver, finalizeRun]);
 
-  // Check for 3-star completion (only after game is initialized)
+  // 3-star completion check
   useEffect(() => {
-    if (!isInitialized) return; // Don't check until game is properly reset
-
-    if (score >= GAME_CONFIG.star3Threshold && gameState === 'playing') {
-      setGameState('complete');
-      const result = endGame(lessonId);
-      setGameResult(result);
+    if (!isInitialized) return;
+    if (score >= scoreTargets.star3 && gameState === 'playing') {
+      const result = finalizeRun('complete');
+      if (!result) return;
       playVictory();
       setEricMood('celebrating');
-      setEricMessage('FANTASTISCH! 3 Sterne!');
-
-      if (spawnIntervalRef.current) {
-        clearInterval(spawnIntervalRef.current);
-      }
-
-      setTimeout(onComplete, 3000);
-    }
-  }, [score, gameState, endGame, lessonId, onComplete, isInitialized, playVictory]);
-
-  // Spawn a new crystal
-  const spawnCrystal = useCallback(() => {
-    if (gameState !== 'playing') return;
-
-    const crystalType = getRandomCrystalType();
-    const config = getCrystalConfig(crystalType);
-
-    // For bombs, use a different (wrong) letter
-    let letter: string;
-    if (crystalType === 'bomb') {
-      // Pick a random letter NOT in availableLetters
-      const allLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-      const unusedLetters = allLetters.filter(l => !availableLetters.map(a => a.toLowerCase()).includes(l));
-      letter = unusedLetters.length > 0
-        ? unusedLetters[Math.floor(Math.random() * unusedLetters.length)]
-        : availableLetters[Math.floor(Math.random() * availableLetters.length)];
-    } else {
-      letter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
-    }
-
-    const x = 10 + Math.random() * 80;
-    const id = `crystal-${crystalIdRef.current++}`;
-    const duration = getFallDuration();
-    const colorClass = crystalType === 'normal' ? getRandomNormalColor() : undefined;
-
-    const newCrystal: CrystalData = { id, letter, x, duration, crystalType, colorClass };
-
-    setCrystals(prev => {
-      if (prev.length >= getMaxCrystals()) return prev;
-      return [...prev, newCrystal];
-    });
-  }, [availableLetters, gameState, getMaxCrystals, getFallDuration]);
-
-  // Handle crystal collection
-  const handleCollect = useCallback((id: string, type: CrystalType) => {
-    // Get crystal position before removing
-    const crystal = crystals.find(c => c.id === id);
-    const crystalX = crystal?.x || 50;
-
-    setCrystals(prev => prev.filter(c => c.id !== id));
-
-    const config = getCrystalConfig(type);
-
-    // Handle bombs (player shouldn't collect these!)
-    if (type === 'bomb') {
-      hitBomb();
-      playBomb();
-      showScreenFlash('#ef4444'); // Red flash
-      setEricMood('worried');
-      setEricMessage('BOEM! Niet de bom!');
-      safeTimeout(() => {
-        if (gameState === 'playing') setEricMood('encouraging');
-      }, 1500);
-      return;
-    }
-
-    // Handle power-ups
-    if (type === 'shield' || type === 'slowmo' || type === 'magnet') {
-      activatePowerUp(type);
-      playPowerUp();
-      showScreenFlash(config.glowColor); // Power-up color flash
-
-      if (type === 'magnet') {
-        // Collect ALL crystals on screen (except bombs)
-        // Use functional update to get current crystals state and avoid race condition
-        setCrystals(prev => {
-          const crystalsToCollect = prev.filter(c => c.crystalType !== 'bomb' && c.id !== id);
-
-          // Calculate total score and trigger hitCrystal for each after render
-          if (crystalsToCollect.length > 0) {
-            safeTimeout(() => {
-              let totalScore = 0;
-              const multiplier = getCurrentComboTier().multiplier * (isFeverMode ? 2 : 1);
-              crystalsToCollect.forEach(c => {
-                const cfg = getCrystalConfig(c.crystalType);
-                totalScore += Math.round(GAME_CONFIG.baseScore * cfg.scoreMultiplier * multiplier);
-                hitCrystal(cfg.scoreMultiplier, cfg.feverBonus);
-              });
-              showScorePopup(50, totalScore, '#ec4899', true);
-            }, 0);
-          }
-
-          // Return only bombs
-          return prev.filter(c => c.crystalType === 'bomb');
-        });
-
-        setEricMessage('MAGNEET! Alles verzameld!');
-      } else if (type === 'shield') {
-        setEricMessage('Schild geactiveerd!');
-      } else if (type === 'slowmo') {
-        setEricMessage('Slow-mo!');
-      }
-
-      setEricMood('celebrating');
-      safeTimeout(() => {
-        if (gameState === 'playing') setEricMood('encouraging');
-      }, 1500);
-      return;
-    }
-
-    // Calculate score for popup
-    const multiplier = getCurrentComboTier().multiplier * (isFeverMode ? 2 : 1);
-    const earnedScore = Math.round(GAME_CONFIG.baseScore * config.scoreMultiplier * multiplier);
-
-    // Show score popup
-    const isSpecial = type === 'gold' || type === 'rainbow';
-    showScorePopup(crystalX, earnedScore, config.glowColor, isSpecial);
-
-    // Screen flash for special crystals
-    if (isSpecial) {
-      showScreenFlash(config.glowColor);
-    }
-
-    // Normal crystal collection
-    hitCrystal(config.scoreMultiplier, config.feverBonus);
-    playCollect(combo);
-
-    // Special messages for special crystals
-    if (type === 'gold') {
-      setEricMood('celebrating');
-      setEricMessage('GOUD! Dubbele punten!');
-    } else if (type === 'rainbow') {
-      setEricMood('celebrating');
-      setEricMessage('REGENBOOG! Koorts-boost!');
-    } else {
-      // Update Eric's mood based on combo
-      const comboTier = getCurrentComboTier();
-      if (comboTier.multiplier >= 5) {
-        setEricMood('celebrating');
-        setEricMessage('MEGA! Ongelooflijk!');
-      } else if (comboTier.multiplier >= 3) {
-        setEricMood('celebrating');
-        const messages = ['Super!', 'Fantastisch!', 'Ga zo door!'];
-        setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
-      } else {
-        setEricMood('encouraging');
-        const messages = ['Mooi!', 'Ja!', 'Top!', 'Yes!'];
-        setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
-      }
-    }
-  }, [hitCrystal, hitBomb, activatePowerUp, getCurrentComboTier, gameState, combo, isFeverMode, playBomb, playPowerUp, playCollect, crystals, showScorePopup, showScreenFlash, safeTimeout]);
-
-  // Handle missed crystal
-  const handleMiss = useCallback((id: string, type: CrystalType) => {
-    setCrystals(prev => prev.filter(c => c.id !== id));
-
-    // Bombs are good to miss!
-    if (type === 'bomb') {
-      return; // No penalty for missing bombs
-    }
-
-    // Ice crystal freeze effect
-    if (type === 'ice') {
-      setFrozenUntil(Date.now() + 3000); // Freeze for 3 seconds
-      setEricMood('worried');
-      setEricMessage('Bevroren!');
-      safeTimeout(() => {
-        if (gameState === 'playing') setEricMood('encouraging');
-        setEricMessage('Weer ontdooid!');
+      setEricMessage('FANTASTISCH! 3 Sterren!');
+      if (completeTimeoutRef.current) clearTimeout(completeTimeoutRef.current);
+      completeTimeoutRef.current = setTimeout(() => {
+        completeTimeoutRef.current = null;
+        onComplete();
       }, 3000);
-      return;
     }
+  }, [score, gameState, onComplete, isInitialized, playVictory, finalizeRun, scoreTargets.star3]);
 
-    missedCrystal();
-    playMiss();
-    setEricMood('worried');
-    setEricMessage('Oeps, gemist!');
-    safeTimeout(() => {
-      if (gameState === 'playing') {
-        setEricMood('encouraging');
-      }
-    }, 1000);
-  }, [missedCrystal, playMiss, safeTimeout, gameState]);
+  // Sync refs each render so timed callbacks always read the latest values.
+  spawnWaveRef.current = spawnWave;
+  getSpawnIntervalRef.current = getSpawnInterval;
+  isSprintingRef.current = isSprinting;
+  isSlowingRef.current = isSlowing;
 
-  // Handle wrong key press
-  const handleWrongKey = useCallback(() => {
-    wrongKey();
-    playWrong();
-    setEricMood('worried');
-    setEricMessage(hasShield ? 'Schild heeft beschermd!' : 'Verkeerde toets!');
-    safeTimeout(() => {
-      if (gameState === 'playing') {
-        setEricMood('encouraging');
-      }
-    }, 800);
-  }, [wrongKey, playWrong, safeTimeout, gameState, hasShield]);
-
-  // Keyboard handler
-  const handleKeyPress = useCallback((key: string) => {
-    if (gameState !== 'playing') return;
-    if (isFrozen) return; // Can't type while frozen
-
-    const lowerKey = key.toLowerCase();
-
-    // Check if key matches any crystal
-    const matchingCrystal = crystals.find(c => c.letter.toLowerCase() === lowerKey);
-
-    if (matchingCrystal) {
-      handleCollect(matchingCrystal.id, matchingCrystal.crystalType);
-    } else {
-      // Check if it's a valid letter we're watching
-      if (availableLetters.map(l => l.toLowerCase()).includes(lowerKey)) {
-        handleWrongKey();
-      }
-    }
-  }, [gameState, crystals, availableLetters, handleCollect, handleWrongKey, isFrozen]);
-
-  useKeyboard({
-    onKeyPress: handleKeyPress,
-    enabled: gameState === 'playing',
-    allowedKeys: [...availableLetters.map(l => l.toLowerCase()), ...crystals.map(c => c.letter.toLowerCase())],
-  });
-
-  // Spawn crystals periodically
+  // Spawn loop — uses recursive setTimeout so the interval dynamically adjusts
+  // with score. Only restarts when gameState changes, not on every score tick.
   useEffect(() => {
     if (gameState !== 'playing') {
-      if (spawnIntervalRef.current) {
-        clearInterval(spawnIntervalRef.current);
-      }
+      if (spawnIntervalRef.current) clearTimeout(spawnIntervalRef.current);
       return;
     }
-
-    // Initial spawn
-    spawnCrystal();
-
-    spawnIntervalRef.current = setInterval(() => {
-      spawnCrystal();
-    }, getSpawnInterval());
-
-    return () => {
-      if (spawnIntervalRef.current) {
-        clearInterval(spawnIntervalRef.current);
-      }
+    spawnWaveRef.current();
+    const scheduleNext = () => {
+      spawnIntervalRef.current = setTimeout(() => {
+        spawnWaveRef.current();
+        scheduleNext();
+      }, getSpawnIntervalRef.current());
     };
-  }, [spawnCrystal, getSpawnInterval, gameState]);
+    scheduleNext();
+    return () => { if (spawnIntervalRef.current) clearTimeout(spawnIntervalRef.current); };
+  }, [gameState]);
 
-  // Restart game
-  const handleRestart = () => {
-    setIsInitialized(false); // Prevent premature win check
+  // Restart
+  const handleRestart = useCallback(() => {
+    if (completeTimeoutRef.current) {
+      clearTimeout(completeTimeoutRef.current);
+      completeTimeoutRef.current = null;
+    }
+    gameFinalizedRef.current = false;
+    setIsInitialized(false);
     resetGame();
-    setCrystals([]);
+    setObstacles([]);
     setScorePopups([]);
+    setPlayerLane(1);
+    setPlayerState('running');
+    setSpeedMultiplier(1);
+    setIsSprinting(false);
+    setIsSlowing(false);
+    setCooldowns({});
+    setActiveAbility(null);
+    gameStartTimeRef.current = Date.now();
+    startMusic();
     setGameState('playing');
     setGameResult(null);
     setEricMood('happy');
-    setEricMessage('Vang de kristallen!');
-    setFrozenUntil(0);
-    crystalIdRef.current = 0;
-    // Re-enable win checks after reset
+    setEricMessage('Klaar voor de race!');
+    setHitResult(null);
+    setShakeIntensity(0);
+    setZoomPulse(false);
+    obstacleIdRef.current = 0;
+    raceConfig.current = getRaceConfig(availableLetters, lessonId);
     setTimeout(() => setIsInitialized(true), 100);
-  };
+  }, [resetGame, startMusic, availableLetters, lessonId]);
+
+  useEffect(() => {
+    const handleMenuKeys = (e: KeyboardEvent) => {
+      if (gameState === 'playing') return;
+
+      if ((e.key === 'Enter' || e.key === ' ') && gameState === 'intro') {
+        e.preventDefault();
+        handleStartGame();
+        return;
+      }
+
+      if (e.key === 'Enter' && gameState === 'paused') {
+        e.preventDefault();
+        setGameState('playing');
+        return;
+      }
+
+      if (e.key === 'Enter' && gameState === 'gameover') {
+        e.preventDefault();
+        handleRestart();
+        return;
+      }
+
+      if (e.key === 'Enter' && gameState === 'complete') {
+        e.preventDefault();
+        handleContinueFromComplete();
+      }
+    };
+
+    window.addEventListener('keydown', handleMenuKeys);
+    return () => window.removeEventListener('keydown', handleMenuKeys);
+  }, [gameState, handleStartGame, handleContinueFromComplete, handleRestart]);
+
+  // --- Build intro ability list ---
+  const { abilities: introAbilities } = raceConfig.current;
+  const liveObstacles = obstacles.filter(o => !o.destroyed);
+  const threats = liveObstacles
+    .map(o => ({ obstacle: o, progress: getObstacleProgress(o) }))
+    .sort((a, b) => b.progress - a.progress);
+  const urgentBomb = threats.find(t => t.obstacle.type === 'bomb' && t.obstacle.lane === playerLane && t.progress > 0.62);
+  const urgentLetter = threats.find(t =>
+    (t.obstacle.type === 'letter' || t.obstacle.type === 'gold' || t.obstacle.type === 'ice') &&
+    !!t.obstacle.letter &&
+    t.progress > 0.42
+  );
+
+  const coachHint = gameState !== 'playing'
+    ? null
+    : urgentBomb
+      ? {
+          tone: 'danger' as const,
+          text: `BOM ${LANE_LABELS[urgentBomb.obstacle.lane]}! Verplaats nu.`,
+        }
+        : urgentLetter
+          ? {
+            tone: 'focus' as const,
+            text: `Typ ${urgentLetter.obstacle.letter?.toUpperCase()} nu`,
+          }
+        : energy < 30
+          ? {
+            tone: 'info' as const,
+            text: 'Raak de kristallen om energie te herstellen',
+          }
+          : isAssistMode
+            ? {
+                tone: 'info' as const,
+                text: 'Rustig ritme: kijk 1 obstakel vooruit',
+              }
+            : {
+                tone: 'info' as const,
+                text: 'Houd je combo vast voor bonuspunten',
+              };
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
-      {/* Arcade Background with Parallax */}
-      <ArcadeBackground isFeverMode={isFeverMode} intensity={intensity} />
+    <div
+      className="fixed inset-0 overflow-hidden"
+      style={{ touchAction: 'none' }}
+      onPointerDownCapture={blockTouchPointer}
+      onPointerMoveCapture={blockTouchPointer}
+      onPointerUpCapture={blockTouchPointer}
+      onTouchStartCapture={blockTouchEvent}
+      onTouchMoveCapture={blockTouchEvent}
+      onTouchEndCapture={blockTouchEvent}
+    >
+      {/* Camera shake wrapper */}
+      <CameraShake
+        shakeIntensity={shakeIntensity}
+        zoomPulse={zoomPulse}
+        isFeverMode={isFeverMode}
+        continuousShake={combo >= 20 && gameState === 'playing'}
+        lane={playerLane}
+        speedMultiplier={speedMultiplier}
+        playerState={playerState}
+      >
+        {/* 3D Lane Runner Background */}
+        <LaneRunnerBackground
+          isFeverMode={isFeverMode}
+          intensity={intensity}
+          laneCount={LANE_COUNT}
+          speedMultiplier={speedMultiplier}
+        />
 
-      {/* Screen flash effect */}
+        {/* Obstacles */}
+        <AnimatePresence>
+          {obstacles.map(obstacle => (
+            <RaceObstacle
+              key={obstacle.id}
+              {...obstacle}
+              onReachEnd={handleObstacleReachEnd}
+            />
+          ))}
+        </AnimatePresence>
+
+        {/* Hit Zone with player marker */}
+        <HitZone
+          hitResult={hitResult}
+          combo={combo}
+          isFeverMode={isFeverMode}
+          playerLane={playerLane}
+        />
+
+        {/* Player */}
+        <RacePlayer
+          lane={playerLane}
+          state={playerState}
+          isFeverMode={isFeverMode}
+        />
+
+        {/* Particle Canvas */}
+        <ParticleCanvas ref={particleRef} />
+
+        {/* Eric character */}
+        <motion.div
+          className="absolute bottom-4 left-4 z-20"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Eric mood={ericMood} message={ericMessage} size="medium" />
+        </motion.div>
+      </CameraShake>
+
+      {/* Screen flash (outside camera shake) */}
       <AnimatePresence>
         {screenFlash && (
           <motion.div
@@ -604,51 +1030,44 @@ export function CrystalGame({
         ))}
       </AnimatePresence>
 
-      {/* Frozen overlay */}
-      <AnimatePresence>
-        {isFrozen && (
+      {/* Game HUD */}
+      <GameHUD lessonId={lessonId} />
+
+      {/* Ability Bar */}
+      <AbilityBar
+        abilities={introAbilities}
+        cooldowns={displayCooldowns}
+        activeAbility={activeAbility}
+      />
+
+      {/* Live coach guidance */}
+      <AnimatePresence mode="wait">
+        {coachHint && (
           <motion.div
-            className="absolute inset-0 z-25 pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              background: 'radial-gradient(circle, rgba(125,211,252,0.3) 0%, rgba(125,211,252,0.5) 100%)',
-            }}
+            key={coachHint.text}
+            className="absolute top-24 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.18 }}
           >
-            {/* Floating snowflakes */}
-            {[...Array(20)].map((_, i) => (
-              <motion.span
-                key={i}
-                className="absolute text-2xl text-white/70"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, 20, 0],
-                  rotate: [0, 180, 360],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 2 + Math.random(),
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                }}
-              >
-                ❄️
-              </motion.span>
-            ))}
+            <div
+              className={`px-4 py-2 rounded-full border text-sm font-semibold tracking-wide backdrop-blur-sm ${
+                coachHint.tone === 'danger'
+                  ? 'bg-red-900/60 border-red-400/50 text-red-100'
+                  : coachHint.tone === 'focus'
+                    ? 'bg-cyan-900/60 border-cyan-400/50 text-cyan-100'
+                    : 'bg-slate-900/60 border-slate-300/40 text-slate-100'
+              }`}
+            >
+              {coachHint.text}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Game HUD */}
-      <GameHUD lessonId={lessonId} />
-
       {/* Sound controls */}
       <div className="absolute bottom-4 right-4 z-20 flex gap-2">
-        {/* Mute All button */}
         <button
           onClick={() => {
             if (soundEnabled || musicEnabled) {
@@ -664,18 +1083,20 @@ export function CrystalGame({
               ? 'bg-red-600/80 hover:bg-red-500/80'
               : 'bg-gray-700/80 hover:bg-gray-600/80'
           }`}
-          title={!soundEnabled && !musicEnabled ? 'Geluid aan' : 'Lautlos'}
+          title={!soundEnabled && !musicEnabled ? 'Geluid aan' : 'Stil'}
         >
-          <span className="text-lg">{!soundEnabled && !musicEnabled ? '🔇' : '🔈'}</span>
+          <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-black/40 text-cyan-200">
+            {!soundEnabled && !musicEnabled ? 'MUTE' : 'AUDIO'}
+          </span>
           <span className="text-white text-xs font-medium">
             {!soundEnabled && !musicEnabled ? 'Aan' : 'Stil'}
           </span>
         </button>
       </div>
 
-      {/* Active power-up indicator */}
+      {/* Sprint/Slow indicator */}
       <AnimatePresence>
-        {activePowerUp && activePowerUp !== 'magnet' && (
+        {(isSprinting || isSlowing) && (
           <motion.div
             className="absolute top-24 left-4 z-20 bg-black/70 rounded-lg px-4 py-2 border border-purple-500/50"
             initial={{ x: -100, opacity: 0 }}
@@ -683,57 +1104,13 @@ export function CrystalGame({
             exit={{ x: -100, opacity: 0 }}
           >
             <div className="flex items-center gap-2">
-              <span className="text-2xl">
-                {activePowerUp === 'shield' ? '🛡️' : '⏱️'}
-              </span>
               <span className="text-white font-bold">
-                {activePowerUp === 'shield' ? 'Schild actief' : 'Slow-mo'}
+                {isSprinting ? 'Sprint!' : 'Slow-mo'}
               </span>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Crystals */}
-      <AnimatePresence>
-        {crystals.map(crystal => (
-          <Crystal
-            key={crystal.id}
-            {...crystal}
-            onCollect={handleCollect}
-            onMiss={handleMiss}
-          />
-        ))}
-      </AnimatePresence>
-
-      {/* Eric */}
-      <motion.div
-        className="absolute bottom-4 left-4 z-20"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <Eric
-          mood={ericMood}
-          message={ericMessage}
-          size="medium"
-        />
-      </motion.div>
-
-      {/* Screen shake on high combo */}
-      {combo >= 20 && gameState === 'playing' && (
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          animate={{
-            x: [0, -2, 2, -1, 1, 0],
-            y: [0, 1, -1, 2, -2, 0],
-          }}
-          transition={{
-            duration: 0.3,
-            repeat: Infinity,
-          }}
-        />
-      )}
 
       {/* Intro Screen */}
       <AnimatePresence>
@@ -755,30 +1132,38 @@ export function CrystalGame({
                 className="text-4xl font-black text-cyan-300 mb-4"
                 style={{ textShadow: '0 0 30px currentColor' }}
               >
-                💎 KRISTAL CHAOS 💎
+                ERIC&apos;S RACE
               </motion.h2>
 
-              <div className="text-left text-white/90 space-y-3 mb-6">
-                <p className="flex items-center gap-3">
-                  <span className="text-2xl">⌨️</span>
-                  <span>Druk de juiste letter om kristallen te vangen</span>
+              <div className="text-left text-white/90 space-y-3 mb-4">
+                <p className="uppercase tracking-wider text-cyan-300/90 text-xs">Doelen Deze Run</p>
+                <p>- Blijf in leven en houd je energie boven nul.</p>
+                <p>- Vang glinsterende munten door erdoor te rennen.</p>
+                <p>- Letterblokken en gouden 2x-blokken: typ de letter op tijd.</p>
+                <p>- Gebruik beweging om bommen te ontwijken.</p>
+                <p className="text-cyan-200">
+                  Target: {scoreTargets.star3.toLocaleString()} punten voor 3 sterren.
                 </p>
-                <p className="flex items-center gap-3">
-                  <span className="text-2xl">⚡</span>
-                  <span>Houd je energie op peil - mis geen kristallen!</span>
-                </p>
-                <p className="flex items-center gap-3">
-                  <span className="text-2xl">🔥</span>
-                  <span>Bouw combo&apos;s op voor KOORTS MODUS</span>
-                </p>
-                <p className="flex items-center gap-3">
-                  <span className="text-2xl">💣</span>
-                  <span>Pas op voor bommen - niet typen!</span>
-                </p>
-                <p className="flex items-center gap-3">
-                  <span className="text-2xl">🎯</span>
-                  <span>Haal {GAME_CONFIG.star3Threshold.toLocaleString()} punten voor 3 sterren</span>
-                </p>
+              </div>
+
+              {/* Show available abilities */}
+              <div className="bg-black/30 rounded-lg p-3 mb-4">
+                <div className="text-xs text-cyan-400/70 tracking-widest mb-2">BEWEGINGS-VAARDIGHEDEN</div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {Object.entries(introAbilities).map(([key, config]) => {
+                    const displayKey = key === ' ' ? 'SPC' : key.toUpperCase();
+                    return (
+                      <div
+                        key={key}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-xs font-mono bg-cyan-900/50 text-cyan-300 border border-cyan-500/30"
+                      >
+                        <span>{config.icon}</span>
+                        <span>{displayKey}</span>
+                        <span className="text-[10px] opacity-60">{config.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="text-purple-300/70 text-sm mb-4">
@@ -791,7 +1176,7 @@ export function CrystalGame({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                START! 🚀
+                START RUN
               </motion.button>
             </motion.div>
           </motion.div>
@@ -819,7 +1204,7 @@ export function CrystalGame({
                 initial={{ y: -10 }}
                 animate={{ y: 0 }}
               >
-                ⏸️ PAUZE
+                PAUZE
               </motion.h2>
 
               <p className="text-slate-300 mb-6">
@@ -833,7 +1218,7 @@ export function CrystalGame({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Verder ▶️
+                  Verder
                 </motion.button>
                 <motion.button
                   onClick={onComplete}
@@ -865,7 +1250,6 @@ export function CrystalGame({
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', delay: 0.2 }}
             >
-              {/* Title */}
               <motion.h2
                 className={`text-4xl font-black mb-4 ${
                   gameState === 'complete' ? 'text-yellow-300' : 'text-purple-300'
@@ -878,7 +1262,6 @@ export function CrystalGame({
                 {gameState === 'complete' ? 'GEWELDIG!' : 'GAME OVER'}
               </motion.h2>
 
-              {/* Score */}
               <motion.div
                 className="mb-4"
                 initial={{ scale: 0 }}
@@ -903,7 +1286,6 @@ export function CrystalGame({
                 )}
               </motion.div>
 
-              {/* Stars */}
               <motion.div
                 className="flex justify-center gap-2 mb-4"
                 initial={{ opacity: 0 }}
@@ -918,12 +1300,11 @@ export function CrystalGame({
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: 0.5 + star * 0.1 }}
                   >
-                    {star <= gameResult.stars ? '⭐' : '☆'}
+                    {star <= gameResult.stars ? '\u2B50' : '\u2606'}
                   </motion.span>
                 ))}
               </motion.div>
 
-              {/* Gems earned */}
               <motion.div
                 className="text-purple-300 mb-6"
                 initial={{ opacity: 0 }}
@@ -931,10 +1312,26 @@ export function CrystalGame({
                 transition={{ delay: 0.7 }}
               >
                 <span className="text-2xl">+{gameResult.gemsEarned}</span>
-                <span className="text-lg ml-1">💎</span>
+                <span className="text-lg ml-1">GEM</span>
               </motion.div>
 
-              {/* Buttons */}
+              {gameState === 'gameover' && (
+                <div className="mb-6 rounded-lg bg-black/30 border border-white/10 p-3 text-left text-sm text-slate-200">
+                  <div>Misses: {missedCount}</div>
+                  <div>Bomb hits: {bombHitCount}</div>
+                  <div>Wrong keys: {wrongKeyCount}</div>
+                  <div className="mt-2 text-cyan-200">
+                    Tip: {
+                      bombHitCount >= missedCount && bombHitCount >= wrongKeyCount
+                        ? 'Kijk 1 baan vooruit en verplaats eerder met F/J.'
+                        : wrongKeyCount >= missedCount
+                          ? 'Typ rustiger: alleen letters die je op het scherm ziet.'
+                          : 'Focus op de dichtstbijzijnde letter en negeer de rest.'
+                    }
+                  </div>
+                </div>
+              )}
+
               <motion.div
                 className="flex gap-3 justify-center"
                 initial={{ y: 20, opacity: 0 }}
@@ -949,7 +1346,7 @@ export function CrystalGame({
                 </button>
                 {gameState === 'complete' && (
                   <button
-                    onClick={onComplete}
+                    onClick={handleContinueFromComplete}
                     className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl font-bold text-white hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg hover:shadow-cyan-500/30"
                   >
                     Verder
@@ -961,7 +1358,7 @@ export function CrystalGame({
         )}
       </AnimatePresence>
 
-      {/* Sparkles overlay for complete */}
+      {/* Sparkles for complete */}
       {gameState === 'complete' && (
         <div className="absolute inset-0 pointer-events-none z-40">
           <Sparkles color="#FFD700" count={20} />

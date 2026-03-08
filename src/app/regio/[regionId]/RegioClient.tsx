@@ -21,7 +21,6 @@ export function RegioClient({ regionId }: RegioClientProps) {
   }
 
   const isLessonCompleted = (lessonId: number) => completedLessons.includes(lessonId);
-  const hasPerfectScore = (lessonId: number) => lessonStars[lessonId] === 3;
   const isLessonUnlocked = (lessonId: number) => {
     if (lessonId === 0) return true;
     // Need 3 stars on previous lesson to unlock next

@@ -81,7 +81,7 @@ export const REGIONS: Region[] = [
         title: 'De Smid en de Lantaarnmaker',
         description: 'Leer de letters S en L',
         newKeys: ['s', 'l'],
-        exercises: ['sss', 'lll', 'slsl', 'lsls', 'sal', 'las', 'als', 'sla', 'fjfj', 'a;fj', 'laf', 'jas', 'sas', 'sjaal'],
+        exercises: ['sss', 'lll', 'sla', 'als', 'las', 'jas', 'laf', 'sjaal', 'alfa', 'alas'],
         storyIntro: `De smid kon vroeger de mooiste zwaarden maken.
           En de lantaarnmaker zorgde voor licht in heel het dorp.
           Met S en L kunnen ze weer aan het werk!`,
@@ -94,7 +94,7 @@ export const REGIONS: Region[] = [
         title: 'De Dokter en de Klokkenmaker',
         description: 'Leer de letters D en K',
         newKeys: ['d', 'k'],
-        exercises: ['ddd', 'kkk', 'dkdk', 'kdkd', 'sad', 'lak', 'dal', 'klas', 'dak', 'kas', 'daad', 'kaas', 'kaal', 'slak'],
+        exercises: ['ddd', 'kkk', 'dak', 'kas', 'dal', 'lak', 'kaal', 'kaas', 'klas', 'slak', 'daad', 'kalk'],
         storyIntro: `Dokter Daan hielp iedereen die ziek was.
           En klokkenmaker Karel zorgde dat niemand te laat kwam.
           Breng D en K terug naar het dorp!`,
@@ -107,7 +107,7 @@ export const REGIONS: Region[] = [
         title: 'De Herbergier en de Houthakker',
         description: 'Leer de letters G en H',
         newKeys: ['g', 'h'],
-        exercises: ['ggg', 'hhh', 'ghgh', 'hghg', 'dag', 'hag', 'slag', 'lach', 'had', 'gas', 'hak', 'haas', 'gala', 'hakhak'],
+        exercises: ['ggg', 'hhh', 'dag', 'had', 'haas', 'glas', 'glad', 'lach', 'hals', 'slag', 'hal', 'haag'],
         storyIntro: `In de herberg was het altijd gezellig en warm.
           En de houthakker zorgde voor hout voor het haardvuur.
           Met G en H brengen we de gezelligheid terug!`,
@@ -120,7 +120,7 @@ export const REGIONS: Region[] = [
         title: 'De Marktplaats',
         description: 'Leer de spatiebalk gebruiken',
         newKeys: [' '],
-        exercises: ['f j', 'd k', 's l', 'a ;', 'g h', 'dag dag', 'ha ha', 'ja ja', 'als sla', 'hallo', 'hal', 'ga sla sla'],
+        exercises: ['f j', 'd k', 's l', 'a ;', 'g h', 'dag', 'dag dag', 'glad als glas', 'dag haas', 'had kaas', 'haas lag glad', 'dag haas dag'],
         storyIntro: `De marktplaats was het hart van het dorp.
           Hier kwamen alle dorpelingen samen.
           Met de SPATIE maak je ruimte tussen woorden!`,
@@ -144,7 +144,7 @@ export const REGIONS: Region[] = [
         title: 'De Boer en de Imker',
         description: 'Leer de letters E en I',
         newKeys: ['e', 'i'],
-        exercises: ['eee', 'iii', 'eiei', 'die', 'lei', 'geit', 'hek', 'kiel', 'ezel', 'eis', 'fel', 'hel', 'gel', 'kil', 'lik', 'dik', 'sik', 'eik', 'lek', 'dek'],
+        exercises: ['eee', 'iii', 'die', 'de held', 'de heks', 'de dijk', 'ik eis de gids', 'die held is gek', 'de dijk is glad', 'de heks is gek', 'ik leid de held', 'ik hak de hei'],
         storyIntro: `De gouden korenvelden liggen er verlaten bij.
           Boer Erik en imker Iris wachten op de terugkeer van de magie.
           E en I brengen het land weer tot leven!`,
@@ -157,7 +157,7 @@ export const REGIONS: Region[] = [
         title: 'De Molenaar en de Uil',
         description: 'Leer de letters R en U',
         newKeys: ['r', 'u'],
-        exercises: ['rrr', 'uuu', 'ruru', 'uur', 'ruw', 'rug', 'ruk', 'raak', 'rijk', 'rek', 'kar', 'sar', 'aar', 'raar', 'ruis', 'lus', 'deur', 'reus'],
+        exercises: ['rrr', 'uuu', 'deur', 'reus', 'raar', 'druk', 'kaars', 'de reus is raar', 'hier is de deur', 'de kaars is duur', 'de gids is druk', 'ik eis huur', 'de rug is erg'],
         storyIntro: `De oude molen staat stil zonder wind.
           En de wijze uil kan niet meer praten.
           R en U brengen beweging en wijsheid terug!`,
@@ -170,7 +170,7 @@ export const REGIONS: Region[] = [
         title: 'De Torenwachter en de Yak',
         description: 'Leer de letters T en Y',
         newKeys: ['t', 'y'],
-        exercises: ['ttt', 'yyy', 'tyty', 'tijd', 'kat', 'rat', 'gat', 'het', 'dat', 'dit', 'yeti', 'yak', 'yurt', 'test', 'taart', 'start', 'staat', 'rit', 'wit', 'fit', 'kit', 'jury'],
+        exercises: ['ttt', 'yyy', 'het', 'dat', 'kat', 'taart', 'tijger', 'de kat eet de rat', 'het dak lekt', 'dat is raar', 'de taart is lekker', 'dit is de tijger', 'de tijger eet het dier'],
         storyIntro: `Hoog op de uitkijktoren tuurt de wachter in de verte.
           En in de wei graast een bijzondere yak.
           T en Y maken het uitzicht weer helder!`,
@@ -183,7 +183,7 @@ export const REGIONS: Region[] = [
         title: 'De Pottenbakker en Opa',
         description: 'Leer de letters O en P',
         newKeys: ['o', 'p'],
-        exercises: ['ooo', 'ppp', 'opop', 'top', 'pot', 'pop', 'dop', 'kop', 'oog', 'oor', 'loop', 'rood', 'poot', 'hoop', 'tor', 'pol', 'dol', 'rol', 'soep', 'poes', 'kip', 'lip', 'sip', 'dip', 'gip'],
+        exercises: ['ooo', 'ppp', 'goed', 'paard', 'soep', 'poes', 'het is goed', 'de poes slaapt', 'soep is lekker', 'het paard is groot', 'sport is goed', 'de poes eet soep', 'het doel is top'],
         storyIntro: `Opa vertelt verhalen bij de pottenbakkerij.
           Maar de oven is koud en de verhalen zijn vergeten.
           O en P bakken weer mooie potten!`,
@@ -196,7 +196,7 @@ export const REGIONS: Region[] = [
         title: 'De Kwibus en de Waarzegster',
         description: 'Leer de letters Q en W',
         newKeys: ['q', 'w'],
-        exercises: ['qqq', 'www', 'qwqw', 'kwark', 'wak', 'wat', 'wie', 'wit', 'wip', 'wis', 'was', 'wee', 'wol', 'qua', 'aqua', 'wok', 'wel', 'wet', 'wei'],
+        exercises: ['www', 'qqq', 'wat', 'wie', 'water', 'woud', 'wat is dat', 'wie is het', 'water is goed', 'het woud is groot', 'wie was de gids', 'de held wordt groot', 'water is lekker'],
         storyIntro: `De grappige kwibus en de mysterieuze waarzegster
           zijn hun stem kwijt.
           Q en W brengen de raadsels en grappen terug!`,
@@ -221,7 +221,7 @@ export const REGIONS: Region[] = [
         title: 'De Tovenaar en de Nachtegaal',
         description: 'Leer de letters Z en M',
         newKeys: ['z', 'm'],
-        exercises: ['zzz', 'mmm', 'zmzm', 'zam', 'mes', 'zelf', 'zeep', 'zoom', 'zoet', 'zout', 'map', 'mot', 'mol', 'mis', 'mus', 'man', 'maan', 'maat', 'mat', 'tam', 'dam', 'lam', 'kam', 'ham'],
+        exercises: ['zzz', 'mmm', 'zie', 'mooi', 'maar', 'hij', 'ik zie de poes', 'de motor start', 'ik zit hier', 'dat is mooi', 'hij is groot maar mooi', 'de mast is groot', 'maar de motor is mooi'],
         storyIntro: `Het Fluisterwoud is donker en stil geworden.
           Tovenaar Zeno heeft zijn spreukboek verloren.
           En de nachtegaal Mira kan niet meer zingen.
@@ -235,7 +235,7 @@ export const REGIONS: Region[] = [
         title: 'De Heks en de Nimf',
         description: 'Leer de letters X en N',
         newKeys: ['x', 'n'],
-        exercises: ['nnn', 'xxx', 'nxnx', 'in', 'en', 'aan', 'een', 'niet', 'net', 'nat', 'noot', 'nu', 'pan', 'dan', 'kan', 'mix', 'max', 'fax', 'text', 'extra', 'next', 'sfinx'],
+        exercises: ['nnn', 'xxx', 'een', 'niet', 'zijn', 'maan', 'de maan is mooi', 'wij zijn hier', 'ik zie een dier', 'het is niet goed', 'mensen zien de maan', 'ik ren naar de toren', 'wij wonen in het woud'],
         storyIntro: `Dieper in het woud woont heks Xandra.
           En nimf Nina danst tussen de bomen.
           X en N geven hen hun krachten terug!`,
@@ -248,7 +248,7 @@ export const REGIONS: Region[] = [
         title: 'De Centaur en de Vos',
         description: 'Leer de letters C en V',
         newKeys: ['c', 'v'],
-        exercises: ['ccc', 'vvv', 'cvcv', 'cel', 'vel', 'vis', 'vat', 'vet', 'vaak', 'veel', 'vier', 'vijf', 'code', 'cola', 'cactus', 'cavia', 'actie', 'vacht', 'lucht', 'nacht'],
+        exercises: ['ccc', 'vvv', 'vuur', 'vier', 'van', 'cirkel', 'van ver zie ik vuur', 'vier vissen zwemmen', 'ik voel de warmte', 'van ver zien wij licht', 'veel mensen zien vuur', 'eric spuwt vuur', 'de cirkel is groot en mooi'],
         storyIntro: `Centaur Carlo bewaakt het woud al eeuwen.
           En slimme vos Victor kent alle geheime paden.
           C en V maken het woud weer veilig!`,
@@ -261,7 +261,7 @@ export const REGIONS: Region[] = [
         title: 'De Beer en het Bos',
         description: 'Leer de letter B en leestekens . en ,',
         newKeys: ['b', '.', ','],
-        exercises: ['bbb', 'b.b', 'b,b', 'bal', 'bel', 'bol', 'bak', 'bek', 'bok', 'bad', 'bed', 'bod', 'heb', 'web', 'rob', 'big', 'de beer is bruin.', 'ik zie een boom, en een beer.', 'bruno slaapt.', 'de vos rent.'],
+        exercises: ['bbb', 'boom', 'beer', 'brood', 'de beer slaapt.', 'ik zie een boom.', 'de beer eet brood.', 'de boot vaart op het water.', 'wij zijn blij met de brug.', 'een beer in een boom is raar.', 'de boom is groot, de beer is blij.'],
         storyIntro: `Beer Bruno slaapt al veel te lang.
           Het bos mist zijn beschermer.
           B wekt de beer en het hele woud!
@@ -287,7 +287,7 @@ export const REGIONS: Region[] = [
         title: 'De Eerste Bergbeklimmer',
         description: 'Leer de cijfers 1, 2 en 3',
         newKeys: ['1', '2', '3'],
-        exercises: ['111', '222', '333', '123', '321', 'ik tel 1, 2, 3.', 'er zijn 2 beren.', 'de 3 vissen.', 'tel tot 123.', 'ik heb 3 boeken.'],
+        exercises: ['111', '222', '333', '1, 2, 3', '3, 2, 1', 'ik tel 1, 2, 3.', 'er zijn 2 beren.', 'ik zie 3 vissen.', 'er zijn 3 grote bomen.', 'ik heb 1 brood voor jou.', 'er zijn 2 boten op het water.', 'tel 1, 2, 3 en begin dan.'],
         storyIntro: `De Toppen van Taal rijzen hoog boven Lettoria uit.
           Hier woonden ooit de Tellermeester en zijn leerlingen.
           Met 1, 2 en 3 begin je de klim naar de top!`,
@@ -300,7 +300,7 @@ export const REGIONS: Region[] = [
         title: 'De Kristalgrot',
         description: 'Leer de cijfers 4, 5 en 6',
         newKeys: ['4', '5', '6'],
-        exercises: ['444', '555', '666', '456', '654', 'ik heb 4 stenen.', 'er zijn 5 bloemen.', 'tel 4, 5, 6.', 'de 6 kristallen.', 'ik tel 456.'],
+        exercises: ['444', '555', '666', '4, 5, 6', '6, 5, 4', 'ik heb 4 stenen.', 'er zijn 5 bloemen.', 'ik tel 4, 5, 6.', 'er zijn 6 vissen in het meer.', 'ik zie 5 boten op zee.', 'er zijn 4 bomen en 5 beren.', 'de boot vaart 6 uur op zee.'],
         storyIntro: `Halverwege de berg ligt een kristalgrot.
           Hier bewaarde de Tellermeester zijn rekenboeken.
           4, 5 en 6 verlichten de grot!`,
@@ -313,7 +313,7 @@ export const REGIONS: Region[] = [
         title: 'De Wolkenweg',
         description: 'Leer de cijfers 7, 8 en 9',
         newKeys: ['7', '8', '9'],
-        exercises: ['777', '888', '999', '789', '987', 'ik tel 7, 8, 9.', 'er zijn 8 wolken.', 'de 9 sterren.', 'tel tot 789.', 'ik zie 7 bomen.'],
+        exercises: ['777', '888', '999', '7, 8, 9', '9, 8, 7', 'ik tel 7, 8, 9.', 'er zijn 8 wolken.', 'de 9 sterren zijn mooi.', 'ik zie 7 grote vissen.', 'er zijn 8 bomen in het woud.', 'ik heb 9 broden en 7 boten.', 'de beer slaapt 8 uur per nacht.'],
         storyIntro: `Boven de wolken ligt een magische weg.
           Alleen met de juiste cijfers kun je verder.
           7, 8 en 9 openen de poort naar de top!`,
@@ -326,7 +326,7 @@ export const REGIONS: Region[] = [
         title: 'De Top Bereikt',
         description: 'Leer 0 en oefen alle cijfers',
         newKeys: ['0'],
-        exercises: ['000', '10', '20', '100', '1234567890', 'tel van 0 tot 10.', 'er zijn 100 stenen.', 'de nul is rond.', 'ik heb 0 fouten.', 'tel 10, 20, 30.'],
+        exercises: ['000', '10', '20', '100', '1234567890', 'tel van 0 tot 10.', 'er zijn 100 mensen.', 'ik zie 10 boten.', 'de nul is rond.', 'ik heb 0 fouten gemaakt.', 'ik heb 10 broden voor 5 mensen.', 'tel 10, 20, 30, 40, 50.'],
         storyIntro: `De top is in zicht! Maar er ontbreekt nog één cijfer.
           De nul - het begin en het einde van alles.
           Met 0 bereik je de hoogste top!`,
@@ -352,7 +352,7 @@ export const REGIONS: Region[] = [
         title: 'De Haven van Haast',
         description: 'Snelheidsuitdaging: korte woorden',
         newKeys: [],
-        exercises: ['de', 'het', 'een', 'is', 'en', 'van', 'met', 'bij', 'de zee is mooi.', 'het is een boot.'],
+        exercises: ['de zee is mooi.', 'het is een boot.', 'de boot vaart snel.', 'wij zien het land.', 'de vis zwemt diep.', 'het water is blauw.', 'de wind is sterk.', 'wij varen naar het eiland.', 'de kapitein ziet de kust.', 'de golven zijn groot en mooi.'],
         storyIntro: `De Zee van Snelheid strekt zich voor je uit!
           Kapitein Kira wacht in de haven met haar snelle schip.
           Typ de woorden zo snel als je kunt om wind in de zeilen te krijgen!`,
@@ -365,7 +365,7 @@ export const REGIONS: Region[] = [
         title: 'De Dolfijnenrace',
         description: 'Snelheidsuitdaging: langere woorden',
         newKeys: [],
-        exercises: ['dolfijn', 'zeemeermin', 'schat', 'eiland', 'piraat', 'kompas', 'de dolfijn zwemt snel.', 'ik zie een schat.', 'het eiland is ver.', 'de piraat lacht.'],
+        exercises: ['de dolfijn zwemt heel snel.', 'wij racen met de dolfijnen.', 'de zeemeermin zingt een lied.', 'ik zie een schat op de bodem.', 'de piraat zoekt het eiland.', 'het kompas wijst naar het noorden.', 'de mast is erg hoog.', 'wij vinden de schat niet.', 'de boot is groot en heel snel.', 'eric vliegt hoog over de zee.'],
         storyIntro: `Dolfijnen zwemmen naast het schip!
           Ze dagen je uit voor een race.
           Typ sneller om ze bij te houden!`,
@@ -378,7 +378,7 @@ export const REGIONS: Region[] = [
         title: 'De Schattenkaart',
         description: 'Snelheidsuitdaging: zinnen',
         newKeys: [],
-        exercises: ['de zon schijnt.', 'het schip vaart.', 'een vis zwemt.', 'de zee is blauw.', 'ik zie land.', 'de kaart is oud.', 'we vinden de schat.', 'het goud glimt.', 'de kist is zwaar.', 'we zijn rijk.'],
+        exercises: ['de zon schijnt op het water.', 'het schip vaart naar het eiland.', 'een vis zwemt onder de boot.', 'de zee is blauw en diep.', 'ik zie land aan de horizon.', 'de schatkaart is oud en versleten.', 'wij volgen de kaart naar de schat.', 'het goud glimt in de zon.', 'de kist is zwaar maar niet groot.', 'wij zijn rijk en heel blij.'],
         storyIntro: `Een schatkaart! Maar de inkt vervaagt snel.
           Typ de aanwijzingen voordat ze verdwijnen!`,
         storyImageUrl: '/images/stories/lesson_18_treasure.png',
@@ -390,7 +390,7 @@ export const REGIONS: Region[] = [
         title: 'De Stormrace',
         description: 'Ultieme snelheidstest',
         newKeys: [],
-        exercises: ['de storm komt eraan.', 'hou het roer vast.', 'we gaan sneller varen.', 'bijna bij de kust.', 'we hebben het gehaald.', 'de wind is sterk.', 'de golven zijn hoog.', 'ik stuur het schip.', 'we zijn veilig.', 'de storm is voorbij.'],
+        exercises: ['de storm komt snel eraan.', 'hou het grote roer stevig vast.', 'de golven slaan over het dek.', 'wij varen zo snel als de wind.', 'bijna bij de kust, niet stoppen.', 'de bliksem slaat in het water.', 'wij sturen het schip door de storm.', 'de wind is erg sterk en koud.', 'wij zijn veilig in de haven.', 'de storm is voorbij, wij zijn gered.'],
         storyIntro: `Een storm nadert! Dit is de ultieme test.
           Typ zo snel als de bliksem om veilig thuis te komen!`,
         storyImageUrl: '/images/stories/lesson_19_storm.png',
@@ -415,7 +415,7 @@ export const REGIONS: Region[] = [
         title: 'De Kasteelpoort',
         description: 'Test: thuisrij en bovenste rij',
         newKeys: [],
-        exercises: ['qwerty', 'asdfgh', 'poiuy', 'water', 'rivier', 'de poort is groot.', 'ik zie het kasteel.', 'de ridder wacht.', 'we gaan naar binnen.', 'het is prachtig.'],
+        exercises: ['qwerty uiop.', 'asdfg hjkl;', 'de poort is groot.', 'ik zie het kasteel.', 'de ridder wacht op ons.', 'wij gaan door de poort.', 'het is een prachtig kasteel.', 'de slotvoogd opent de poort.', 'wij lopen door de grote hal.', 'het kasteel heeft tien grote torens.'],
         storyIntro: `Kasteel Compleet verschijnt aan de horizon!
           De grote poort is vergrendeld met lettermachines.
           Bewijs je kennis van de thuisrij en bovenste rij!`,
@@ -428,7 +428,7 @@ export const REGIONS: Region[] = [
         title: 'De Ridderzaal',
         description: 'Test: onderste rij en cijfers',
         newKeys: [],
-        exercises: ['zxcvb', 'nm123', 'zebra', 'circus', 'de ridder heeft 5 zwaarden.', 'er zijn 10 schilden.', 'de zaal is groot.', 'ik tel 123 ridders.', 'de vlag is rood, blauw.', 'we zijn bijna klaar.'],
+        exercises: ['zxcvb nm.', 'vijf zebras.', 'de ridder heeft 5 zwaarden.', 'er zijn 10 gouden schilden.', 'de zaal heeft 7 grote ramen.', 'ik zie 3 ridders en 2 draken.', 'de vlag is rood, wit en blauw.', 'wij zijn bijna klaar met typen.', 'ik kan alle 26 letters typen.', 'de schat bevat 100 gouden munten.'],
         storyIntro: `De Ridderzaal is gevuld met schaduwen.
           Alleen een meester van alle letters kan het licht terugbrengen.
           Laat zien wat je kunt!`,
@@ -441,7 +441,7 @@ export const REGIONS: Region[] = [
         title: 'De Troonzaal',
         description: 'Ultieme meesterschapstest',
         newKeys: [],
-        exercises: ['de draak eric.', 'koning van lettoria.', 'magische letters.', 'typen is leuk.', 'ik ben de beste.', 'eric spuwt vuur.', 'de kroon glimt.', 'we hebben gewonnen.', 'lettoria is gered.', 'bedankt voor het spelen.'],
+        exercises: ['eric is een groene draak.', 'hij woont in een grot in lettoria.', 'wij hebben alle letters geleerd.', 'eric kan nu weer vuur spuwen.', 'de magie is terug in lettoria.', 'jij bent de beste typist van het land.', 'eric vliegt hoog over het kasteel.', 'bedankt voor het leren typen.', 'lettoria is gered door jou.', 'jij bent de held van lettoria.'],
         storyIntro: `De troonzaal! Hier wacht de laatste uitdaging.
           Typ de magische woorden om Eric's volledige kracht te ontgrendelen!`,
         storyImageUrl: '/images/stories/lesson_22_throne.png',

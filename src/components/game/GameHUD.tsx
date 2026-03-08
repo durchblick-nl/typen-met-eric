@@ -130,9 +130,12 @@ export function GameHUD({ lessonId }: GameHUDProps) {
           <div className="text-right">
             {/* Gems display */}
             <div className="flex items-center justify-end gap-1 mb-2">
-              <span className="text-lg">💎</span>
               <span
-                className="font-mono font-bold text-purple-300"
+                className="w-4 h-4 rounded-full border border-amber-200 bg-gradient-to-br from-yellow-300 to-amber-500"
+                style={{ boxShadow: '0 0 8px rgba(251, 191, 36, 0.6)' }}
+              />
+              <span
+                className="font-mono font-bold text-amber-200"
                 style={{ textShadow: '0 0 10px currentColor' }}
               >
                 {totalGems.toLocaleString()}
