@@ -348,7 +348,7 @@ export function CrystalGame({
         lane,
         type,
         letter,
-        duration: duration + (Math.random() * 0.5 - 0.25),
+        duration: duration + (Math.random() * 1.6 - 0.8),
         spawnAt: Date.now(),
         destroyed: false,
       });
