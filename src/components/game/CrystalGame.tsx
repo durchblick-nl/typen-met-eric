@@ -675,6 +675,10 @@ export function CrystalGame({
         clearTimeout(completeTimeoutRef.current);
         completeTimeoutRef.current = null;
       }
+      if (playerStateTimerRef.current) {
+        clearTimeout(playerStateTimerRef.current);
+        playerStateTimerRef.current = null;
+      }
       timeoutsRef.current.forEach(id => clearTimeout(id));
       timeoutsRef.current.clear();
     };
@@ -917,7 +921,7 @@ export function CrystalGame({
         : energy < 30
           ? {
             tone: 'info' as const,
-            text: 'Pak gouden munten om energie te herstellen',
+            text: 'Raak de kristallen om energie te herstellen',
           }
           : isAssistMode
             ? {
@@ -1134,8 +1138,8 @@ export function CrystalGame({
               <div className="text-left text-white/90 space-y-3 mb-4">
                 <p className="uppercase tracking-wider text-cyan-300/90 text-xs">Doelen Deze Run</p>
                 <p>- Blijf in leven en houd je energie boven nul.</p>
-                <p>- Pak gouden munten door erdoor te rennen.</p>
-                <p>- Letterblokken NIET pakken: typ de letter op tijd.</p>
+                <p>- Vang glinsterende munten door erdoor te rennen.</p>
+                <p>- Letterblokken en gouden 2x-blokken: typ de letter op tijd.</p>
                 <p>- Gebruik beweging om bommen te ontwijken.</p>
                 <p className="text-cyan-200">
                   Target: {scoreTargets.star3.toLocaleString()} punten voor 3 sterren.

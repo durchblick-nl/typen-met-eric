@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ObstacleType, LANE_POSITIONS } from '@/lib/data/raceAbilities';
 
 interface RaceObstacleProps {
@@ -52,6 +52,17 @@ export function RaceObstacle({
 }: RaceObstacleProps) {
   const style = TYPE_STYLES[type];
   const reachedEndRef = useRef(false);
+
+  // Generate stable fragment offsets once per obstacle so the destruction
+  // animation doesn't repick random values on re-renders.
+  const fragmentOffsets = useMemo(
+    () => [0, 1, 2, 3].map((i) => ({
+      x: (i % 2 === 0 ? -1 : 1) * (20 + Math.random() * 20),
+      y: (i < 2 ? -1 : 1) * (15 + Math.random() * 15),
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [id] // keyed by obstacle id so each obstacle gets its own stable set
+  );
 
   // Progress from 0 (horizon) to 1 (player position)
   const progress = useMotionValue(0);
@@ -121,8 +132,8 @@ export function RaceObstacle({
             }}
             initial={{ x: 0, y: 0 }}
             animate={{
-              x: [0, (i % 2 === 0 ? -1 : 1) * (20 + Math.random() * 20)],
-              y: [0, (i < 2 ? -1 : 1) * (15 + Math.random() * 15)],
+              x: [0, fragmentOffsets[i].x],
+              y: [0, fragmentOffsets[i].y],
               opacity: [1, 0],
               rotate: [0, (i % 2 === 0 ? 180 : -180)],
             }}

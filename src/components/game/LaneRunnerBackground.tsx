@@ -305,7 +305,6 @@ export function LaneRunnerBackground({
           top: `${VP_Y}%`, left: `${DIVIDERS[0]}%`, bottom: '0', width: '1px',
           background: `linear-gradient(to bottom, transparent 0%, ${neonColor}30 30%, ${neonColor}60 100%)`,
           boxShadow: `0 0 8px ${neonColor}30`,
-          transform: `rotate(${Math.atan2(100 - VP_Y, DIVIDERS[0] - VP_X) * 0}deg)`,
         }}
       />
 
