@@ -51,8 +51,16 @@ src/
 │   │   ├── DiplomaDocument.tsx  # PDF document (@react-pdf/renderer)
 │   │   └── DiplomaPreview.tsx   # HTML preview component
 │   ├── game/               # Bonus mini-games
-│   │   ├── Crystal.tsx     # Falling crystal component
-│   │   └── CrystalGame.tsx # Crystal collection game (3-star reward)
+│   │   ├── CrystalGame.tsx      # Eric's Race lane-runner (3-star reward)
+│   │   ├── LaneRunnerBackground.tsx  # Parallax synthwave background
+│   │   ├── RacePlayer.tsx       # Eric sprite with state-based mood
+│   │   ├── RaceObstacle.tsx     # Obstacles (gem, letter, gold, bomb, ice)
+│   │   ├── LaneCrystal.tsx      # Collectible crystal in lane
+│   │   ├── AbilityBar.tsx       # Sprint/slow/jump/dash ability buttons
+│   │   ├── GameHUD.tsx          # Energy/fever/score HUD
+│   │   ├── HitZone.tsx          # Player hit detection area
+│   │   ├── ParticleCanvas.tsx   # Particle effects canvas
+│   │   └── CameraShake.tsx      # Screen shake wrapper
 │   ├── keyboard/           # Virtual keyboard with finger guides
 │   ├── map/WorldMap.tsx    # Interactive world map
 │   ├── typing/             # Typing exercise components
@@ -138,18 +146,19 @@ The game world has 7 regions with 26 lessons total:
 - [x] Keyboard shortcuts (Enter, Escape) throughout app
 - [x] Space character shown as ␣ symbol for clarity
 - [x] JetBrains Mono font for better letter distinction (especially 'l' vs '1')
-- [x] Crystal bonus game after 3-star lessons (collect 30 crystals by typing)
+- [x] Eric's Race lane-runner bonus game after 3-star lessons (type letters to destroy obstacles)
 - [x] Diploma/certificate generation (PDF download with @react-pdf/renderer)
 - [x] Eric dragon favicon (all sizes including apple-touch-icon)
 - [x] Full sitemap with all 39 pages (main, 26 lessons, 7 regions, diploma, impressum)
+- [x] Achievements system (score milestones, accuracy streaks, speed records)
+- [x] Sound effects and background music (Web Audio API, togglable)
+- [x] Real Dutch words/sentences in all lessons (progressively longer as more letters are learned)
 
 ## Next Steps
 
 1. **Uppercase letters** - Add Shift key lessons (see docs/plan-grossbuchstaben.md)
-2. Add gamification features (gems, achievements, streaks)
-3. Add sound effects and background music (optional)
-4. Multi-language support (German, English)
-5. PWA offline support with service worker
+2. Multi-language support (German, English)
+3. PWA offline support with service worker
 
 ## Deployment
 
