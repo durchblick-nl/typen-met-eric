@@ -266,8 +266,8 @@ export function CrystalGame({
     let base = isFeverMode ? 1100 : age < 6 ? 2400 : 1800;
     const reduction = Math.min(400, Math.floor(score / 3000) * 60);
     base = base - reduction;
-    if (isAssistMode) base += 260;
-    return Math.max(800, base);
+    if (isAssistMode) base += 300;
+    return Math.max(1000, base);
   }, [score, isFeverMode, getGameAge, isAssistMode]);
 
   const spawnWave = useCallback(() => {
@@ -280,9 +280,9 @@ export function CrystalGame({
     const isTutorialLetters = age >= 4 && age < 8;
     const isTutorialMix = age >= 8 && age < 12;
 
-    // Wave size: start with 1, ramp up to 2-3
-    const maxWaveSize = isAssistMode ? 2 : 3;
-    const waveSize = age < 3 ? 1 : Math.min(maxWaveSize, 2 + Math.floor(score / 5000));
+    // Wave size: max 2 so there is always at least 1 free lane to stand in
+    const maxWaveSize = isAssistMode ? 1 : 2;
+    const waveSize = age < 4 ? 1 : Math.min(maxWaveSize, 1 + Math.floor(score / 10000));
     const usedLanes = new Set<number>();
     const newObstacles: ObstacleData[] = [];
 
