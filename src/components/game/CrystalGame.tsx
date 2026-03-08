@@ -354,26 +354,30 @@ export function CrystalGame({
       });
     }
 
-    setObstacles(prev => {
-      const activeObstacles = prev.filter(o => !o.destroyed);
-      if (activeObstacles.length >= 8) return prev;
+    const addObstacle = (obs: ObstacleData) => {
+      setObstacles(prev => {
+        const activeObstacles = prev.filter(o => !o.destroyed);
+        if (activeObstacles.length >= 8) return prev;
 
-      const isTypingObstacle = (obstacle: ObstacleData) =>
-        obstacle.type === 'letter' || obstacle.type === 'gold' || obstacle.type === 'ice';
+        const isTypingObstacle = (o: ObstacleData) =>
+          o.type === 'letter' || o.type === 'gold' || o.type === 'ice';
 
-      const availableSlots = 8 - activeObstacles.length;
-      let typingObstacleCount = activeObstacles.filter(isTypingObstacle).length;
-      const adjustedNew = newObstacles.slice(0, availableSlots).map((obstacle) => {
-        if (isTypingObstacle(obstacle) && typingObstacleCount >= 3) {
-          return { ...obstacle, type: 'gem' as const, letter: undefined };
-        }
-        if (isTypingObstacle(obstacle)) typingObstacleCount += 1;
-        return obstacle;
+        const typingCount = activeObstacles.filter(isTypingObstacle).length;
+        const adjusted = isTypingObstacle(obs) && typingCount >= 3
+          ? { ...obs, type: 'gem' as const, letter: undefined }
+          : obs;
+
+        return [...prev, adjusted];
       });
+    };
 
-      return [...prev, ...adjustedNew];
-    });
-  }, [gameState, score, getBaseDuration, getGameAge, isAssistMode]);
+    // Spawn first obstacle immediately; stagger second by 400-600ms so they
+    // don't arrive at the player at exactly the same time.
+    if (newObstacles[0]) addObstacle(newObstacles[0]);
+    if (newObstacles[1]) {
+      safeTimeout(() => addObstacle(newObstacles[1]), 400 + Math.random() * 200);
+    }
+  }, [gameState, score, getBaseDuration, getGameAge, isAssistMode, safeTimeout]);
 
   // --- Collision handling ---
   // IMPORTANT: side effects (store updates, sounds) are deferred via queueMicrotask
