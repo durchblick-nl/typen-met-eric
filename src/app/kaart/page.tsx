@@ -9,11 +9,12 @@ import Image from 'next/image';
 const TOTAL_LESSONS = 26;
 
 export default function KaartPage() {
-  const { completedLessons, currentLesson, totalStars, currentStreak, lessonStars } = useProgressStore();
+  const { totalStars, currentStreak, lessonStars } = useProgressStore();
 
   // Check if all lessons completed with 3 stars
   const threeStarLessons = Object.values(lessonStars).filter(stars => stars >= 3).length;
   const canGetDiploma = threeStarLessons >= TOTAL_LESSONS;
+  const currentMapLesson = Math.min(TOTAL_LESSONS - 1, threeStarLessons);
 
   const getEricMessage = () => {
     if (canGetDiploma) {
@@ -65,7 +66,7 @@ export default function KaartPage() {
         {/* Eric */}
         <div className="mb-6">
           <Eric
-            mood={completedLessons.length > 0 ? 'happy' : 'encouraging'}
+            mood={threeStarLessons > 0 ? 'happy' : 'encouraging'}
             message={getEricMessage()}
           />
         </div>
@@ -73,19 +74,19 @@ export default function KaartPage() {
         {/* World Map */}
         <WorldMap
           perfectLessons={threeStarLessons}
-          currentLesson={currentLesson}
+          currentLesson={currentMapLesson}
         />
 
         {/* Progress bar */}
         <div className="mt-8 max-w-md mx-auto">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
             <span>Voortgang</span>
-            <span>{completedLessons.length} / {TOTAL_LESSONS} lessen voltooid</span>
+            <span>{threeStarLessons} / {TOTAL_LESSONS} lessen met 3 sterren</span>
           </div>
           <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-eric-green to-eric-gold transition-all duration-500"
-              style={{ width: `${Math.min(100, (completedLessons.length / TOTAL_LESSONS) * 100)}%` }}
+              style={{ width: `${Math.min(100, (threeStarLessons / TOTAL_LESSONS) * 100)}%` }}
             />
           </div>
         </div>

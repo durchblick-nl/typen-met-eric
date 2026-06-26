@@ -39,6 +39,11 @@ export const useProgressStore = create<ProgressState>()(
         // Only add stars if better than before
         const starDiff = Math.max(0, stars - previousStars);
 
+        const nextCurrentLesson = Math.max(
+          state.currentLesson,
+          stars === 3 ? lessonId + 1 : state.currentLesson
+        );
+
         set({
           completedLessons: alreadyCompleted
             ? state.completedLessons
@@ -48,7 +53,7 @@ export const useProgressStore = create<ProgressState>()(
             [lessonId]: Math.max(previousStars, stars),
           },
           totalStars: state.totalStars + starDiff,
-          currentLesson: lessonId + 1,
+          currentLesson: nextCurrentLesson,
         });
 
         // Update streak

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { getAchievement } from '@/lib/data/achievements';
+import { useEffect } from 'react';
 
 interface AchievementPopupProps {
   achievementId: string;
@@ -10,6 +11,18 @@ interface AchievementPopupProps {
 
 export function AchievementPopup({ achievementId, onClose }: AchievementPopupProps) {
   const achievement = getAchievement(achievementId);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   if (!achievement) return null;
 
@@ -81,8 +94,8 @@ export function AchievementPopup({ achievementId, onClose }: AchievementPopupPro
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <span className="text-yellow-400 font-bold">+{achievement.gemReward}</span>
-          <span className="text-2xl">💎</span>
+          <span className="text-yellow-400 font-bold">+{achievement.coinReward}</span>
+          <span className="text-2xl">🪙</span>
         </motion.div>
 
         {/* Tap to close hint */}
@@ -92,7 +105,7 @@ export function AchievementPopup({ achievementId, onClose }: AchievementPopupPro
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          Tik om te sluiten
+          Druk op Enter om verder te gaan
         </motion.p>
       </motion.div>
     </motion.div>

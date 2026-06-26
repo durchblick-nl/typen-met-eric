@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { getAchievement } from '@/lib/data/achievements';
 
 // Power-up types
 export type PowerUpType = 'shield' | 'slowmo' | 'magnet' | null;
@@ -32,7 +33,7 @@ export const GAME_CONFIG = {
   baseScore: 100,
   goldMultiplier: 2,
 
-  // Stars (score thresholds) — tuned for race game with combos + distance scoring
+  // Stars (score thresholds) — tuned for short, motivating bonus runs.
   star1Threshold: 5000,
   star2Threshold: 15000,
   star3Threshold: 30000,
@@ -45,7 +46,7 @@ function getLessonNumber(lessonId: string): number {
 
 export function getLessonScoreThresholds(lessonId: string) {
   const lessonNum = getLessonNumber(lessonId);
-  const star3 = Math.min(30000, 18000 + lessonNum * 450);
+  const star3 = Math.min(22000, 9000 + lessonNum * 350);
   return {
     star1: Math.round(star3 / 6),
     star2: Math.round(star3 / 2),
@@ -345,14 +346,16 @@ export const useGameStore = create<GameState>()(
         checkAchievement('shield_first', state.powerupsCollected.includes('shield'));
         checkAchievement('magnet_first', state.powerupsCollected.includes('magnet'));
 
-        // Calculate achievement gem rewards
-        const achievementGems = newAchievements.length > 0 ? newAchievements.reduce((sum) => sum + 25, 0) : 0;
+        // Calculate achievement coin rewards
+        const achievementCoins = newAchievements.reduce((sum, id) => {
+          return sum + (getAchievement(id)?.coinReward ?? 25);
+        }, 0);
 
-        // Calculate base gems earned
+        // Calculate base coins earned
         let gemsEarned = Math.floor(state.score / 1000);
         if (newHighScore) gemsEarned += 5;
         if (stars === 3) gemsEarned += 10;
-        gemsEarned += achievementGems;
+        gemsEarned += achievementCoins;
 
         const newGamesPlayed = state.gamesPlayed + 1;
         const newTotalScore = state.totalScore + state.score;

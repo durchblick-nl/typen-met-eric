@@ -20,11 +20,11 @@ const TYPE_STYLES: Record<ObstacleType, {
   glow: string;
 }> = {
   letter: {
-    gradient: 'from-slate-700 to-slate-900',
+    gradient: 'from-slate-800 via-cyan-950 to-slate-950',
     glow: '#38bdf8',
   },
   gold: {
-    gradient: 'from-orange-500 via-amber-500 to-yellow-500',
+    gradient: 'from-zinc-900 via-amber-600 to-orange-500',
     glow: '#fb923c',
   },
   bomb: {
@@ -36,7 +36,7 @@ const TYPE_STYLES: Record<ObstacleType, {
     glow: '#fbbf24',
   },
   ice: {
-    gradient: 'from-sky-200 via-cyan-300 to-sky-400',
+    gradient: 'from-slate-900 via-sky-500 to-cyan-300',
     glow: '#7dd3fc',
   },
 };
@@ -221,12 +221,22 @@ function ObstacleShape({
 
   return (
     <div className="relative">
+      {/* Floating warning bracket so typed hazards read as targets, not loot. */}
+      <div
+        className="absolute -inset-2 -z-0 rounded-xl border border-white/15"
+        style={{
+          background: `linear-gradient(135deg, ${style.glow}18, rgba(0,0,0,0.25), transparent)`,
+          boxShadow: `inset 0 0 16px rgba(255,255,255,0.08), 0 0 24px ${style.glow}35`,
+          transform: 'skewY(-4deg)',
+        }}
+      />
+
       {/* Main hexagon */}
       <div
-        className={`w-16 h-[5rem] flex items-center justify-center relative bg-gradient-to-br ${style.gradient}`}
+        className={`w-16 h-[5rem] flex items-center justify-center relative overflow-hidden bg-gradient-to-br ${style.gradient}`}
         style={{
           clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-          boxShadow: `0 0 20px ${style.glow}60, 0 0 40px ${style.glow}30`,
+          boxShadow: `0 0 20px ${style.glow}70, 0 0 46px ${style.glow}35, inset 0 0 18px rgba(255,255,255,0.14), inset 0 -16px 24px rgba(0,0,0,0.38)`,
         }}
       >
         {/* Inner highlight */}
@@ -235,6 +245,24 @@ function ObstacleShape({
           style={{
             clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
           }}
+        />
+
+        {/* Hard-light bevels for a more physical arcade prop. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(145deg, rgba(255,255,255,0.5) 0%, transparent 22%, transparent 58%, rgba(0,0,0,0.42) 100%)',
+            clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+          }}
+        />
+
+        <motion.div
+          className="absolute -inset-10"
+          style={{
+            background: `linear-gradient(100deg, transparent 35%, ${style.glow}55 50%, transparent 65%)`,
+          }}
+          animate={{ x: ['-55%', '55%'] }}
+          transition={{ duration: type === 'gold' ? 0.9 : 1.4, repeat: Infinity, repeatDelay: 0.5 }}
         />
 
         {/* Ice shimmer */}
@@ -260,15 +288,15 @@ function ObstacleShape({
             <span className="w-5 h-5 mb-0.5 rotate-45 border border-white/70" />
           )}
           {letter && (
-            <span className="text-[9px] px-1.5 py-0.5 mb-0.5 rounded bg-cyan-400/20 border border-cyan-300/40 tracking-wide leading-none">
+            <span className="text-[9px] px-1.5 py-0.5 mb-0.5 rounded bg-black/45 border border-cyan-300/60 tracking-wide leading-none text-cyan-100">
               TYP
             </span>
           )}
           {letter && (
             <span
-              className="font-mono text-2xl font-black text-white"
+              className="font-mono text-3xl font-black text-white"
               style={{
-                textShadow: '2px 2px 0 rgba(0,0,0,0.8), -1px -1px 0 rgba(0,0,0,0.5), 0 0 8px rgba(255,255,255,0.5)',
+                textShadow: `2px 2px 0 rgba(0,0,0,0.9), -1px -1px 0 rgba(0,0,0,0.55), 0 0 10px ${style.glow}`,
                 letterSpacing: '0.05em',
               }}
             >
@@ -303,14 +331,27 @@ function BombShape({ style }: { style: { gradient: string; glow: string } }) {
         transition={{ duration: 0.6, repeat: Infinity }}
       />
 
+      <motion.div
+        className="absolute -inset-4 -z-10"
+        style={{
+          background: 'conic-gradient(from 0deg, transparent, rgba(239,68,68,0.45), transparent, rgba(251,191,36,0.25), transparent)',
+          clipPath: 'polygon(50% 0%, 62% 32%, 100% 50%, 62% 68%, 50% 100%, 38% 68%, 0% 50%, 38% 32%)',
+          filter: 'blur(4px)',
+        }}
+        animate={{ rotate: [0, 360] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
+      />
+
       {/* Main orb */}
       <div
-        className="w-16 h-16 rounded-full flex items-center justify-center relative"
+        className="w-16 h-16 rounded-full flex items-center justify-center relative overflow-hidden"
         style={{
           background: 'radial-gradient(circle at 35% 35%, #7f1d1d 0%, #450a0a 50%, #1c0404 100%)',
-          boxShadow: '0 0 25px rgba(239,68,68,0.7), 0 0 50px rgba(239,68,68,0.3), inset 0 0 15px rgba(239,68,68,0.4)',
+          boxShadow: '0 0 25px rgba(239,68,68,0.8), 0 0 56px rgba(239,68,68,0.35), inset 0 0 15px rgba(239,68,68,0.4), inset 0 -16px 20px rgba(0,0,0,0.55)',
         }}
       >
+        <div className="absolute left-3 top-2 h-4 w-5 rounded-full bg-white/25 blur-[1px]" />
+
         {/* Pulsing red core */}
         <motion.div
           className="absolute inset-2 rounded-full"
@@ -357,13 +398,19 @@ function CoinShape({ style }: { style: { gradient: string; glow: string } }) {
       />
       {/* Coin body */}
       <div
-        className={`w-10 h-10 rounded-full bg-gradient-to-br ${style.gradient} border-2 border-amber-200/80 relative flex items-center justify-center`}
+        className={`w-12 h-12 rounded-full bg-gradient-to-br ${style.gradient} border-2 border-amber-100/90 relative flex items-center justify-center overflow-hidden`}
         style={{
-          boxShadow: `0 0 18px ${style.glow}90, 0 0 35px ${style.glow}50`,
+          boxShadow: `0 0 20px ${style.glow}95, 0 0 42px ${style.glow}55, inset 0 0 10px rgba(255,255,255,0.35), inset 0 -10px 16px rgba(146,64,14,0.38)`,
         }}
       >
-        <div className="absolute inset-1 rounded-full border border-amber-50/70" />
-        <div className="w-3 h-3 rounded-full border border-amber-50/80" />
+        <div className="absolute inset-1 rounded-full border border-amber-50/80" />
+        <div className="absolute left-2 top-1.5 h-3 w-5 rounded-full bg-white/45 blur-[1px]" />
+        <div className="absolute inset-y-1 left-1/2 w-px bg-amber-100/45" />
+        <div className="absolute inset-x-2 top-1/2 h-px bg-amber-100/35" />
+        <div
+          className="relative h-5 w-5 rounded-full border-2 border-amber-50/90"
+          style={{ boxShadow: 'inset 0 0 6px rgba(255,255,255,0.45)' }}
+        />
       </div>
       {/* Outer glow */}
       <div

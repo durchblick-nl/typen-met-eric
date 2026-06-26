@@ -378,7 +378,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
             </motion.div>
           )}
 
-          {/* Game Phase - Bonus crystal game for 3 stars */}
+          {/* Game Phase - keyboard-only bonus race for 3 stars */}
           {phase === 'game' && (
             <motion.div
               key="game"

@@ -1,11 +1,11 @@
-// Achievement definitions for Crystal Chaos
+// Achievement definitions for Eric's Race
 
 export interface Achievement {
   id: string;
   name: string;
   description: string;
   icon: string;
-  gemReward: number;
+  coinReward: number;
   condition: AchievementCondition;
   secret?: boolean; // Hidden until unlocked
 }
@@ -28,7 +28,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Eerste Stappen',
     description: '5x combo bereiken',
     icon: '🔥',
-    gemReward: 10,
+    coinReward: 10,
     condition: { type: 'combo', value: 5 },
   },
   {
@@ -36,7 +36,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Op Dreef',
     description: '10x combo bereiken',
     icon: '🔥',
-    gemReward: 25,
+    coinReward: 25,
     condition: { type: 'combo', value: 10 },
   },
   {
@@ -44,7 +44,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Onstopbaar',
     description: '20x combo bereiken',
     icon: '💪',
-    gemReward: 50,
+    coinReward: 50,
     condition: { type: 'combo', value: 20 },
   },
   {
@@ -52,25 +52,25 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'LEGENDE',
     description: '50x combo bereiken',
     icon: '👑',
-    gemReward: 200,
+    coinReward: 200,
     condition: { type: 'combo', value: 50 },
   },
 
   // Fever achievements
   {
     id: 'fever_first',
-    name: 'Eerste Hitte',
-    description: 'Eerste koortsmodus bereiken',
+    name: 'Eerste Turbo',
+    description: 'Eerste turbomodus bereiken',
     icon: '🌡️',
-    gemReward: 15,
+    coinReward: 15,
     condition: { type: 'fever_count', value: 1 },
   },
   {
     id: 'fever_3',
     name: 'Gloeiend Heet',
-    description: '3x koorts in één spel',
+    description: '3x turbo in één spel',
     icon: '🔥',
-    gemReward: 75,
+    coinReward: 75,
     condition: { type: 'fever_count', value: 3 },
   },
 
@@ -80,15 +80,15 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Eerste Goud',
     description: '5.000 punten in één spel',
     icon: '⭐',
-    gemReward: 15,
+    coinReward: 15,
     condition: { type: 'score', value: 5000 },
   },
   {
     id: 'score_10000',
-    name: 'Kristalmeester',
+    name: 'Muntenmeester',
     description: '10.000 punten in één spel',
-    icon: '💎',
-    gemReward: 50,
+    icon: '🪙',
+    coinReward: 50,
     condition: { type: 'score', value: 10000 },
   },
   {
@@ -96,7 +96,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Hoogvlieger',
     description: '25.000 punten in één spel',
     icon: '🚀',
-    gemReward: 100,
+    coinReward: 100,
     condition: { type: 'score', value: 25000 },
   },
 
@@ -106,7 +106,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Scherpschutter',
     description: 'Spel zonder fouten afronden',
     icon: '🎯',
-    gemReward: 100,
+    coinReward: 100,
     condition: { type: 'perfect_game' },
   },
 
@@ -116,7 +116,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Beschermer',
     description: 'Eerste schild verzamelen',
     icon: '🛡️',
-    gemReward: 10,
+    coinReward: 10,
     condition: { type: 'powerup_collected', powerup: 'shield' },
   },
   {
@@ -124,7 +124,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Magneet Meester',
     description: 'Eerste magneet verzamelen',
     icon: '🧲',
-    gemReward: 20,
+    coinReward: 20,
     condition: { type: 'powerup_collected', powerup: 'magnet' },
   },
 
@@ -134,7 +134,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Puntenverzamelaar',
     description: '100.000 punten totaal',
     icon: '📊',
-    gemReward: 150,
+    coinReward: 150,
     condition: { type: 'total_score', value: 100000 },
   },
   {
@@ -142,7 +142,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: 'Vaste Klant',
     description: '10 spellen gespeeld',
     icon: '🎮',
-    gemReward: 50,
+    coinReward: 50,
     condition: { type: 'games_played', value: 10 },
   },
 ];

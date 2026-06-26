@@ -27,8 +27,8 @@ export function RegioClient({ regionId }: RegioClientProps) {
     return lessonStars[lessonId - 1] === 3;
   };
 
-  const completedInRegion = region.lessons.filter((l) =>
-    completedLessons.includes(l.id)
+  const masteredInRegion = region.lessons.filter((l) =>
+    (lessonStars[l.id] || 0) === 3
   ).length;
 
   return (
@@ -59,7 +59,7 @@ export function RegioClient({ regionId }: RegioClientProps) {
           </div>
 
           <div className="text-sm text-gray-500">
-            {completedInRegion}/{region.lessons.length}
+            {masteredInRegion}/{region.lessons.length} 3★
           </div>
         </div>
 

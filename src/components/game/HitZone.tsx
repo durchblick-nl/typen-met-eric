@@ -25,6 +25,15 @@ export function HitZone({ hitResult, combo, isFeverMode, playerLane }: HitZonePr
       className="absolute left-0 right-0 z-15 pointer-events-none"
       style={{ bottom: '15%' }}
     >
+      {/* Physical collection gate */}
+      <div
+        className="absolute left-4 right-4 -top-5 h-10 rounded-full"
+        style={{
+          background: `radial-gradient(ellipse at 50% 50%, ${baseColor}18 0%, transparent 62%)`,
+          boxShadow: `inset 0 0 20px ${baseColor}18`,
+        }}
+      />
+
       {/* Main neon line */}
       <div
         className="relative mx-4"
@@ -57,6 +66,29 @@ export function HitZone({ hitResult, combo, isFeverMode, playerLane }: HitZonePr
                 ? `0 0 12px ${baseColor}, 0 0 24px ${baseColor}60`
                 : `0 0 8px ${baseColor}80`,
               transition: 'all 0.2s ease',
+            }}
+          />
+        );
+      })}
+
+      {/* Short vertical gate posts */}
+      {LANE_POSITIONS.map((pos, i) => {
+        const isPlayerLane = playerLane === i;
+        return (
+          <div
+            key={`gate-post-${i}`}
+            className="absolute -translate-x-1/2"
+            style={{
+              left: `${pos}%`,
+              top: '-18px',
+              width: isPlayerLane ? 3 : 2,
+              height: isPlayerLane ? 42 : 30,
+              borderRadius: 999,
+              background: isPlayerLane
+                ? `linear-gradient(to bottom, transparent, #ffffff, ${baseColor}, transparent)`
+                : `linear-gradient(to bottom, transparent, ${baseColor}90, transparent)`,
+              boxShadow: isPlayerLane ? `0 0 18px ${baseColor}` : `0 0 10px ${baseColor}60`,
+              opacity: isPlayerLane ? 0.95 : 0.5,
             }}
           />
         );

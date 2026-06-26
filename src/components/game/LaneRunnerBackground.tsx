@@ -74,6 +74,7 @@ export function LaneRunnerBackground({
   speedMultiplier = 1,
 }: LaneRunnerBackgroundProps) {
   const neonColor = isFeverMode ? '#f472b6' : '#06b6d4';
+  const amberColor = '#fbbf24';
   const starSpeed = Math.max(0.6, 1.4 / speedMultiplier);
   const gridSpeed = Math.max(0.8, (3 - intensity * 1.5) / speedMultiplier);
 
@@ -89,6 +90,15 @@ export function LaneRunnerBackground({
           0%, 100% { opacity: 0.4; transform: scale(1); }
           50% { opacity: 0.8; transform: scale(1.1); }
         }
+        @keyframes roadSweep {
+          0% { transform: translateY(-22%) scaleY(0.85); opacity: 0; }
+          35% { opacity: 0.45; }
+          100% { transform: translateY(90%) scaleY(1.35); opacity: 0; }
+        }
+        @keyframes cabinetGlow {
+          0%, 100% { opacity: 0.55; }
+          50% { opacity: 0.9; }
+        }
       `}</style>
 
       {/* Deep space background */}
@@ -98,6 +108,26 @@ export function LaneRunnerBackground({
           background: isFeverMode
             ? 'radial-gradient(ellipse at 50% 20%, #2d1b4e 0%, #1a0a2e 30%, #0a0a1a 70%)'
             : 'radial-gradient(ellipse at 50% 20%, #0c1929 0%, #0a1020 30%, #0a0a1a 70%)',
+        }}
+      />
+
+      {/* Arcade cabinet glass: bevel, reflection and CRT vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.08) 18%, transparent 36%),
+            radial-gradient(ellipse at 50% 50%, transparent 42%, rgba(0,0,0,0.28) 78%, rgba(0,0,0,0.7) 100%)
+          `,
+          mixBlendMode: 'screen',
+          opacity: 0.5,
+        }}
+      />
+
+      <div
+        className="absolute inset-0 pointer-events-none border-[10px] border-black/35"
+        style={{
+          boxShadow: `inset 0 0 48px rgba(0,0,0,0.85), inset 0 0 18px ${neonColor}35`,
         }}
       />
 
@@ -215,6 +245,28 @@ export function LaneRunnerBackground({
         }}
       />
 
+      {/* Arcade light gates near the horizon */}
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={`gate-${i}`}
+          className="absolute left-1/2 pointer-events-none"
+          style={{
+            top: `${20 + i * 6}%`,
+            width: `${22 + i * 24}%`,
+            height: `${10 + i * 4}%`,
+            translateX: '-50%',
+            borderTop: `1px solid ${i % 2 === 0 ? neonColor : amberColor}`,
+            borderLeft: `1px solid ${i % 2 === 0 ? neonColor : amberColor}`,
+            borderRight: `1px solid ${i % 2 === 0 ? neonColor : amberColor}`,
+            borderRadius: '999px 999px 0 0',
+            boxShadow: `0 -4px 24px ${i % 2 === 0 ? neonColor : amberColor}30`,
+            opacity: 0.16 + i * 0.04,
+          }}
+          animate={{ opacity: [0.12, 0.26, 0.12] }}
+          transition={{ duration: 1.8 + i * 0.4, repeat: Infinity }}
+        />
+      ))}
+
       {/* === ROAD: SVG lines from vanishing point to lane positions === */}
       {/* These match the actual obstacle flight paths exactly */}
       <svg
@@ -245,8 +297,27 @@ export function LaneRunnerBackground({
         {/* Road surface — dark trapezoid from VP to bottom edges */}
         <polygon
           points={`${VP_X},${VP_Y} ${DIVIDERS[0]},100 ${DIVIDERS[3]},100`}
-          fill={isFeverMode ? 'rgba(13,5,32,0.6)' : 'rgba(6,10,21,0.6)'}
+          fill={isFeverMode ? 'rgba(13,5,32,0.78)' : 'rgba(6,10,21,0.78)'}
         />
+
+        {/* Glossy road core */}
+        <polygon
+          points={`${VP_X},${VP_Y + 1} ${DIVIDERS[1]},100 ${DIVIDERS[2]},100`}
+          fill={isFeverMode ? 'rgba(244,114,182,0.06)' : 'rgba(6,182,212,0.06)'}
+        />
+
+        {/* Lane surface tints */}
+        {LANE_POSITIONS.map((pos, i) => {
+          const left = i === 0 ? DIVIDERS[0] : DIVIDERS[i];
+          const right = i === 2 ? DIVIDERS[3] : DIVIDERS[i + 1];
+          return (
+            <polygon
+              key={`lane-fill-${i}`}
+              points={`${VP_X},${VP_Y + 0.4} ${left},100 ${right},100`}
+              fill={i === 1 ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.08)'}
+            />
+          );
+        })}
 
         {/* Lane divider lines (outer = brighter, inner = subtle) */}
         {DIVIDERS.map((pos, i) => {
@@ -298,6 +369,20 @@ export function LaneRunnerBackground({
         })}
       </svg>
 
+      {/* Animated road light sweeps for speed and depth */}
+      {[0, 1, 2].map((i) => (
+        <div
+          key={`sweep-${i}`}
+          className="absolute left-1/2 top-[22%] h-16 w-[78%] -translate-x-1/2 pointer-events-none"
+          style={{
+            clipPath: 'polygon(48% 0%, 52% 0%, 100% 100%, 0% 100%)',
+            background: `linear-gradient(to bottom, transparent, ${i === 1 ? amberColor : neonColor}22, transparent)`,
+            animation: `roadSweep ${2.4 / speedMultiplier}s linear infinite`,
+            animationDelay: `${i * 0.75}s`,
+          }}
+        />
+      ))}
+
       {/* Side neon trim lines */}
       <div
         className="absolute pointer-events-none"
@@ -305,6 +390,24 @@ export function LaneRunnerBackground({
           top: `${VP_Y}%`, left: `${DIVIDERS[0]}%`, bottom: '0', width: '1px',
           background: `linear-gradient(to bottom, transparent 0%, ${neonColor}30 30%, ${neonColor}60 100%)`,
           boxShadow: `0 0 8px ${neonColor}30`,
+        }}
+      />
+
+      {/* Arcade cabinet side rails */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-16 pointer-events-none"
+        style={{
+          background: `linear-gradient(to right, rgba(0,0,0,0.7), ${neonColor}18 42%, transparent)`,
+          boxShadow: `inset 8px 0 22px rgba(0,0,0,0.8), 8px 0 28px ${neonColor}12`,
+          animation: 'cabinetGlow 2.4s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none"
+        style={{
+          background: `linear-gradient(to left, rgba(0,0,0,0.7), ${amberColor}16 42%, transparent)`,
+          boxShadow: `inset -8px 0 22px rgba(0,0,0,0.8), -8px 0 28px ${amberColor}10`,
+          animation: 'cabinetGlow 2.7s ease-in-out infinite',
         }}
       />
 
@@ -370,7 +473,7 @@ export function LaneRunnerBackground({
         />
       )}
 
-      {/* Mid-ground parallax crystals — drift across at depth-based speeds */}
+      {/* Mid-ground hologram shards — drift across at depth-based speeds */}
       {PARALLAX_OBJECTS.map((obj, i) => (
         <motion.div
           key={`par-${i}`}

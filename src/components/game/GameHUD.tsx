@@ -57,12 +57,13 @@ export function GameHUD({ lessonId }: GameHUDProps) {
     <>
       {/* Top bar container */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 rounded-2xl border border-cyan-300/20 bg-black/30 p-3 backdrop-blur-md"
+          style={{ boxShadow: 'inset 0 0 24px rgba(6,182,212,0.08), 0 12px 40px rgba(0,0,0,0.22)' }}>
           {/* Left side: Energy + Fever */}
           <div className="flex-1 max-w-md space-y-2">
             {/* Energy bar */}
             <div className="relative">
-              <div className="text-xs text-cyan-300 font-bold mb-1 tracking-wider"
+              <div className="text-xs text-cyan-300 font-black mb-1 tracking-[0.22em]"
                 style={{ textShadow: '0 0 10px currentColor' }}>
                 ENERGIE
               </div>
@@ -84,7 +85,7 @@ export function GameHUD({ lessonId }: GameHUDProps) {
 
             {/* Fever bar */}
             <div className="relative">
-              <div className="text-xs font-bold mb-1 tracking-wider flex items-center gap-2"
+              <div className="text-xs font-black mb-1 tracking-[0.22em] flex items-center gap-2"
                 style={{
                   color: isFeverMode ? '#f472b6' : '#a855f7',
                   textShadow: '0 0 10px currentColor'
@@ -94,9 +95,9 @@ export function GameHUD({ lessonId }: GameHUDProps) {
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ duration: 0.3, repeat: Infinity }}
                   >
-                    KOORTS!
+                    TURBO!
                   </motion.span>
-                ) : 'KOORTS'}
+                ) : 'TURBO'}
                 {isFeverMode && (
                   <span className="text-white/80">
                     {Math.ceil(feverTimeLeft / 1000)}s
@@ -135,16 +136,17 @@ export function GameHUD({ lessonId }: GameHUDProps) {
                 style={{ boxShadow: '0 0 8px rgba(251, 191, 36, 0.6)' }}
               />
               <span
-                className="font-mono font-bold text-amber-200"
+                className="font-mono font-black text-amber-200"
                 style={{ textShadow: '0 0 10px currentColor' }}
               >
                 {totalGems.toLocaleString()}
               </span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-100/60">munten</span>
             </div>
 
             {/* Score display - LED style */}
-            <div className="bg-black/70 rounded-lg px-4 py-2 border border-cyan-500/30"
-              style={{ boxShadow: '0 0 20px rgba(6, 182, 212, 0.3), inset 0 0 20px rgba(0,0,0,0.5)' }}>
+            <div className="bg-black/75 rounded-xl px-4 py-2 border border-cyan-300/35"
+              style={{ boxShadow: '0 0 24px rgba(6, 182, 212, 0.32), inset 0 0 24px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.12)' }}>
               <div className="text-xs text-cyan-400/70 tracking-widest mb-1">SCORE</div>
               <motion.div
                 className="font-mono text-3xl font-bold text-cyan-300"

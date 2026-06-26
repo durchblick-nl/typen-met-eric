@@ -50,6 +50,8 @@ interface CrystalGameProps {
 }
 
 const LANE_LABELS = ['links', 'midden', 'rechts'] as const;
+const isTypingObstacle = (obstacle: ObstacleData) =>
+  obstacle.type === 'letter' || obstacle.type === 'gold' || obstacle.type === 'ice';
 
 export function CrystalGame({
   lessonId,
@@ -106,6 +108,7 @@ export function CrystalGame({
   const completeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const spawnWaveRef = useRef<() => void>(() => {});
   const getSpawnIntervalRef = useRef<() => number>(() => 1800);
+  const gameStateRef = useRef(gameState);
 
   // Game store
   const {
@@ -249,11 +252,11 @@ export function CrystalGame({
 
   const getBaseDuration = useCallback(() => {
     const age = getGameAge();
-    let duration = age < 6 ? 6 : 5;
-    if (isFeverMode) duration = 3.4;
-    else if (score >= 15000) duration = 3.9;
-    else if (score >= 8000) duration = 4.3;
-    else if (score >= 3000) duration = 4.7;
+    let duration = age < 8 ? 6.5 : 5.8;
+    if (isFeverMode) duration = 4.2;
+    else if (score >= 15000) duration = 4.6;
+    else if (score >= 8000) duration = 5.0;
+    else if (score >= 3000) duration = 5.4;
     // Speed modifiers
     if (isSlowing) duration *= 1.5;
     if (isSprinting) duration *= 0.7;
@@ -263,11 +266,11 @@ export function CrystalGame({
 
   const getSpawnInterval = useCallback(() => {
     const age = getGameAge();
-    let base = isFeverMode ? 1100 : age < 6 ? 2400 : 1800;
-    const reduction = Math.min(400, Math.floor(score / 3000) * 60);
+    let base = isFeverMode ? 1400 : age < 8 ? 2700 : 2200;
+    const reduction = Math.min(350, Math.floor(score / 4000) * 50);
     base = base - reduction;
-    if (isAssistMode) base += 300;
-    return Math.max(1000, base);
+    if (isAssistMode) base += 450;
+    return Math.max(1350, base);
   }, [score, isFeverMode, getGameAge, isAssistMode]);
 
   const spawnWave = useCallback(() => {
@@ -279,6 +282,22 @@ export function CrystalGame({
     const isSafeStart = age < 4;
     const isTutorialLetters = age >= 4 && age < 8;
     const isTutorialMix = age >= 8 && age < 12;
+    const activeTypingLetters = new Set(
+      obstacles
+        .filter(o => !o.destroyed && isTypingObstacle(o) && o.letter)
+        .map(o => o.letter!.toLowerCase())
+    );
+    const plannedTypingLetters = new Set<string>();
+    const pickTypingLetter = () => {
+      const candidates = obstacleLetters.filter((candidate) => {
+        const lower = candidate.toLowerCase();
+        return !activeTypingLetters.has(lower) && !plannedTypingLetters.has(lower);
+      });
+      if (candidates.length === 0) return undefined;
+      const picked = candidates[Math.floor(Math.random() * candidates.length)];
+      plannedTypingLetters.add(picked.toLowerCase());
+      return picked;
+    };
 
     // Wave size: max 2 so there is always at least 1 free lane to stand in
     const maxWaveSize = isAssistMode ? 1 : 2;
@@ -301,9 +320,7 @@ export function CrystalGame({
         type = 'gem';
       } else if (isTutorialLetters) {
         type = 'letter';
-        letter = obstacleLetters.length > 0
-          ? obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)]
-          : undefined;
+        letter = pickTypingLetter();
         if (!letter) type = 'gem';
       } else if (isTutorialMix) {
         if (obstacleLetters.length === 0) {
@@ -314,7 +331,8 @@ export function CrystalGame({
           type = 'gem';
         } else {
           type = 'letter';
-          letter = obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)];
+          letter = pickTypingLetter();
+          if (!letter) type = 'gem';
         }
       } else if (obstacleLetters.length === 0) {
         // No obstacle letters (lesson 0) — bombs and gems, but fewer bombs
@@ -329,13 +347,16 @@ export function CrystalGame({
         type = 'gem';
       } else if (roll < (isAssistMode ? 50 : 46)) {
         type = 'gold';
-        letter = obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)];
+        letter = pickTypingLetter();
+        if (!letter) type = 'gem';
       } else if (roll < (isAssistMode ? 54 : 52)) {
         type = 'ice';
-        letter = obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)];
+        letter = pickTypingLetter();
+        if (!letter) type = 'gem';
       } else {
         type = 'letter';
-        letter = obstacleLetters[Math.floor(Math.random() * obstacleLetters.length)];
+        letter = pickTypingLetter();
+        if (!letter) type = 'gem';
       }
 
       // Safety: never put a bomb in the only free lane
@@ -356,14 +377,18 @@ export function CrystalGame({
 
     const addObstacle = (obs: ObstacleData) => {
       setObstacles(prev => {
+        if (gameStateRef.current !== 'playing') return prev;
         const activeObstacles = prev.filter(o => !o.destroyed);
-        if (activeObstacles.length >= 8) return prev;
-
-        const isTypingObstacle = (o: ObstacleData) =>
-          o.type === 'letter' || o.type === 'gold' || o.type === 'ice';
+        if (activeObstacles.length >= 7) return prev;
 
         const typingCount = activeObstacles.filter(isTypingObstacle).length;
-        const adjusted = isTypingObstacle(obs) && typingCount >= 3
+        const activeLetters = new Set(
+          activeObstacles
+            .filter(o => isTypingObstacle(o) && o.letter)
+            .map(o => o.letter!.toLowerCase())
+        );
+        const wouldDuplicate = !!obs.letter && activeLetters.has(obs.letter.toLowerCase());
+        const adjusted = isTypingObstacle(obs) && (typingCount >= 3 || wouldDuplicate)
           ? { ...obs, type: 'gem' as const, letter: undefined }
           : obs;
 
@@ -371,13 +396,13 @@ export function CrystalGame({
       });
     };
 
-    // Spawn first obstacle immediately; stagger second by 400-600ms so they
+    // Spawn first obstacle immediately; stagger second by 550-800ms so they
     // don't arrive at the player at exactly the same time.
     if (newObstacles[0]) addObstacle(newObstacles[0]);
     if (newObstacles[1]) {
-      safeTimeout(() => addObstacle(newObstacles[1]), 400 + Math.random() * 200);
+      safeTimeout(() => addObstacle(newObstacles[1]), 550 + Math.random() * 250);
     }
-  }, [gameState, score, getBaseDuration, getGameAge, isAssistMode, safeTimeout]);
+  }, [gameState, score, obstacles, getBaseDuration, getGameAge, isAssistMode, safeTimeout]);
 
   // --- Collision handling ---
   // IMPORTANT: side effects (store updates, sounds) are deferred via queueMicrotask
@@ -402,7 +427,7 @@ export function CrystalGame({
       if (!inPlayerLane) return; // different lane, flies by harmlessly
 
       if (obstacle.type === 'gem') {
-        hitCrystal(1.5, 3); // Gems worth 150 base + fever bonus
+        hitCrystal(1.5, 3); // Coins are worth 150 base + fever bonus.
         playCollect(combo);
         const gemMultiplier = getCurrentComboTier().multiplier * (isFeverMode ? 2 : 1);
         showScorePopup(LANE_POSITIONS[obstacle.lane], Math.round(150 * gemMultiplier), '#fbbf24', false);
@@ -531,10 +556,10 @@ export function CrystalGame({
   const handleTypeLetter = useCallback((key: string) => {
     const lowerKey = key.toLowerCase();
 
-    // Find the first matching obstacle (not destroyed)
-    const matchingObstacle = obstacles.find(
-      o => !o.destroyed && o.letter?.toLowerCase() === lowerKey && (o.type === 'letter' || o.type === 'gold' || o.type === 'ice')
-    );
+    // Target the closest matching obstacle so duplicate legacy state stays predictable.
+    const matchingObstacle = obstacles
+      .filter(o => !o.destroyed && o.letter?.toLowerCase() === lowerKey && isTypingObstacle(o))
+      .sort((a, b) => getObstacleProgress(b) - getObstacleProgress(a))[0];
 
     if (matchingObstacle) {
       // Destroy the obstacle
@@ -566,7 +591,7 @@ export function CrystalGame({
         showScreenFlash('#fbbf24');
         triggerShake(3, 200);
         setEricMood('celebrating');
-        setEricMessage('GOUD! Dubbele punten!');
+        setEricMessage('2x-blok geraakt!');
       } else if (matchingObstacle.type === 'ice') {
         setEricMood('encouraging');
         setEricMessage('IJs vernietigd!');
@@ -600,7 +625,7 @@ export function CrystalGame({
         if (gameState === 'playing') setEricMood('encouraging');
       }, 800);
     }
-  }, [obstacles, isFeverMode, combo, gameState, hitCrystal, wrongKey, getCurrentComboTier, playCollect, playWrong, showScorePopup, showScreenFlash, triggerHitResult, triggerShake, burstAtLane, safeTimeout]);
+  }, [obstacles, isFeverMode, combo, gameState, hitCrystal, wrongKey, getCurrentComboTier, playCollect, playWrong, showScorePopup, showScreenFlash, triggerHitResult, triggerShake, burstAtLane, getObstacleProgress, safeTimeout]);
 
   // --- Main keyboard handler ---
 
@@ -757,7 +782,7 @@ export function CrystalGame({
     if (feverMeter >= 100 && !isFeverMode && gameState === 'playing') {
       activateFever();
       setEricMood('celebrating');
-      setEricMessage('KOORTS MODUS!');
+      setEricMessage('TURBO MODUS!');
     }
   }, [feverMeter, isFeverMode, activateFever, gameState]);
 
@@ -814,6 +839,7 @@ export function CrystalGame({
   getSpawnIntervalRef.current = getSpawnInterval;
   isSprintingRef.current = isSprinting;
   isSlowingRef.current = isSlowing;
+  gameStateRef.current = gameState;
 
   // Spawn loop — uses recursive setTimeout so the interval dynamically adjusts
   // with score. Only restarts when gameState changes, not on every score tick.
@@ -905,10 +931,13 @@ export function CrystalGame({
     .sort((a, b) => b.progress - a.progress);
   const urgentBomb = threats.find(t => t.obstacle.type === 'bomb' && t.obstacle.lane === playerLane && t.progress > 0.62);
   const urgentLetter = threats.find(t =>
-    (t.obstacle.type === 'letter' || t.obstacle.type === 'gold' || t.obstacle.type === 'ice') &&
+    isTypingObstacle(t.obstacle) &&
     !!t.obstacle.letter &&
     t.progress > 0.42
   );
+  const typingThreats = threats
+    .filter(t => isTypingObstacle(t.obstacle) && !!t.obstacle.letter)
+    .slice(0, 3);
 
   const coachHint = gameState !== 'playing'
     ? null
@@ -925,7 +954,7 @@ export function CrystalGame({
         : energy < 30
           ? {
             tone: 'info' as const,
-            text: 'Raak de kristallen om energie te herstellen',
+            text: 'Pak gouden munten voor energie',
           }
           : isAssistMode
             ? {
@@ -934,7 +963,7 @@ export function CrystalGame({
               }
             : {
                 tone: 'info' as const,
-                text: 'Houd je combo vast voor bonuspunten',
+                text: 'Munt = pakken, letter = typen',
               };
 
   return (
@@ -1056,15 +1085,60 @@ export function CrystalGame({
             transition={{ duration: 0.18 }}
           >
             <div
-              className={`px-4 py-2 rounded-full border text-sm font-semibold tracking-wide backdrop-blur-sm ${
+              className={`px-4 py-2 rounded-xl border text-sm font-black tracking-wide backdrop-blur-md ${
                 coachHint.tone === 'danger'
-                  ? 'bg-red-900/60 border-red-400/50 text-red-100'
+                  ? 'bg-red-950/75 border-red-300/60 text-red-100 shadow-[0_0_24px_rgba(239,68,68,0.35)]'
                   : coachHint.tone === 'focus'
-                    ? 'bg-cyan-900/60 border-cyan-400/50 text-cyan-100'
-                    : 'bg-slate-900/60 border-slate-300/40 text-slate-100'
+                    ? 'bg-cyan-950/75 border-cyan-300/60 text-cyan-100 shadow-[0_0_24px_rgba(6,182,212,0.3)]'
+                    : 'bg-slate-950/75 border-slate-300/40 text-slate-100 shadow-[0_0_20px_rgba(15,23,42,0.5)]'
               }`}
             >
               {coachHint.text}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Current typing targets: at most three, ordered by urgency. */}
+      <AnimatePresence>
+        {gameState === 'playing' && typingThreats.length > 0 && (
+          <motion.div
+            className="absolute top-36 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div
+              className="rounded-2xl border border-cyan-300/35 bg-black/65 px-4 py-3 shadow-2xl backdrop-blur-md"
+              style={{ boxShadow: '0 0 28px rgba(6,182,212,0.2), inset 0 0 18px rgba(255,255,255,0.06)' }}
+            >
+              <div className="mb-2 text-center text-[11px] font-black uppercase tracking-[0.24em] text-cyan-200">
+                Typ deze letters
+              </div>
+              <div className="flex items-center justify-center gap-3">
+                {typingThreats.map(({ obstacle, progress }) => (
+                  <motion.div
+                    key={obstacle.id}
+                    className={`relative flex h-14 w-14 items-center justify-center rounded-xl border-2 font-mono text-3xl font-black text-white shadow-lg ${
+                      obstacle.type === 'gold'
+                        ? 'border-amber-200 bg-gradient-to-br from-amber-400 to-orange-500'
+                        : obstacle.type === 'ice'
+                          ? 'border-sky-200 bg-gradient-to-br from-sky-400 to-cyan-600'
+                          : 'border-cyan-200 bg-gradient-to-br from-cyan-500 to-blue-700'
+                    }`}
+                    initial={{ scale: 0.7 }}
+                    animate={{ scale: progress > 0.72 ? [1, 1.08, 1] : 1 }}
+                    transition={{ duration: 0.35, repeat: progress > 0.72 ? Infinity : 0 }}
+                  >
+                    {obstacle.letter?.toUpperCase()}
+                    {obstacle.type === 'gold' && (
+                      <span className="absolute -right-2 -top-2 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] text-amber-200">
+                        2x
+                      </span>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
@@ -1126,27 +1200,30 @@ export function CrystalGame({
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-gradient-to-b from-indigo-900/95 to-purple-900/95 rounded-2xl p-8 text-center shadow-2xl max-w-lg mx-4 border border-cyan-500/30"
-              style={{ boxShadow: '0 0 60px rgba(6, 182, 212, 0.3)' }}
+              className="relative overflow-hidden bg-gradient-to-b from-slate-950/95 via-indigo-950/95 to-purple-950/95 rounded-3xl p-8 text-center shadow-2xl max-w-lg mx-4 border border-cyan-300/35"
+              style={{ boxShadow: '0 0 70px rgba(6, 182, 212, 0.32), inset 0 0 36px rgba(255,255,255,0.06)' }}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring' }}
             >
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
+              <div className="absolute -right-20 -top-20 h-44 w-44 rounded-full bg-cyan-400/10 blur-2xl" />
+              <div className="absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-amber-400/10 blur-2xl" />
               <motion.h2
-                className="text-4xl font-black text-cyan-300 mb-4"
-                style={{ textShadow: '0 0 30px currentColor' }}
+                className="relative text-4xl font-black text-cyan-200 mb-4 tracking-[0.12em]"
+                style={{ textShadow: '0 0 18px currentColor, 0 0 48px rgba(6,182,212,0.5)' }}
               >
                 ERIC&apos;S RACE
               </motion.h2>
 
-              <div className="text-left text-white/90 space-y-3 mb-4">
+              <div className="relative text-left text-white/90 space-y-3 mb-4 rounded-2xl border border-white/10 bg-black/25 p-4">
                 <p className="uppercase tracking-wider text-cyan-300/90 text-xs">Doelen Deze Run</p>
-                <p>- Blijf in leven en houd je energie boven nul.</p>
-                <p>- Vang glinsterende munten door erdoor te rennen.</p>
-                <p>- Letterblokken en gouden 2x-blokken: typ de letter op tijd.</p>
-                <p>- Gebruik beweging om bommen te ontwijken.</p>
+                <p>- Pak gouden munten met Eric: die geven energie en punten.</p>
+                <p>- Typ letterblokken weg. Niet vangen, want dan verlies je energie.</p>
+                <p>- Er staan maximaal 3 letters tegelijk op het scherm.</p>
+                <p>- Ontwijk bommen met de bewegings-toetsen.</p>
                 <p className="text-cyan-200">
-                  Target: {scoreTargets.star3.toLocaleString()} punten voor 3 sterren.
+                  Doel: {scoreTargets.star3.toLocaleString()} punten voor 3 sterren.
                 </p>
               </div>
 
@@ -1180,7 +1257,7 @@ export function CrystalGame({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                START RUN
+                START RACE
               </motion.button>
             </motion.div>
           </motion.div>
@@ -1316,14 +1393,14 @@ export function CrystalGame({
                 transition={{ delay: 0.7 }}
               >
                 <span className="text-2xl">+{gameResult.gemsEarned}</span>
-                <span className="text-lg ml-1">GEM</span>
+                <span className="text-lg ml-1">munten</span>
               </motion.div>
 
               {gameState === 'gameover' && (
                 <div className="mb-6 rounded-lg bg-black/30 border border-white/10 p-3 text-left text-sm text-slate-200">
-                  <div>Misses: {missedCount}</div>
-                  <div>Bomb hits: {bombHitCount}</div>
-                  <div>Wrong keys: {wrongKeyCount}</div>
+                  <div>Gemiste letters: {missedCount}</div>
+                  <div>Bommen geraakt: {bombHitCount}</div>
+                  <div>Verkeerde toetsen: {wrongKeyCount}</div>
                   <div className="mt-2 text-cyan-200">
                     Tip: {
                       bombHitCount >= missedCount && bombHitCount >= wrongKeyCount
