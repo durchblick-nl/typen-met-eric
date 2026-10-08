@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   arcadeCourse,
   newArcade,
@@ -11,6 +12,8 @@ import {
   arcadePosition,
   ARCADE_DURATION_MS,
 } from "@/lib/arcadeFlight";
+import { IllustratedProp } from "./IllustratedProp";
+import { arcadeLandscape } from "@/lib/journey";
 import { FlightDragon } from "./FlightDragon";
 import { ArcadeMusic } from "@/lib/arcadeMusic";
 import { isTrainingKey } from "@/lib/hooks/useKeyboard";
@@ -253,14 +256,7 @@ export function ArcadeFlight({
     state.feedback && state.feedback.until > state.elapsedMs
       ? state.feedback.text
       : "Typ de letters. Pak kristallen. Ontwijk de rotsen.";
-  const sceneFilter =
-    course.regionId === "zee"
-      ? "hue-rotate(12deg)"
-      : course.regionId === "toppen"
-        ? "saturate(.7)"
-        : course.regionId === "woud"
-          ? "saturate(1.15)"
-          : undefined;
+  const sceneFilter = course.regionId === "woud" ? "saturate(1.15)" : undefined;
   return (
     <section
       ref={dialog}
@@ -273,7 +269,7 @@ export function ArcadeFlight({
         if (event.key !== "Tab") return;
         const controls = [
           ...(dialog.current?.querySelectorAll<HTMLElement>(
-            "button:not([disabled]), input:not([disabled])",
+            "button:not([disabled]), input:not([disabled]), a[href]",
           ) || []),
         ];
         const first = controls[0],
@@ -366,7 +362,7 @@ export function ArcadeFlight({
           className="relative h-[460px] sm:h-[490px] overflow-hidden rounded-3xl border-4 border-eric-gold/40 bg-green-100"
         >
           <Image
-            src="/images/game/arcade-track.webp"
+            src={arcadeLandscape(course.regionId)}
             alt="Een magische vliegroute door Lettoria"
             fill
             className="object-cover"
@@ -436,38 +432,12 @@ export function ArcadeFlight({
                   >
                     {object.key === " " ? "␣" : object.key}
                   </div>
-                ) : object.kind === "gem" ? (
-                  <svg
-                    width="48"
-                    height="60"
-                    viewBox="0 0 48 60"
-                    aria-label="Kristal"
-                  >
-                    <path
-                      d="M24 2 L43 20 L24 58 L5 20Z"
-                      fill="#f7cc44"
-                      stroke="#fff5ba"
-                      strokeWidth="3"
-                    />
-                    <path d="M24 2L18 20L24 58L30 20Z" fill="#ffe67e" />
-                    <path d="M5 20H43" stroke="#b67c17" strokeWidth="2" />
-                  </svg>
                 ) : (
-                  <svg
-                    width="74"
-                    height="62"
-                    viewBox="0 0 74 62"
-                    aria-label="Rots"
-                  >
-                    <path
-                      d="M5 50L13 24L31 7L54 16L69 47L60 58L15 57Z"
-                      fill="#56636a"
-                      stroke="#f4af49"
-                      strokeWidth="3"
-                    />
-                    <path d="M13 24L31 7L36 30L20 48Z" fill="#819096" />
-                    <path d="M36 30L54 16L60 46L43 50Z" fill="#39484e" />
-                  </svg>
+                  <IllustratedProp
+                    name={object.kind === "gem" ? "gem" : "rock"}
+                    label={object.kind === "gem" ? "Kristal" : "Rots"}
+                    className={object.kind === "gem" ? "w-16" : "w-20"}
+                  />
                 )}
               </div>
             );
@@ -519,7 +489,7 @@ export function ArcadeFlight({
           </div>
           {(phase === "ready" || phase === "paused" || phase === "ended") && (
             <div className="absolute inset-0 z-40 bg-eric-green/15 flex items-center justify-center p-4">
-              <div className="bg-perkament/95 max-w-lg w-full rounded-3xl p-5 sm:p-7 shadow-xl border border-eric-gold text-center">
+              <div className="bg-perkament/95 max-w-lg w-full max-h-full overflow-y-auto rounded-3xl p-5 sm:p-7 shadow-xl border border-eric-gold text-center">
                 {phase === "ready" && (
                   <>
                     <p className="text-xs font-bold text-eric-green mb-2">
@@ -601,6 +571,9 @@ export function ArcadeFlight({
                       <button className={button} onClick={start}>
                         Nog een race
                       </button>
+                      <Link className={button} href="/kaart#erics-grot">
+                        Naar Erics grot
+                      </Link>
                     </div>
                   </>
                 )}

@@ -4,11 +4,13 @@ import { GrotRewards } from '@/components/game/GrotRewards';
 import { ComfortSettings } from '@/components/settings/ComfortSettings';
 import { WorldMap } from '@/components/map';
 import { useProgressStore } from '@/lib/stores/progressStore';
-import { Eric } from '@/components/eric';
+import { JourneyPreview } from '@/components/map/JourneyPreview';
+import { nextJourneyLesson } from '@/lib/journey';
+import { getTotalLessons } from '@/lib/data/regions';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const TOTAL_LESSONS = 26;
+const TOTAL_LESSONS = getTotalLessons();
 
 export default function KaartPage() {
   const { totalStars, currentStreak, lessonStars } = useProgressStore();
@@ -16,23 +18,7 @@ export default function KaartPage() {
   // Check if all lessons completed with 3 stars
   const threeStarLessons = Object.values(lessonStars).filter(stars => stars >= 3).length;
   const canGetDiploma = threeStarLessons >= TOTAL_LESSONS;
-  const currentMapLesson = Math.min(TOTAL_LESSONS - 1, threeStarLessons);
-
-  const getEricMessage = () => {
-    if (canGetDiploma) {
-      return 'Ongelooflijk! Je hebt ALLE lessen met 3 sterren voltooid! Haal je diploma op!';
-    }
-    if (threeStarLessons === 0) {
-      return 'Welkom in Lettoria! Klik op mijn grot om te beginnen!';
-    }
-    if (threeStarLessons < 3) {
-      return 'Goed bezig! Ga verder met het Startdorp!';
-    }
-    if (threeStarLessons < 6) {
-      return 'Je leert snel! Nog even en het dorp is gered!';
-    }
-    return 'Geweldig! Je bent een echte held van Lettoria!';
-  };
+  const currentMapLesson = nextJourneyLesson(lessonStars)?.lesson.id ?? TOTAL_LESSONS - 1;
 
   return (
     <main className="min-h-screen bg-perkament p-4 md:p-8">
@@ -65,14 +51,7 @@ export default function KaartPage() {
           </div>
         </div>
 
-        {/* Eric */}
-        <div className="mb-6">
-          <Eric
-            mood="happy"
-            stage={threeStarLessons < 6 ? 'baby' : threeStarLessons < 15 ? 'teen' : 'adult'}
-            message={getEricMessage()}
-          />
-        </div>
+        <JourneyPreview />
 
         <div className="flex justify-end mb-4"><ComfortSettings /></div>
         {/* World Map */}

@@ -530,3 +530,29 @@ test("music loading failure can be retried without a stale source", async () => 
   assert.equal(context.starts.length, 1);
   music.dispose();
 });
+
+test("Eric grows at earned-star boundaries and keeps a bounded growth indicator", () => {
+  const { ericGrowth } = sources()("lib/journey");
+  assert.equal(ericGrowth(17).stage, "baby");
+  assert.equal(ericGrowth(18).stage, "teen");
+  assert.equal(ericGrowth(18).progress, 0);
+  assert.equal(ericGrowth(44).remaining, 1);
+  assert.equal(ericGrowth(45).stage, "adult");
+  assert.equal(ericGrowth(78).progress, 100);
+  assert.equal(ericGrowth(-1).progress, 0);
+});
+
+test("the journey follows the first unmastered lesson even when saved progress has gaps", () => {
+  const load = sources();
+  const { nextJourneyLesson, arcadeLandscape } = load("lib/journey");
+  const { REGIONS } = load("lib/data/regions");
+  assert.equal(nextJourneyLesson({}).lesson.id, 0);
+  assert.equal(nextJourneyLesson({ 0: 3, 1: 2, 2: 3 }).lesson.id, 1);
+  const complete = Object.fromEntries(
+    REGIONS.flatMap((region) => region.lessons.map((lesson) => [lesson.id, 3])),
+  );
+  assert.equal(nextJourneyLesson(complete), null);
+  assert.match(arcadeLandscape("toppen"), /mountains/);
+  assert.match(arcadeLandscape("zee"), /coast/);
+  assert.match(arcadeLandscape("grot"), /track/);
+});

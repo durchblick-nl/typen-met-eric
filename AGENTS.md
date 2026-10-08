@@ -38,6 +38,9 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 - `src/components/game/ArcadeFlight.tsx` and `src/lib/arcadeFlight.ts`: three-lane bonus race unlocked by lesson mastery, deterministic state engine, typing targets, arrow movement, 75-second round, hearts and turbo.
 - `src/components/game/MagicFlight.tsx` and `src/lib/magicFlight.ts`: current optional bonus game, typing targets, 40-character goal, 60-second active clock and rewards.
 - `src/components/game/GrotRewards.tsx` and `src/lib/stores/gameStore.ts`: local decorations, game records and crystals. Original race components/abilities remain as historical implementation; they are not used by the lesson flow.
+- `src/lib/journey.ts` and `src/components/map/JourneyPreview.tsx`: first unmastered lesson and consistent Eric growth (18 and 45 earned lesson stars). Do not infer the next lesson from a count that skips gaps in saved progress.
+- `src/components/game/IllustratedProp.tsx`: six transparent props in a 3-column, 2-row atlas. Use CSS cell positioning; preserve square cells and alpha. `docs/art/eric-adventure.md` records the visual direction and asset roles.
+- `src/components/eric/EricPortrait.tsx`: matching baby/teen/adult portraits in the transparent 3-column growth atlas. Keep all horns and wings inside their cells and preserve original mood assets.
 - `src/components/game/FlightDragon.tsx`: separated dragon body, wing and tail atlas, poses derived from the arcade simulation clock; no independent animation timers.
 - `src/lib/arcadeMusic.ts` and `public/sounds/celesta-quest.mp3`: optional Kristaljacht music, loaded only after opting in and starting play. Preserve the supplied recording; pause/resume keeps its position and a new race restarts it. Music and effects have separate controls, both off initially. Dispose playback and pending loads on exit.
 - `src/components/settings/ComfortSettings.tsx`: local quiet setting, shared motion configuration and OS motion preference.
@@ -69,6 +72,7 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 - Give each round a clear goal and readable end state. Retry, continue and exit must be available without trapping the child or automatically dismissing results before they can read them.
 - Pause must freeze movement, collisions, spawning, game clocks, power-ups and scoring. Resuming must not produce a catch-up burst. Handle loss of visibility/focus deliberately.
 - Restart must clear timers and transient effects, award results once, and preserve earned progress.
+- Grot decorations cost crystals once. Selecting or storing an owned decoration is free; render only the active decoration. Growth uses lesson stars, never game scores or crystal purchases.
 - Use short optional rounds and natural stopping points. Avoid rewards based on endless play, pressure to maintain daily streaks or escalating visual noise.
 
 ## Visual and accessibility rules

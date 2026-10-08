@@ -15,6 +15,7 @@ import { notFound } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { KeyboardHint, KeyboardHintDark } from '@/components/ui/KeyboardHint';
 import { ArcadeFlight } from '@/components/game/ArcadeFlight';
+import { LessonCelebration } from '@/components/typing/LessonCelebration';
 import { MagicFlight } from '@/components/game/MagicFlight';
 
 type LessonPhase = 'arcade' | 'warmup' | 'intro' | 'exercise' | 'outro' | 'game' | 'complete';
@@ -399,54 +400,14 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center"
             >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring' }}
-                className="text-6xl mb-4"
-              >
-                🎉
-              </motion.div>
-
-              <h2 className="text-3xl font-bold text-eric-green mb-6">
-                Les Voltooid!
-              </h2>
-
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-eric-gold max-w-md mx-auto mb-8">
-                {/* Stars */}
-                <div className="flex justify-center gap-2 mb-6">
-                  {[1, 2, 3].map((s) => (
-                    <motion.span
-                      key={s}
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ delay: 0.3 + s * 0.1 }}
-                      className={`text-4xl ${s <= stars ? '' : 'grayscale opacity-30'}`}
-                    >
-                      ⭐
-                    </motion.span>
-                  ))}
-                </div>
-
-                {/* Stats - only show accuracy (WPM doesn't make sense across multiple exercises) */}
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-eric-green">{cumulativeAccuracy}%</div>
-                  <div className="text-sm text-gray-500">Nauwkeurig</div>
-                </div>
-
-                {/* Encouragement for retry */}
-                {stars < 3 && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <p className="text-sm text-accent">
-                      Je hebt 3 sterren nodig om verder te gaan.
-                      <br />
-                      Probeer het nog eens voor een betere score!
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {(stars >= 3 || mastered) && <div className="max-w-md mx-auto mb-5 text-eric-green"><p className="font-bold">Arcadebaan {lessonId + 1} vrijgespeeld!</p><p className="text-sm mt-1">Een snelle kristaljacht met turbo, drie levens en jouw eigen record.</p></div>}
+              <LessonCelebration
+                stars={stars}
+                accuracy={cumulativeAccuracy}
+                lessonId={lessonId}
+                title={lesson.title}
+                mastered={mastered}
+                onArcade={handleStartArcade}
+              />
               {weakKeys.length > 0 && <div className="mb-6 text-gray-700"><p className="mb-3">Extra aandacht voor: <span className="font-mono font-bold">{weakKeys.map(key => key === ' ' ? '␣' : key).join(' · ')}</span></p><button className="text-eric-green underline font-semibold" onClick={() => { setTargetText(warmupText); setPhase('warmup'); }}>Oefen deze toetsen even apart</button></div>}
               <div className="flex flex-wrap justify-center gap-4">
                 <button
@@ -456,7 +417,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                   {isLastLesson ? 'Terug naar kaart' : `Terug naar ${region.name}`}
                   <KeyboardHintDark keyName="Esc" />
                 </button>
-                {(stars >= 3 || mastered) && <button onClick={handleStartArcade} className="px-6 py-3 rounded-full bg-eric-green hover:bg-eric-green/90 text-white font-bold shadow-md">Speel kristaljacht{stars >= 3 && <KeyboardHint keyName="↵" />}</button>}
+
                 {stars >= 3 && <button onClick={handleGameComplete} className="px-6 py-3 rounded-full border border-eric-green/30 font-semibold text-eric-green">{isLastLesson ? 'Naar de kaart' : 'Volgende les'}</button>}
                 {stars < 3 ? (
                   <button
