@@ -17,3 +17,11 @@ body {
     box-shadow: 0 0 15px currentColor;
   }
 }
+
+/* Quiet presentation also covers CSS effects outside Framer Motion. */
+html[data-calm="true"] *, html[data-calm="true"] *::before, html[data-calm="true"] *::after {
+  animation: none !important; transition-duration: 0s !important; scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
+}

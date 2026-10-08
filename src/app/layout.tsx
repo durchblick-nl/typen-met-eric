@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "vanilla-cookieconsent/dist/cookieconsent.css";
+import { ComfortProvider } from '@/components/settings/ComfortSettings';
+import { PrivacyConsent } from '@/components/privacy/PrivacyConsent';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lettoria.nl'),
@@ -22,7 +25,7 @@ export const metadata: Metadata = {
     ],
   },
   description:
-    "Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers in de magische wereld van Lettoria. Geen registratie, geen kosten, geen data opslag. Spelenderwijs leren typen met Eric de draak.",
+    "Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers in de magische wereld van Lettoria. Geen registratie, geen kosten. Je voortgang blijft lokaal op je apparaat. Spelenderwijs leren typen met Eric de draak.",
   keywords: [
     "typecursus kinderen",
     "gratis typen leren",
@@ -147,7 +150,8 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-perkament min-h-screen">
-        {children}
+        <ComfortProvider>{children}</ComfortProvider>
+        <PrivacyConsent />
       </body>
     </html>
   );

@@ -1,6 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useProgressStore } from '@/lib/stores/progressStore';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useComfortStore } from '@/components/settings/ComfortSettings';
 import { REGIONS, Region } from '@/lib/data/regions';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -11,6 +13,10 @@ interface WorldMapProps {
 }
 
 export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
+  const calm = useComfortStore(state => state.calm);
+  const reduced = useReducedMotion();
+  const lessonStars = useProgressStore(state => state.lessonStars);
+  const restored = (region: Region) => region.lessons.every(lesson => lessonStars[lesson.id] === 3);
   const isRegionUnlocked = (region: Region) => perfectLessons >= region.requiredLessons;
   const isRegionCurrent = (region: Region) => {
     const nextLesson = region.lessons.find((l) => l.id === currentLesson);
@@ -26,6 +32,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
           alt="Map of Lettoria"
           fill
           className="object-cover"
+          style={{ filter: `saturate(${.25 + perfectLessons / 26 * .75})` }}
           priority
         />
       </div>
@@ -59,7 +66,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={perfectLessons >= 22 ? 1 : 0.3}
+          opacity={perfectLessons >= 19 ? 1 : 0.3}
         />
         {/* Velden to Woud */}
         <path
@@ -68,7 +75,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={perfectLessons >= 12 ? 1 : 0.3}
+          opacity={perfectLessons >= 11 ? 1 : 0.3}
         />
         {/* Woud to Toppen */}
         <path
@@ -77,7 +84,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={perfectLessons >= 18 ? 1 : 0.3}
+          opacity={perfectLessons >= 15 ? 1 : 0.3}
         />
         {/* Toppen to Kasteel */}
         <path
@@ -86,7 +93,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={perfectLessons >= 28 ? 1 : 0.3}
+          opacity={perfectLessons >= 23 ? 1 : 0.3}
         />
         {/* Zee to Kasteel */}
         <path
@@ -95,7 +102,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
           strokeWidth="0.5"
           strokeDasharray="2,1"
           fill="none"
-          opacity={perfectLessons >= 28 ? 1 : 0.3}
+          opacity={perfectLessons >= 23 ? 1 : 0.3}
         />
       </svg>
 
@@ -131,7 +138,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
                   {current && (
                     <motion.div
                       className="absolute inset-0 bg-eric-gold rounded-full blur-xl"
-                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      animate={{ opacity: calm || reduced ? .4 : [0.5, 1, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
                       style={{ transform: 'scale(1.5)' }}
                     />
@@ -155,7 +162,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
 
                   <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
                     <span className="text-xs font-bold text-gray-700 bg-white/80 px-2 py-0.5 rounded">
-                      {region.name}
+                      {restored(region) ? '✦ ' : ''}{region.name}
                     </span>
                   </div>
                 </motion.div>

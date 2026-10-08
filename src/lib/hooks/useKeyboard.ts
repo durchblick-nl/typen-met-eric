@@ -1,56 +1,56 @@
-'use client';
+"use client";
+import { useEffect, type RefObject } from "react";
 
-import { useEffect, useCallback } from 'react';
-
+export function isTrainingKey(
+  event: KeyboardEvent,
+  scope?: HTMLElement | null,
+): boolean {
+  if (
+    event.defaultPrevented ||
+    event.repeat ||
+    event.isComposing ||
+    event.ctrlKey ||
+    event.altKey ||
+    event.metaKey ||
+    event.key.length !== 1
+  )
+    return false;
+  const target = event.target;
+  if (
+    target instanceof Element &&
+    target.closest(
+      'input, textarea, select, [contenteditable="true"], button, a',
+    )
+  )
+    return false;
+  const dialog =
+    target instanceof Element ? target.closest('[role="dialog"]') : null;
+  return !dialog || dialog === scope;
+}
 interface UseKeyboardOptions {
   onKeyPress: (key: string) => void;
   enabled?: boolean;
   allowedKeys?: string[];
+  scope?: RefObject<HTMLElement | null>;
 }
-
 export function useKeyboard({
   onKeyPress,
   enabled = true,
-  allowedKeys
+  allowedKeys,
+  scope,
 }: UseKeyboardOptions) {
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (!enabled) return;
-
-    // Ignore modifier keys alone
-    if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab', 'Escape'].includes(event.key)) {
-      return;
-    }
-
-    // Prevent default for space to avoid page scroll
-    if (event.key === ' ') {
-      event.preventDefault();
-    }
-
-    // Get the actual character
-    let key = event.key;
-
-    // Handle space
-    if (key === ' ') {
-      key = ' ';
-    }
-
-    // Only allow single characters and space
-    if (key.length !== 1) {
-      return;
-    }
-
-    // Check if key is allowed
-    if (allowedKeys && !allowedKeys.includes(key.toLowerCase())) {
-      return;
-    }
-
-    onKeyPress(key);
-  }, [enabled, allowedKeys, onKeyPress]);
-
   useEffect(() => {
-    if (enabled) {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [enabled, handleKeyDown]);
+    if (!enabled) return;
+    const handler = (event: KeyboardEvent) => {
+      if (
+        !isTrainingKey(event, scope?.current) ||
+        (allowedKeys && !allowedKeys.includes(event.key.toLowerCase()))
+      )
+        return;
+      event.preventDefault();
+      onKeyPress(event.key);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [enabled, allowedKeys, onKeyPress, scope]);
 }

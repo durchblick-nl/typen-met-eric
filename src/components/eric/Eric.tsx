@@ -1,12 +1,14 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useComfortStore } from '@/components/settings/ComfortSettings';
+import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import { Sparkles } from '@/components/ui/Sparkles';
 
 type EricMood = 'happy' | 'encouraging' | 'thinking' | 'celebrating' | 'worried';
 
 interface EricProps {
+  stage?: 'baby' | 'teen' | 'adult';
   mood?: EricMood;
   message?: string;
   size?: 'small' | 'medium' | 'large';
@@ -28,7 +30,10 @@ const MOOD_EMOJIS: Record<EricMood, string> = {
   worried: '😟',
 };
 
-export function Eric({ mood = 'happy', message, size = 'medium' }: EricProps) {
+export function Eric({ mood = 'happy', message, size = 'medium', stage }: EricProps) {
+  const calm = useComfortStore(state => state.calm);
+  const reduced = useReducedMotion();
+  const quiet = calm || reduced;
   const sizes = {
     small: { width: 80, height: 80 },
     medium: { width: 120, height: 120 },
@@ -41,9 +46,9 @@ export function Eric({ mood = 'happy', message, size = 'medium' }: EricProps) {
     <div className="flex items-end gap-4">
       {/* Eric the Dragon */}
       <motion.div
-        className="relative select-none"
+        className="relative select-none shrink-0"
         animate={{
-          y: [0, -5, 0],
+          y: quiet ? 0 : [0, -5, 0],
         }}
         transition={{
           duration: 2,
@@ -52,7 +57,7 @@ export function Eric({ mood = 'happy', message, size = 'medium' }: EricProps) {
         }}
       >
         {/* Magical Sparkles for positive moods */}
-        {(mood === 'happy' || mood === 'celebrating' || mood === 'encouraging' || mood === 'thinking') && (
+        {!quiet && (mood === 'happy' || mood === 'celebrating' || mood === 'encouraging' || mood === 'thinking') && (
           <div className="absolute inset-0 -z-10 scale-150">
             <Sparkles
               color={mood === 'celebrating' ? '#FFD700' : '#A8D5A2'}
@@ -63,7 +68,7 @@ export function Eric({ mood = 'happy', message, size = 'medium' }: EricProps) {
         )}
 
         <Image
-          src={MOOD_IMAGES[mood]}
+          src={stage && stage !== 'adult' ? `/images/eric/eric-${stage}.png` : MOOD_IMAGES[mood]}
           alt={`Eric de draak - ${mood}`}
           width={currentSize.width}
           height={currentSize.height}

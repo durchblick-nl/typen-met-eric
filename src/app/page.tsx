@@ -35,8 +35,9 @@ export default function Home() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      // Let focused controls (including privacy settings) handle their own keys.
+      if (e.defaultPrevented || (e.target instanceof Element &&
+        e.target.closest('a, button, input, textarea, select, [contenteditable="true"], [role="dialog"]'))) {
         return;
       }
 
@@ -136,7 +137,7 @@ export default function Home() {
               <span className="text-eric-green text-lg">✓</span> Geen account nodig
             </div>
             <div className="flex items-center gap-2 bg-white/50 px-4 py-2 rounded-full border border-gray-100 shadow-sm">
-              <span className="text-eric-green text-lg">✓</span> 100% Privacy
+              <span className="text-eric-green text-lg">✓</span> Voortgang op je apparaat
             </div>
           </motion.div>
         </motion.div>
@@ -161,7 +162,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { emoji: "💰", title: "100% Gratis", desc: "Andere typecursussen kosten €150 of meer. Lettoria is en blijft volledig gratis. Geen addertjes onder het gras." },
-              { emoji: "🔒", title: "Privacy First", desc: "Geen registratie, geen e-mail, geen tracking. Alle voortgang wordt veilig lokaal op je eigen apparaat opgeslagen." },
+              { emoji: "🔒", title: "Jij kiest", desc: "Geen registratie of e-mail nodig. Je voortgang blijft op je apparaat. Pagina-analyse met OpenPanel gebeurt alleen met jouw toestemming." },
               { emoji: "🎮", title: "Gamification", desc: "Een magisch avontuur waar je levels uitspeelt. Verdien badges, ontgrendel nieuwe gebieden en vier je successen." }
             ].map((feature, idx) => (
               <motion.div

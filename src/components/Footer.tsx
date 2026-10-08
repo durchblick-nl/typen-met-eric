@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { PrivacySettingsButton } from '@/components/privacy/PrivacyConsent';
 
 export function Footer() {
     const currentYear = new Date().getFullYear();
@@ -22,6 +23,10 @@ export function Footer() {
                     <Link href="/impressum" className="hover:text-eric-green transition-colors">
                         Colofon
                     </Link>
+                    <Link href="/privacy" className="hover:text-eric-green transition-colors">
+                        Privacy & cookies
+                    </Link>
+                    <PrivacySettingsButton className="hover:text-eric-green transition-colors" />
                 </div>
 
                 <div className="flex items-center justify-center gap-2 mb-4">

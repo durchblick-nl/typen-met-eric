@@ -203,13 +203,13 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
   const showHands = true;
 
   return (
-    <div className="bg-gray-800/95 backdrop-blur rounded-2xl p-4 shadow-xl border border-gray-700 box-glow">
+    <div className="bg-gray-800/95 backdrop-blur w-full max-w-xl min-w-0 rounded-2xl p-2 sm:p-4 shadow-xl border border-gray-700 box-glow">
       {/* Main keyboard rows */}
       {KEYBOARD_ROWS.map((row, rowIndex) => (
         <div key={rowIndex} className="flex justify-center gap-1 mb-1">
           {/* Add offset for home and bottom rows */}
-          {rowIndex === 2 && <div className="w-4" />}
-          {rowIndex === 3 && <div className="w-8" />}
+          {rowIndex === 2 && <div className="w-[3%] shrink-0" />}
+          {rowIndex === 3 && <div className="w-[6%] shrink-0" />}
 
           {row.map((key) => {
             const isCurrentKey = key === currentKey;
@@ -222,10 +222,10 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
               <div
                 key={key}
                 className={`
-                  relative w-12 h-12 rounded-lg flex items-center justify-center
-                  font-mono text-lg font-bold transition-all duration-150
+                  relative flex-1 max-w-12 min-w-0 h-9 sm:h-12 rounded-lg flex items-center justify-center
+                  font-mono text-sm sm:text-lg font-bold transition-all duration-150
                   ${isCurrentKey
-                    ? `${fingerBgColor} text-gray-900 scale-110 shadow-lg`
+                    ? `${fingerBgColor} text-gray-900 ring-2 ring-white shadow-lg`
                     : 'bg-gray-700 text-gray-300'
                   }
                   ${isHomeKey && !isCurrentKey ? 'border-b-4 border-gray-500' : ''}
@@ -235,7 +235,7 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
                   boxShadow: `0 0 20px ${FINGER_HEX_COLORS[fingerIndex]}80`,
                 } : undefined}
               >
-                <span className={isCurrentKey ? 'animate-bounce' : ''}>
+                <span>
                   {key === ';' ? ';' : key.toUpperCase()}
                 </span>
 
@@ -253,7 +253,7 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
       <div className="flex justify-center mt-2">
         <div
           className={`
-            w-64 h-10 rounded-lg flex items-center justify-center
+            w-1/2 h-10 rounded-lg flex items-center justify-center
             font-mono text-sm transition-all duration-150
             ${currentKey === ' '
               ? 'bg-gray-500 text-white scale-105 shadow-lg'
@@ -261,7 +261,7 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
             }
           `}
         >
-          <span className={currentKey === ' ' ? 'animate-bounce' : ''}>
+          <span>
             SPATIE
           </span>
         </div>

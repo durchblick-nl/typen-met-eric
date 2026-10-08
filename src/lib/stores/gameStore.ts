@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { arcadeReward } from '@/lib/arcadeFlight';
+import { flightReward, GROT_DECORATIONS } from '@/lib/magicFlight';
 import { getAchievement } from '@/lib/data/achievements';
 
 // Power-up types
@@ -57,6 +59,11 @@ export function getLessonScoreThresholds(lessonId: string) {
 export type ComboTier = typeof COMBO_TIERS[number];
 
 interface GameState {
+  finishArcadeRun: (lessonId: string, hits: number, score: number, completed: boolean, collected?: number) => { gems: number; record: boolean };
+  grotDecorations: string[];
+  activeDecoration: string | null;
+  decorateGrot: (id: string) => void;
+  finishMagicRun: (lessonId: string, correct: number, score: number) => { gems: number; record: boolean };
   // Active game state
   energy: number;
   score: number;
@@ -111,6 +118,31 @@ interface GameState {
 export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
+      grotDecorations: [], activeDecoration: null,
+      decorateGrot: (id) => {
+        const decoration = GROT_DECORATIONS.find(item => item.id === id);
+        if (!decoration) return;
+        const state = get();
+        if (state.grotDecorations.includes(id)) { set({ activeDecoration: state.activeDecoration === id ? null : id }); return; }
+        if (state.totalGems < decoration.cost) return;
+        set({ totalGems: state.totalGems - decoration.cost, grotDecorations: [...state.grotDecorations, id], activeDecoration: id });
+      },
+      finishArcadeRun: (lessonId, hits, score, completed, collected = 0) => {
+        const state = get(); const key = `arcade-${lessonId}`;
+        const gems = arcadeReward(hits, completed, collected); const record = score > (state.highScores[key] || 0);
+        set({ totalGems: state.totalGems + gems, gamesPlayed: state.gamesPlayed + 1, totalScore: state.totalScore + score,
+          highScores: { ...state.highScores, [key]: Math.max(score, state.highScores[key] || 0) } });
+        return { gems, record };
+      },
+      finishMagicRun: (lessonId, correct, score) => {
+        const state = get(); const key = `magic-${lessonId}`;
+        const gems = flightReward(correct);
+        const record = score > (state.highScores[key] || 0);
+        set({ totalGems: state.totalGems + gems, gamesPlayed: state.gamesPlayed + 1,
+          totalScore: state.totalScore + score,
+          highScores: { ...state.highScores, [key]: Math.max(score, state.highScores[key] || 0) } });
+        return { gems, record };
+      },
       // Initial game state
       energy: GAME_CONFIG.startEnergy,
       score: 0,
@@ -399,6 +431,8 @@ export const useGameStore = create<GameState>()(
     {
       name: 'lettoria-game-store',
       partialize: (state) => ({
+        grotDecorations: state.grotDecorations,
+        activeDecoration: state.activeDecoration,
         highScores: state.highScores,
         totalGems: state.totalGems,
         totalScore: state.totalScore,

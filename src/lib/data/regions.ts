@@ -107,7 +107,7 @@ export const REGIONS: Region[] = [
         title: 'De Herbergier en de Houthakker',
         description: 'Leer de letters G en H',
         newKeys: ['g', 'h'],
-        exercises: ['ggg', 'hhh', 'dag', 'had', 'haas', 'glas', 'glad', 'lach', 'hals', 'slag', 'hal', 'haag'],
+        exercises: ['ggg', 'hhh', 'dag', 'had', 'haas', 'glas', 'glad', 'laag', 'hals', 'slag', 'hal', 'haag'],
         storyIntro: `In de herberg was het altijd gezellig en warm.
           En de houthakker zorgde voor hout voor het haardvuur.
           Met G en H brengen we de gezelligheid terug!`,
@@ -170,7 +170,7 @@ export const REGIONS: Region[] = [
         title: 'De Torenwachter en de Yak',
         description: 'Leer de letters T en Y',
         newKeys: ['t', 'y'],
-        exercises: ['ttt', 'yyy', 'het', 'dat', 'kat', 'taart', 'tijger', 'de kat eet de rat', 'het dak lekt', 'dat is raar', 'de taart is lekker', 'dit is de tijger', 'de tijger eet het dier'],
+        exercises: ['tyty', 'yuyu', 'ytty', 'uyyu', 'ttt', 'yyy', 'het', 'dat', 'kat', 'taart', 'tijger', 'de kat eet de rat', 'het dak lekt', 'dat is raar', 'de taart is lekker', 'dit is de tijger', 'de tijger eet het dier'],
         storyIntro: `Hoog op de uitkijktoren tuurt de wachter in de verte.
           En in de wei graast een bijzondere yak.
           T en Y maken het uitzicht weer helder!`,
@@ -196,7 +196,7 @@ export const REGIONS: Region[] = [
         title: 'De Kwibus en de Waarzegster',
         description: 'Leer de letters Q en W',
         newKeys: ['q', 'w'],
-        exercises: ['www', 'qqq', 'wat', 'wie', 'water', 'woud', 'wat is dat', 'wie is het', 'water is goed', 'het woud is groot', 'wie was de gids', 'de held wordt groot', 'water is lekker'],
+        exercises: ['qaqa', 'qoqo', 'qwqw', 'ququ', 'www', 'qqq', 'wat', 'wie', 'water', 'woud', 'wat is dat', 'wie is het', 'water is goed', 'het woud is groot', 'wie was de gids', 'de held wordt groot', 'water is lekker'],
         storyIntro: `De grappige kwibus en de mysterieuze waarzegster
           zijn hun stem kwijt.
           Q en W brengen de raadsels en grappen terug!`,
@@ -235,7 +235,7 @@ export const REGIONS: Region[] = [
         title: 'De Heks en de Nimf',
         description: 'Leer de letters X en N',
         newKeys: ['x', 'n'],
-        exercises: ['nnn', 'xxx', 'een', 'niet', 'zijn', 'maan', 'de maan is mooi', 'wij zijn hier', 'ik zie een dier', 'het is niet goed', 'mensen zien de maan', 'ik ren naar de toren', 'wij wonen in het woud'],
+        exercises: ['xmxm', 'mix mix', 'taxi taxi', 'max mix', 'nnn', 'xxx', 'een', 'niet', 'zijn', 'maan', 'de maan is mooi', 'wij zijn hier', 'ik zie een dier', 'het is niet goed', 'mensen zien de maan', 'ik ren naar de toren', 'wij wonen in het woud'],
         storyIntro: `Dieper in het woud woont heks Xandra.
           En nimf Nina danst tussen de bomen.
           X en N geven hen hun krachten terug!`,
@@ -261,7 +261,7 @@ export const REGIONS: Region[] = [
         title: 'De Beer en het Bos',
         description: 'Leer de letter B en leestekens . en ,',
         newKeys: ['b', '.', ','],
-        exercises: ['bbb', 'boom', 'beer', 'brood', 'de beer slaapt.', 'ik zie een boom.', 'de beer eet brood.', 'de boot vaart op het water.', 'wij zijn blij met de brug.', 'een beer in een boom is raar.', 'de boom is groot, de beer is blij.'],
+        exercises: [',,,', '.,.,', 'dag, dag.', 'ja, ik kom.', 'bbb', 'boom', 'beer', 'brood', 'de beer slaapt.', 'ik zie een boom.', 'de beer eet brood.', 'de boot vaart op het water.', 'wij zijn blij met de brug.', 'een beer in een boom is raar.', 'de boom is groot, de beer is blij.'],
         storyIntro: `Beer Bruno slaapt al veel te lang.
           Het bos mist zijn beschermer.
           B wekt de beer en het hele woud!

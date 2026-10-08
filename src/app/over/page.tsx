@@ -6,7 +6,7 @@ import { Footer } from '@/components/Footer';
 export const metadata: Metadata = {
   title: 'Over Lettoria',
   description:
-    'Lettoria is een gratis typecursus voor kinderen van 8-12 jaar. Geen registratie, geen kosten, geen data opslag. Leer blind typen met 10 vingers.',
+    'Lettoria is een gratis typecursus voor kinderen van 8-12 jaar. Geen registratie, geen kosten. Je voortgang blijft op je apparaat. Leer blind typen met 10 vingers.',
 };
 
 export default function OverPage() {
@@ -124,10 +124,14 @@ export default function OverPage() {
               <li className="flex items-start gap-3">
                 <span className="text-eric-green font-bold">✓</span>
                 <span className="text-gray-600">
-                  <strong>Geen tracking</strong> - We volgen je kind niet over het internet
+                  <strong>Jij kiest</strong> - OpenPanel telt paginaweergaven alleen met jouw toestemming. Geen getypte tekst of schermopnames
                 </span>
               </li>
             </ul>
+
+            <p className="text-sm text-gray-600 mb-4">
+              <Link href="/privacy" className="text-eric-green underline">Lees meer over privacy en cookies</Link>. Je kunt je keuze altijd wijzigen via de footer.
+            </p>
 
             <div className="bg-blue-50 rounded-xl p-4">
               <p className="text-blue-800 text-sm">

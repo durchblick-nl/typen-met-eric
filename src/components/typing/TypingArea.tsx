@@ -1,21 +1,33 @@
 'use client';
 
 import { useTypingStore } from '@/lib/stores/typingStore';
+import { useEffect, useRef } from 'react';
 import { useKeyboard } from '@/lib/hooks/useKeyboard';
 
 export function TypingArea() {
   const {
     targetText,
     currentIndex,
-    typedChars,
+    isPaused,
+    setPaused,
+    lastWrong,
     errors,
     isComplete,
     handleKeyPress
   } = useTypingStore();
 
+  const area = useRef<HTMLDivElement>(null);
+  useEffect(() => { area.current?.focus(); }, [targetText]);
+  useEffect(() => {
+    const pause = () => setPaused(true);
+    const visibility = () => { if (document.hidden) pause(); };
+    window.addEventListener('blur', pause);
+    document.addEventListener('visibilitychange', visibility);
+    return () => { window.removeEventListener('blur', pause); document.removeEventListener('visibilitychange', visibility); };
+  }, [setPaused]);
   useKeyboard({
     onKeyPress: handleKeyPress,
-    enabled: !isComplete && targetText.length > 0,
+    enabled: !isComplete && !isPaused && targetText.length > 0,
   });
 
   if (!targetText) {
@@ -23,8 +35,11 @@ export function TypingArea() {
   }
 
   return (
-    <div className="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl border-2 border-eric-gold/50 box-glow transition-all duration-300 hover:shadow-2xl hover:border-eric-gold">
-      <p className="text-sm text-gray-500 mb-4">Typ dit:</p>
+    <div ref={area} tabIndex={-1} className="outline-none bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl border-2 border-eric-gold/50 box-glow transition-all duration-300 hover:shadow-2xl hover:border-eric-gold">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <p className="text-sm text-gray-600" role="status">{isPaused ? 'Gepauzeerd. Je voortgang blijft staan.' : lastWrong ? 'Probeer dezelfde toets nog eens. Je kunt het!' : 'Typ dit. Een fout? Probeer dezelfde toets opnieuw.'}</p>
+        {(!isComplete || isPaused) && <button className="text-eric-green font-semibold shrink-0" onClick={() => { setPaused(!isPaused); area.current?.focus(); }}>{isPaused ? 'Verder typen' : 'Pauze'}</button>}
+      </div>
 
       <div className="font-mono text-2xl leading-relaxed tracking-wide mb-6 min-h-[80px]">
         {targetText.split('').map((char, index) => {
@@ -39,7 +54,7 @@ export function TypingArea() {
             }
           } else if (index === currentIndex) {
             // Current character
-            className += 'text-eric-green bg-eric-gold/30 animate-pulse';
+            className += lastWrong ? 'text-eric-green bg-orange-100 underline decoration-2' : 'text-eric-green bg-eric-gold/30';
           } else {
             // Not yet typed
             className += 'text-gray-400';

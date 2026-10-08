@@ -1,5 +1,7 @@
 'use client';
 
+import { GrotRewards } from '@/components/game/GrotRewards';
+import { ComfortSettings } from '@/components/settings/ComfortSettings';
 import { WorldMap } from '@/components/map';
 import { useProgressStore } from '@/lib/stores/progressStore';
 import { Eric } from '@/components/eric';
@@ -36,7 +38,7 @@ export default function KaartPage() {
     <main className="min-h-screen bg-perkament p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <Link
             href="/"
             className="text-eric-green hover:text-eric-green/80 transition-colors"
@@ -66,17 +68,20 @@ export default function KaartPage() {
         {/* Eric */}
         <div className="mb-6">
           <Eric
-            mood={threeStarLessons > 0 ? 'happy' : 'encouraging'}
+            mood="happy"
+            stage={threeStarLessons < 6 ? 'baby' : threeStarLessons < 15 ? 'teen' : 'adult'}
             message={getEricMessage()}
           />
         </div>
 
+        <div className="flex justify-end mb-4"><ComfortSettings /></div>
         {/* World Map */}
         <WorldMap
           perfectLessons={threeStarLessons}
           currentLesson={currentMapLesson}
         />
 
+        <GrotRewards />
         {/* Progress bar */}
         <div className="mt-8 max-w-md mx-auto">
           <div className="flex justify-between text-sm text-gray-600 mb-2">

@@ -1,7 +1,10 @@
 import { create } from 'zustand';
+import type { KeyStat } from './typingStore';
 import { persist } from 'zustand/middleware';
 
 interface ProgressState {
+  keyStats: Record<string, KeyStat>;
+  recordPractice: (stats: Record<string, KeyStat>) => void;
   // Completed lessons
   completedLessons: number[];
   currentLesson: number;
@@ -24,6 +27,15 @@ interface ProgressState {
 export const useProgressStore = create<ProgressState>()(
   persist(
     (set, get) => ({
+      keyStats: {},
+      recordPractice: (stats) => set((state) => {
+        const keyStats = { ...state.keyStats };
+        for (const [key, stat] of Object.entries(stats)) {
+          const old = keyStats[key] || { attempts: 0, errors: 0 };
+          keyStats[key] = { attempts: old.attempts + stat.attempts, errors: old.errors + stat.errors };
+        }
+        return { keyStats };
+      }),
       completedLessons: [],
       currentLesson: 0,
       totalStars: 0,
@@ -94,6 +106,7 @@ export const useProgressStore = create<ProgressState>()(
 
       reset: () => {
         set({
+          keyStats: {},
           completedLessons: [],
           currentLesson: 0,
           totalStars: 0,
