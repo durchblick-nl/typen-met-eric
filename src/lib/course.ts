@@ -20,4 +20,4 @@ export function regionalGerman(text: string): string {
   return COURSE === 'ch' ? text.replace(/ß/g, 'ss').replace(/ẞ/g, 'SS') : text;
 }
 
-export const CERTIFICATE_SEAL = '/images/diploma/lettoria_seal_neutral.png';
+export const CERTIFICATE_SEAL = '/images/diploma/lettoria_seal.png';

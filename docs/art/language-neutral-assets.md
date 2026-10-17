@@ -7,7 +7,7 @@ Roger's direction: games are the central motivational hook for completing the ty
 69 existing raster assets were visually screened. Characters, scenery, map icons and game props are language-neutral. The number/cloud illustration uses shared numerals. Two exceptions have been addressed:
 
 - `public/images/stories/lesson_10_fortuneteller_neutral.webp`: removes the English banner from the story illustration, shared by all courses. Created with the built-in image-generation edit tool, visually checked, then exported to WebP. The original image remains as an unused historical source.
-- `public/images/diploma/lettoria_seal_neutral.svg` and `.png`: shared brand-only certificate seal, with LETTORIA and stars but no language-specific title. Authored as SVG and rasterized with Sharp for PDF compatibility. Old language-specific seals remain unused historical assets.
+- Certificate seal: Roger rejected the simplified replacement. All courses now retain the original illustrated `public/images/diploma/lettoria_seal.png` unchanged. Do not replace or redesign this artwork as part of language-neutralization. The experimental neutral seal is unused.
 
 Image edit prompt: “Make it entirely language-neutral: remove the parchment banner and ALL lettering at the bottom, naturally reconstruct the jester's clothing and fortune teller's robe behind it. Preserve the two characters' identities, faces, poses, crowd, magical creatures, watercolor texture, colors, landscape composition and framing. No text, no letters, no logo, no watermark anywhere. Change only the banner area; retain the rest faithfully.”
 
@@ -30,3 +30,7 @@ Future artwork should contain no embedded prose. Put any labels in translated UI
 - DE and CH certificate PDFs generated successfully using the shared seal.
 - 160 exported pages passed language, canonical/hreflang/OpenGraph and local-asset checks. 618 translation lookups audited with no missing German keys.
 - No game/reward/scoring changes. No Grok review was performed in this pass.
+
+## Correction
+
+2026-10-17: Restore the original illustrated seal across all courses at Roger’s explicit request. Keyboard and text-free story illustration remain unchanged.
