@@ -1,3 +1,4 @@
+import { coursePageMetadata } from '@/lib/pageMetadata';
 import { t } from '@/lib/i18n';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -5,6 +6,7 @@ import { Metadata } from 'next';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
+  ...coursePageMetadata('/over', 'Over Lettoria'),
   title: t("Over Lettoria"),
   description:
     t("Lettoria is een gratis typecursus voor kinderen van 8-12 jaar. Geen registratie, geen kosten. Je voortgang blijft op je apparaat. Leer blind typen met 10 vingers."),

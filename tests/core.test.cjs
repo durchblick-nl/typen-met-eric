@@ -615,3 +615,26 @@ test('regional courses keep progress separate and their bonus targets use learne
   }
  }finally{if(old===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=old;}
 });
+
+test('analytics accepts bare regional home paths but never foreign or arbitrary paths',()=>{
+ const {analyticsPagePath}=sources()('lib/analyticsPaths');
+ for(const base of ['','/be','/de','/ch']){
+  for(const suffix of ['/','/kaart','/les/0','/les/25/','/regio/woud'])assert.equal(analyticsPagePath(base+suffix,base),base+suffix);
+  if(base)assert.equal(analyticsPagePath(base,base),base);
+  for(const suffix of ['/les/26','/les/999','/secret','/kaart?name=Max','/kaart#private'])assert.equal(analyticsPagePath(base+suffix,base),null);
+  if(base)assert.equal(analyticsPagePath('/other/kaart',base),null);
+ }
+});
+test('regional page metadata points to corresponding pages, not Dutch or course home',()=>{
+ const previous=process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+ try {
+  for(const course of ['nl','be','de','ch']){
+   process.env.NEXT_PUBLIC_LETTORIA_COURSE=course;
+   const {coursePageMetadata}=sources()('lib/pageMetadata');
+   const meta=coursePageMetadata('/privacy','Privacy & cookies');
+   assert.equal(meta.alternates.canonical,`https://lettoria.nl${course==='nl'?'':`/${course}`}/privacy`);
+   assert.equal(meta.openGraph.url,meta.alternates.canonical);
+   assert.equal(meta.alternates.languages['de-CH'],'https://lettoria.nl/ch/privacy');
+  }
+ }finally{if(previous===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=previous;}
+});

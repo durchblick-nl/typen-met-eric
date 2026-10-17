@@ -1,7 +1,10 @@
+const course = process.env.NEXT_PUBLIC_LETTORIA_COURSE || 'nl';
+if (!['nl','be','de','ch'].includes(course)) throw new Error('Unsupported Lettoria course: ' + course);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  basePath: process.env.NEXT_PUBLIC_LETTORIA_COURSE && process.env.NEXT_PUBLIC_LETTORIA_COURSE !== 'nl' ? '/' + process.env.NEXT_PUBLIC_LETTORIA_COURSE : '',
+  basePath: course === 'nl' ? '' : '/' + course,
   // Bound export workers on shared build hosts.
   experimental: { cpus: 2 },
   images: {

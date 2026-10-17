@@ -1,4 +1,6 @@
 'use client';
+import { CERTIFICATE_SEAL } from '@/lib/course';
+
 
 import { t } from '@/lib/i18n';
 import { useEffect } from 'react';
@@ -271,7 +273,7 @@ export default function Home() {
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <Image
-                  src="/images/diploma/lettoria_seal.png"
+                  src={CERTIFICATE_SEAL}
                   alt={t("Lettoria Typmeester Siegel")}
                   width={180}
                   height={180}

@@ -1,10 +1,12 @@
+import { coursePageMetadata } from '@/lib/pageMetadata';
 import { t } from '@/lib/i18n';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
-    title: t("Colofon & Disclaimer | Lettoria"),
+  ...coursePageMetadata('/impressum', 'Colofon & Disclaimer'),
+    title: t("Colofon & Disclaimer"),
     description: t("Bedrijfsgegevens, juridische informatie en disclaimer van Lettoria."),
     robots: {
         index: false,

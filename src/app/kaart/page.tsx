@@ -1,4 +1,6 @@
 'use client';
+import { CERTIFICATE_SEAL } from '@/lib/course';
+
 
 import { t } from '@/lib/i18n';
 import { GrotRewards } from '@/components/game/GrotRewards';
@@ -80,7 +82,7 @@ export default function KaartPage() {
               className="flex items-center gap-4 bg-gradient-to-r from-eric-green to-eric-gold p-4 rounded-2xl text-white hover:scale-[1.02] transition-transform shadow-lg"
             >
               <Image
-                src="/images/diploma/lettoria_seal.png"
+                src={CERTIFICATE_SEAL}
                 alt={t("Diploma")}
                 width={60}
                 height={60}
@@ -97,7 +99,7 @@ export default function KaartPage() {
               className="flex items-center gap-4 bg-white p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-gray-200"
             >
               <Image
-                src="/images/diploma/lettoria_seal.png"
+                src={CERTIFICATE_SEAL}
                 alt={t("Diploma")}
                 width={50}
                 height={50}

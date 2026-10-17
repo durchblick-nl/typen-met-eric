@@ -1,4 +1,6 @@
 'use client';
+import { CERTIFICATE_SEAL } from '@/lib/course';
+
 
 import { t } from '@/lib/i18n';
 import Image from 'next/image';
@@ -108,7 +110,7 @@ export function DiplomaPreview({ name, date }: DiplomaPreviewProps) {
           {/* Seal */}
           <div className="relative w-12 h-12 md:w-20 md:h-20 mb-1">
             <Image
-              src="/images/diploma/lettoria_seal.png"
+              src={CERTIFICATE_SEAL}
               alt={t("Lettoria Siegel")}
               fill
               className="object-contain"

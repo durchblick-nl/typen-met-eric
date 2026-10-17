@@ -1,3 +1,4 @@
+import { coursePageMetadata } from '@/lib/pageMetadata';
 import { t } from '@/lib/i18n';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -5,9 +6,9 @@ import { Footer } from '@/components/Footer';
 import { PrivacySettingsButton } from '@/components/privacy/PrivacyConsent';
 
 export const metadata: Metadata = {
+  ...coursePageMetadata('/privacy', 'Privacy & cookies'),
   title: t("Privacy & cookies"),
   description: t("Hoe Lettoria je voortgang bewaart en hoe je optionele pagina-analyse kunt in- of uitschakelen."),
-  alternates: { canonical: 'https://lettoria.nl/privacy' },
 };
 
 export default function PrivacyPage() {

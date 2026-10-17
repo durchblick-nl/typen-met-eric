@@ -1,6 +1,7 @@
 'use client';
 
 import { t } from '@/lib/i18n';
+import { analyticsPagePath } from '@/lib/analyticsPaths';
 import { BASE_PATH, IS_GERMAN } from '@/lib/course';
 import { useEffect } from 'react';
 import * as CookieConsent from 'vanilla-cookieconsent';
@@ -37,10 +38,7 @@ function filterPageView(event: OpenPanelEvent): boolean {
   }
 
   const path = window.location.pathname;
-  const localPath = BASE_PATH && path.startsWith(BASE_PATH + '/') ? path.slice(BASE_PATH.length) : path;
-  if (!/^\/(?:kaart|oefenen|over|impressum|privacy|diploma|les\/(?:[0-9]|1[0-9]|2[0-5])|regio\/(?:grot|dorp|velden|woud|toppen|zee|kasteel))?\/?$/.test(localPath)) {
-    return false;
-  }
+  if (!analyticsPagePath(path)) return false;
 
   event.payload.properties = {
     __path: `${window.location.origin}${path}`,
@@ -135,7 +133,7 @@ export function PrivacyConsent() {
                 },
                 {
                   title: t("Meer informatie"),
-                  description: `<a href="${BASE_PATH}/privacy" class="cc__link">${IS_GERMAN ? 'Datenschutzerklärung lesen' : 'Lees onze privacyverklaring'}</a>. ${IS_GERMAN ? 'Du kannst diese Einstellungen jederzeit über die Fußzeile öffnen.' : 'Je kunt deze instellingen altijd opnieuw openen via de footer.'}`,
+                  description: `<a href="${BASE_PATH}/privacy" class="cc__link">${IS_GERMAN ? 'Datenschutzerklärung lesen' : 'Lees onze privacyverklaring'}</a>. ${IS_GERMAN ? 'Du kannst diese Einstellungen jederzeit am Seitenende öffnen.' : 'Je kunt deze instellingen altijd opnieuw openen via de footer.'}`,
                 },
               ],
             },

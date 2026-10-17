@@ -1,4 +1,6 @@
 'use client';
+import { CERTIFICATE_SEAL } from '@/lib/course';
+
 
 import { t } from '@/lib/i18n';
 import {
@@ -308,7 +310,7 @@ export function DiplomaDocument({ name, date }: DiplomaDocumentProps) {
 
             {/* Seal */}
             <View style={styles.sealColumn}>
-              <Image src="/images/diploma/lettoria_seal.png" style={styles.sealImage} />
+              <Image src={CERTIFICATE_SEAL} style={styles.sealImage} />
             </View>
           </View>
         </View>
