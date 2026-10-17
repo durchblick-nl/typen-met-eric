@@ -638,3 +638,74 @@ test('regional page metadata points to corresponding pages, not Dutch or course 
   }
  }finally{if(previous===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=previous;}
 });
+
+test('Shift combinations receive 25 percent extra reaction time on their actual layout', () => {
+  const {keyReactionFactor} = sources()('lib/keyboards');
+  for (const course of ['nl','be','de','ch']) {
+    assert.equal(keyReactionFactor('f',course),1);
+    assert.equal(keyReactionFactor('F',course),1.25);
+    assert.equal(keyReactionFactor(' ',course),1);
+  }
+  assert.equal(keyReactionFactor('1','be'),1.25);
+  assert.equal(keyReactionFactor('.','be'),1.25);
+  assert.equal(keyReactionFactor('/','be'),1.25);
+  assert.equal(keyReactionFactor('&','be'),1);
+  assert.equal(keyReactionFactor('1','nl'),1);
+  assert.equal(keyReactionFactor('1','de'),1);
+  assert.equal(keyReactionFactor('ß','de'),1);
+  assert.equal(keyReactionFactor("'",'ch'),1);
+});
+
+test('arcade slows only Shift targets, preserving hazards, clock, turbo and correct input', () => {
+  const saved=process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+  try {
+    for (const profile of ['nl','be','de','ch']) {
+      process.env.NEXT_PUBLIC_LETTORIA_COURSE=profile;
+      const {arcadeCourse,newArcade,advanceArcade,typeArcade}=sources()('lib/arcadeFlight');
+      const course={...arcadeCourse(15),travelMs:5000};
+      const state={...newArcade(course,1),nextSpawn:Infinity,turboUntil:5000,objects:[
+        {id:1,lane:0,kind:'letter',key:'1',depth:0.2},
+        {id:2,lane:1,kind:'letter',key:'f',depth:0.2},
+        {id:3,lane:2,kind:'rock',depth:0.2},
+        {id:4,lane:2,kind:'gem',depth:0.2},
+      ]};
+      const next=advanceArcade(state,200,course);
+      const drift=id=>next.objects.find(o=>o.id===id).depth-0.2;
+      assert.ok(Math.abs(drift(1)*(profile==='be'?1.25:1)-drift(2))<1e-12);
+      assert.equal(drift(2),drift(3));assert.equal(drift(3),drift(4));
+      assert.equal(next.elapsedMs,200);assert.equal(next.turboUntil,5000);
+      assert.equal(typeArcade(next,'Shift').hits,0);
+      const hit=typeArcade(next,'1');assert.equal(hit.hits,1);assert.equal(hit.attempts,1);
+      assert.equal(state.objects[0].depth,0.2,'simulation does not mutate prior state');
+    }
+  } finally { if(saved===undefined) delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=saved; }
+});
+
+test('arcade hint follows earliest expiry and does not reorder objects', () => {
+  const saved=process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+  try {
+    process.env.NEXT_PUBLIC_LETTORIA_COURSE='be';
+    const {nextArcadeTarget,typeArcade,newArcade,arcadeCourse}=sources()('lib/arcadeFlight');
+    const objects=[{id:3,lane:0,kind:'letter',key:'1',depth:0.6},{id:2,lane:1,kind:'letter',key:'f',depth:0.55},{id:1,lane:2,kind:'rock',depth:0.8}];
+    assert.equal(nextArcadeTarget(objects).key,'f');
+    assert.deepEqual(objects.map(o=>o.id),[3,2,1]);
+    const state={...newArcade(arcadeCourse(15),1),objects};
+    const next=typeArcade(state,'f');assert.equal(nextArcadeTarget(next.objects).key,'1');
+    assert.equal(nextArcadeTarget([{id:1,lane:0,kind:'letter',key:'f',depth:0.86}]),undefined);
+    assert.equal(nextArcadeTarget([]),undefined);
+  } finally { if(saved===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=saved; }
+});
+
+test('a Shift target remains hittable for its extra reaction window', () => {
+  const saved=process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+  try {
+    process.env.NEXT_PUBLIC_LETTORIA_COURSE='be';
+    const {arcadeCourse,newArcade,advanceArcade,typeArcade}=sources()('lib/arcadeFlight');
+    const course={...arcadeCourse(15),travelMs:5000};
+    const initial={...newArcade(course,1),nextSpawn:Infinity,objects:[{id:1,lane:0,kind:'letter',key:'1',depth:0.82},{id:2,lane:1,kind:'letter',key:'f',depth:0.82}]};
+    const next=advanceArcade(initial,210,course);
+    assert.equal(next.missed,1);assert.equal(next.objects.length,1);assert.equal(next.objects[0].key,'1');
+    assert.equal(typeArcade(next,'1').hits,1);
+    assert.equal(advanceArcade(next,0,course),next,'paused/no-tick simulation preserves the extra window');
+  } finally { if(saved===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=saved; }
+});

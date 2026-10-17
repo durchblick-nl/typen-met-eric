@@ -22,3 +22,8 @@ export function keyGuidance(character: string, course: CourseId = COURSE): {key:
   }
   return undefined;
 }
+
+/** Extra headroom for a two-key Shift action; ordinary keys retain their pace. */
+export function keyReactionFactor(character: string, course: CourseId = COURSE): number {
+  return keyGuidance(character, course)?.shift ? 1.25 : 1;
+}

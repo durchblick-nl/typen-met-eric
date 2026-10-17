@@ -1,4 +1,5 @@
 import { t } from '@/lib/i18n';
+import { keyReactionFactor } from "./keyboards";
 import { REGIONS } from "./data/regions";
 export const ARCADE_DURATION_MS = 75000;
 export const ARCADE_HIT_DEPTH = 0.86;
@@ -106,6 +107,20 @@ export function moveArcade(state: ArcadeState, direction: -1 | 1): ArcadeState {
     ? state
     : { ...state, lane: Math.max(0, Math.min(2, state.lane + direction)) };
 }
+/** Hint the target with the least remaining reaction time, not just greatest depth. */
+export function nextArcadeTarget(objects: ArcadeObject[]): ArcadeObject | undefined {
+  let target: ArcadeObject | undefined;
+  let remaining = Infinity;
+  for (const object of objects) {
+    if (object.kind !== "letter" || object.key === undefined || object.depth < 0 || object.depth >= ARCADE_HIT_DEPTH) continue;
+    const time = (ARCADE_HIT_DEPTH - object.depth) * keyReactionFactor(object.key);
+    if (!target || time < remaining || (time === remaining && object.id < target.id)) {
+      target = object;
+      remaining = time;
+    }
+  }
+  return target;
+}
 function random(state: ArcadeState): number {
   state.rng = (Math.imul(state.rng, 1664525) + 1013904223) >>> 0;
   return state.rng / 4294967296;
@@ -130,7 +145,7 @@ export function typeArcade(state: ArcadeState, key: string): ArcadeState {
       attempts: state.attempts + 1,
       streak: 0,
       feedback: {
-        text: t("Typ een letter die je op de baan ziet."),
+        text: t("Typ een teken dat je op de baan ziet."),
         kind: "hint",
         until: state.elapsedMs + 1100,
       },
@@ -160,8 +175,8 @@ export function typeArcade(state: ArcadeState, key: string): ArcadeState {
       text: triggerTurbo
         ? t("TURBO! Dubbele punten en een magisch schild!")
         : perfect
-          ? `Perfect! +${points}`
-          : `Raak! +${points}`,
+          ? t("Perfect! +{points}", { points })
+          : t("Raak! +{points}", { points }),
       kind: "good",
       until: state.elapsedMs + 1300,
     },
@@ -186,7 +201,9 @@ export function advanceArcade(
   for (const object of state.objects) {
     const moved = {
       ...object,
-      depth: object.depth + (delta / course.travelMs) * speed,
+      // Only Shift targets get additional reaction time. Obstacles, round clock,
+      // turbo, collision depths and points remain identical across layouts.
+      depth: object.depth + (delta / (course.travelMs * (object.kind === "letter" && object.key !== undefined ? keyReactionFactor(object.key) : 1))) * speed,
     };
     if (object.depth < ARCADE_HIT_DEPTH && moved.depth >= ARCADE_HIT_DEPTH) {
       if (object.kind === "letter") {

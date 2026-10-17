@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   arcadeCourse,
+  nextArcadeTarget,
   newArcade,
   advanceArcade,
   moveArcade,
@@ -13,6 +14,8 @@ import {
   arcadePosition,
   ARCADE_DURATION_MS,
 } from "@/lib/arcadeFlight";
+import { keyGuidance } from "@/lib/keyboards";
+import { ArcadeKeyGuide } from "./ArcadeKeyGuide";
 import { IllustratedProp } from "./IllustratedProp";
 import { arcadeLandscape } from "@/lib/journey";
 import { FlightDragon } from "./FlightDragon";
@@ -249,6 +252,7 @@ export function ArcadeFlight({
     }
   };
   const turbo = arcadeTurbo(state);
+  const priorityTarget = nextArcadeTarget(state.objects);
   const seconds = Math.ceil((ARCADE_DURATION_MS - state.elapsedMs) / 1000);
   const player = arcadePosition(state.lane, 0.86);
   const button =
@@ -256,11 +260,12 @@ export function ArcadeFlight({
   const feedback =
     state.feedback && state.feedback.until > state.elapsedMs
       ? state.feedback.text
-      : t("Typ de letters. Pak kristallen. Ontwijk de rotsen.");
+      : t("Typ het teken. Pak kristallen. Ontwijk de rotsen.");
   const sceneFilter = course.regionId === "woud" ? "saturate(1.15)" : undefined;
   return (
     <section
       ref={dialog}
+      data-phase={phase}
       role="dialog"
       aria-modal="true"
       aria-label={t("Erics kristaljacht")}
@@ -293,8 +298,8 @@ export function ArcadeFlight({
           <div>
             <p className="text-sm text-eric-green font-semibold">{' ' + t("ARCADEBAAN") + ' '} {lessonId + 1} · {course.name}
             </p>
-            <h1 className="text-3xl sm:text-4xl text-eric-green font-extrabold mt-1">{' ' + t("Erics kristaljacht") + ' '} </h1>
-            <p className="text-gray-600 mt-1">{' ' + t("Typ, verzamel en vlieg naar een nieuw record.") + ' '} </p>
+            <h1 className={`${phase === "playing" ? "text-xl" : "text-3xl"} sm:text-4xl text-eric-green font-extrabold mt-1`}>{' ' + t("Erics kristaljacht") + ' '} </h1>
+            <p className={`${phase === "playing" ? "hidden sm:block" : ""} text-gray-600 mt-1`}>{' ' + t("Typ, verzamel en vlieg naar een nieuw record.") + ' '} </p>
           </div>
           <div className="flex gap-2">
             {phase === "playing" && (
@@ -350,7 +355,7 @@ export function ArcadeFlight({
         </div>
         <div
           data-testid="arcade-scene"
-          className="relative h-[460px] sm:h-[490px] overflow-hidden rounded-3xl border-4 border-eric-gold/40 bg-green-100"
+          className="relative h-[clamp(260px,44svh,380px)] sm:h-[clamp(260px,48svh,490px)] overflow-hidden rounded-3xl border-4 border-eric-gold/40 bg-green-100"
         >
           <Image
             src={arcadeLandscape(course.regionId)}
@@ -422,6 +427,7 @@ export function ArcadeFlight({
                     className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full flex items-center justify-center font-mono text-4xl sm:text-5xl font-bold border-[3px] shadow-lg ${object.depth >= 0.65 ? "bg-yellow-100 border-yellow-500 text-green-950" : "bg-green-100 border-eric-green text-green-950"}`}
                   >
                     {object.key === " " ? "␣" : object.key}
+                    {object.key !== undefined && keyGuidance(object.key)?.shift && <span className="absolute -top-2 -right-1 rounded-full border border-eric-gold bg-perkament px-1.5 text-base leading-6" title={t('Shift-combinatie')} aria-label={t('Shift-combinatie')}>⇧</span>}
                   </div>
                 ) : (
                   <IllustratedProp
@@ -485,8 +491,9 @@ export function ArcadeFlight({
                   <>
                     <p className="text-xs font-bold text-eric-green mb-2">{' ' + t("DRIE STERREN. DEZE BAAN IS VAN JOU!") + ' '} </p>
                     <h2 className="text-2xl sm:text-3xl text-eric-green font-bold mb-3">{' ' + t("Klaar voor de kristaljacht?") + ' '} </h2>
-                    <p className="text-gray-700 mb-3">{' ' + t("Met") + ' '} <kbd>←</kbd>{' ' + t("en") + ' '} <kbd>→</kbd>{' ' + t("wissel je van baan. Pak kristallen en ontwijk de rotsen. Typ de letters om magische doelen te raken.") + ' '} </p>
-                    <p className="text-gray-700 mb-3">{' ' + t("Zes goede letters op rij? Turbo! Dan krijg je dubbele punten en een schild. Doelen bij de gouden lijn geven extra punten.") + ' '} </p>
+                    <p className="text-gray-700 mb-3">{' ' + t("Met") + ' '} <kbd>←</kbd>{' ' + t("en") + ' '} <kbd>→</kbd>{' ' + t("wissel je van baan. Pak kristallen en ontwijk de rotsen. Typ de tekens om magische doelen te raken.") + ' '} </p>
+                    <p className="text-gray-700 mb-3">{' ' + t("Zes goede tekens op rij? Turbo! Dan krijg je dubbele punten en een schild. Doelen bij de gouden lijn geven extra punten.") + ' '} </p>
+                    <p className="text-sm text-gray-700 mb-3">{t('De toetsenhulp toont de juiste vinger en Shift-hand. Shift-doelen geven je meer tijd.')}</p>
                     <p className="text-sm text-gray-600 mb-5">{' ' + t("3 levens · maximaal 75 seconden · eigen toetsenbord nodig") + ' '} </p>
                     <button
                       className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
@@ -541,13 +548,14 @@ export function ArcadeFlight({
             </div>
           )}
         </div>
+        {(phase === "playing" || phase === "paused") && <ArcadeKeyGuide character={priorityTarget?.key} />}
         <p
           role="status"
           className="text-center min-h-7 text-eric-green font-semibold mt-3"
         >
           {phase === "playing"
             ? feedback
-            : t("← → Wissel van baan · Typ de letters voor magie")}
+            : t("← → Wissel van baan · Typ de tekens voor magie")}
         </p>
         <footer className="flex flex-wrap justify-between items-center gap-4 mt-3">
           <p className="text-sm text-gray-600">{' ' + t("Je lessterren staan vast. Hier speel je voor je eigen record.") + ' '} </p>
