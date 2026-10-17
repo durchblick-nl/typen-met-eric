@@ -201,7 +201,7 @@ export const DUTCH_REGIONS: Region[] = [
         storyIntro: `De grappige kwibus en de mysterieuze waarzegster
           zijn hun stem kwijt.
           Q en W brengen de raadsels en grappen terug!`,
-        storyImageUrl: '/images/stories/lesson_10_fortuneteller.png',
+        storyImageUrl: '/images/stories/lesson_10_fortuneteller_neutral.webp',
         storyOutro: `De kwibus maakt iedereen aan het lachen!
           De waarzegster ziet weer een prachtige toekomst.`,
       },

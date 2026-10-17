@@ -1,163 +1,30 @@
 'use client';
 
+import { useEffect, useState, type CSSProperties } from 'react';
 import { t } from '@/lib/i18n';
 import { useTypingStore } from '@/lib/stores/typingStore';
-
-import { COURSE } from '@/lib/course';
+import { COURSE, COURSE_LABEL } from '@/lib/course';
 import { KEYBOARDS, keyGuidance } from '@/lib/keyboards';
+import { useQuietMotion } from '@/components/settings/ComfortSettings';
 
-// Finger colors - background classes
-const FINGER_BG_COLORS: Record<number, string> = {
-  0: 'bg-pink-400',    // Left pinky
-  1: 'bg-orange-400',  // Left ring
-  2: 'bg-yellow-400',  // Left middle
-  3: 'bg-green-400',   // Left index
-  4: 'bg-cyan-400',    // Right index
-  5: 'bg-blue-400',    // Right middle
-  6: 'bg-purple-400',  // Right ring
-  7: 'bg-pink-400',    // Right pinky
-  8: 'bg-gray-500',    // Thumbs (space)
-};
+const FINGER_COLORS = ['#f472b6', '#fb923c', '#facc15', '#4ade80', '#22d3ee', '#60a5fa', '#c084fc', '#f472b6', '#e2c478'];
 
-// Finger colors - hex values for SVG
-const FINGER_HEX_COLORS: Record<number, string> = {
-  0: '#f472b6', // pink-400
-  1: '#fb923c', // orange-400
-  2: '#facc15', // yellow-400
-  3: '#4ade80', // green-400
-  4: '#22d3ee', // cyan-400
-  5: '#60a5fa', // blue-400
-  6: '#c084fc', // purple-400
-  7: '#f472b6', // pink-400
-};
-
-// Home row keys (have bumps on F and J)
-const HOME_KEYS = KEYBOARDS[COURSE].homeKeys;
-
-// Left Hand SVG - viewed from above, fingers pointing UP toward keyboard
-function LeftHandSVG({ activeFingerIndex }: { activeFingerIndex: number | null }) {
-  // Left hand: pinky=0, ring=1, middle=2, index=3
-  const fingers = [
-    { x: 12, fingerIndex: 0 },  // pinky (leftmost)
-    { x: 28, fingerIndex: 1 },  // ring
-    { x: 44, fingerIndex: 2 },  // middle
-    { x: 60, fingerIndex: 3 },  // index
-  ];
-
+function Hand({ side, finger, shift }: { side: 'left' | 'right'; finger: number | null; shift: boolean }) {
+  const left = side === 'left';
+  const indices = left ? [0, 1, 2, 3] : [4, 5, 6, 7];
   return (
-    <svg viewBox="0 0 90 120" className="w-20 h-28">
-      {/* Wrist/sleeve */}
-      <rect x="15" y="95" width="50" height="20" rx="4" fill="#4a5568" stroke="#2d3748" strokeWidth="2" />
-
-      {/* Palm */}
-      <path
-        d="M 10 95 Q 5 70 12 55 L 12 55 L 68 55 Q 75 70 70 95 Z"
-        fill="#e8c4a0"
-        stroke="#d4a574"
-        strokeWidth="2"
-      />
-
-      {/* Fingers - pointing UP */}
-      {fingers.map(({ x, fingerIndex }) => {
-        const isActive = activeFingerIndex === fingerIndex;
-        const color = FINGER_HEX_COLORS[fingerIndex];
-        const height = fingerIndex === 2 ? 45 : fingerIndex === 1 || fingerIndex === 3 ? 40 : 32; // middle longest
-
-        return (
-          <g key={fingerIndex}>
-            <rect
-              x={x}
-              y={55 - height}
-              width={12}
-              height={height}
-              rx={6}
-              fill={color}
-              stroke={isActive ? '#fff' : '#00000030'}
-              strokeWidth={isActive ? 3 : 1.5}
-              className={isActive ? 'animate-pulse' : ''}
-              style={{
-                filter: isActive ? 'drop-shadow(0 0 8px rgba(255,255,255,0.9))' : 'none',
-              }}
-            />
-          </g>
-        );
+    <svg viewBox="-10 0 110 120" className="keyboard-hand" aria-hidden="true">
+      <rect x={left ? 15 : 25} y="94" width="50" height="21" rx="7" fill="#42645e" />
+      <path d={left ? 'M10 95Q5 70 12 55H68Q75 70 70 95Z' : 'M20 95Q15 70 22 55H78Q85 70 80 95Z'} fill="#e8c4a0" stroke="#bd946e" strokeWidth="1.5" />
+      {indices.map((index, position) => {
+        const active = finger === index;
+        const shiftFinger = shift && (left ? index === 0 : index === 7);
+        const height = index === 2 || index === 5 ? 45 : index === 0 || index === 7 ? 32 : 40;
+        return <rect key={index} x={(left ? 12 : 18) + position * 16} y={55 - height} width="12" height={height} rx="6"
+          fill={active ? FINGER_COLORS[index] : '#d7b492'} stroke={active ? '#fff8e1' : shiftFinger ? '#f3cf78' : '#bd946e'}
+          strokeWidth={active || shiftFinger ? 3 : 1.5} data-finger={index} data-active={active} data-shift={shiftFinger} />;
       })}
-
-      {/* Thumb - pointing RIGHT toward center */}
-      <rect
-        x="68"
-        y="60"
-        width="28"
-        height="14"
-        rx={7}
-        fill="#e8c4a0"
-        stroke="#d4a574"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
-
-// Right Hand SVG - viewed from above, fingers pointing UP toward keyboard
-function RightHandSVG({ activeFingerIndex }: { activeFingerIndex: number | null }) {
-  // Right hand: index=4, middle=5, ring=6, pinky=7
-  const fingers = [
-    { x: 18, fingerIndex: 4 },  // index
-    { x: 34, fingerIndex: 5 },  // middle
-    { x: 50, fingerIndex: 6 },  // ring
-    { x: 66, fingerIndex: 7 },  // pinky (rightmost)
-  ];
-
-  return (
-    <svg viewBox="0 0 90 120" className="w-20 h-28">
-      {/* Wrist/sleeve */}
-      <rect x="25" y="95" width="50" height="20" rx="4" fill="#4a5568" stroke="#2d3748" strokeWidth="2" />
-
-      {/* Palm */}
-      <path
-        d="M 20 95 Q 15 70 22 55 L 22 55 L 78 55 Q 85 70 80 95 Z"
-        fill="#e8c4a0"
-        stroke="#d4a574"
-        strokeWidth="2"
-      />
-
-      {/* Fingers - pointing UP */}
-      {fingers.map(({ x, fingerIndex }) => {
-        const isActive = activeFingerIndex === fingerIndex;
-        const color = FINGER_HEX_COLORS[fingerIndex];
-        const height = fingerIndex === 5 ? 45 : fingerIndex === 4 || fingerIndex === 6 ? 40 : 32; // middle longest
-
-        return (
-          <g key={fingerIndex}>
-            <rect
-              x={x}
-              y={55 - height}
-              width={12}
-              height={height}
-              rx={6}
-              fill={color}
-              stroke={isActive ? '#fff' : '#00000030'}
-              strokeWidth={isActive ? 3 : 1.5}
-              className={isActive ? 'animate-pulse' : ''}
-              style={{
-                filter: isActive ? 'drop-shadow(0 0 8px rgba(255,255,255,0.9))' : 'none',
-              }}
-            />
-          </g>
-        );
-      })}
-
-      {/* Thumb - pointing LEFT toward center */}
-      <rect
-        x="-6"
-        y="60"
-        width="28"
-        height="14"
-        rx={7}
-        fill="#e8c4a0"
-        stroke="#d4a574"
-        strokeWidth="2"
-      />
+      <rect x={left ? 68 : -6} y="60" width="28" height="14" rx="7" fill={finger === 8 ? FINGER_COLORS[8] : '#e8c4a0'} stroke={finger === 8 ? '#fff8e1' : '#bd946e'} strokeWidth={finger === 8 ? 3 : 1.5} />
     </svg>
   );
 }
@@ -168,109 +35,69 @@ interface VirtualKeyboardProps {
   lessonId?: number;
 }
 
-export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId = 0 }: VirtualKeyboardProps) {
-  const { targetText, currentIndex } = useTypingStore();
-
-  // Get the current key to press
-  const currentKey = highlightKey || targetText[currentIndex]?.toLowerCase() || '';
+export function VirtualKeyboard({ showFingerHints = true, highlightKey }: VirtualKeyboardProps) {
+  const targetText = useTypingStore(state => state.targetText);
+  const currentIndex = useTypingStore(state => state.currentIndex);
+  const typedChars = useTypingStore(state => state.typedChars);
+  const lastWrong = useTypingStore(state => state.lastWrong);
+  const quiet = useQuietMotion();
+  const [feedback, setFeedback] = useState<{ key: string; wrong: boolean; attempt: number } | null>(null);
+  const currentKey = highlightKey || targetText[currentIndex] || '';
   const guidance = keyGuidance(currentKey);
-  const currentFingerIndex = guidance?.finger ?? null;
+  const finger = guidance?.finger ?? null;
 
-  // Always show hands
-  const showHands = true;
+  useEffect(() => {
+    const character = typedChars.at(-1);
+    if (!character) { setFeedback(null); return; }
+    const pressed = keyGuidance(character);
+    setFeedback(pressed ? { key: pressed.key, wrong: lastWrong, attempt: typedChars.length } : null);
+    const timer = window.setTimeout(() => setFeedback(null), 240);
+    return () => window.clearTimeout(timer);
+  }, [typedChars, lastWrong]);
+
+  function keycap(key: string, fingerIndex: number, shifted?: string) {
+    const active = key === guidance?.key;
+    const pressed = feedback?.key === key;
+    const home = KEYBOARDS[COURSE].homeKeys.includes(key);
+    const bump = key === 'f' || key === 'j';
+    return (
+      <div key={key} className={`keyboard-key ${key === ' ' ? 'keyboard-space' : ''}`}
+        data-key={key} data-active={active} data-home={home} data-feedback={pressed ? feedback.wrong ? 'wrong' : 'correct' : undefined}
+        style={{ '--finger-color': FINGER_COLORS[fingerIndex] } as CSSProperties}>
+        {shifted && <span className="keyboard-shift-symbol" data-target={active && guidance?.shift}>{shifted}</span>}
+        <span className="keyboard-key-label">{key === ' ' ? t('SPATIE') : /^[a-zäöü]$/.test(key) ? key.toUpperCase() : key}</span>
+        {bump && <span className="keyboard-home-bump" />}
+        {pressed && <span key={feedback.attempt} className="keyboard-feedback" aria-hidden="true">{feedback.wrong ? '×' : '✓'}</span>}
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-gray-800/95 backdrop-blur w-full max-w-xl min-w-0 rounded-2xl p-2 sm:p-4 shadow-xl border border-gray-700 box-glow">
-      {/* Main keyboard rows */}
-      {KEYBOARDS[COURSE].rows.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex justify-center gap-1 mb-1">
-          {/* Add offset for home and bottom rows */}
-          {rowIndex === 2 && <div className="w-[3%] shrink-0" />}
-          {rowIndex === 3 && <div className="w-[6%] shrink-0" />}
-
-          {row.map((entry) => {
-            const key = entry.key;
-            const isCurrentKey = key === guidance?.key;
-            const isHomeKey = HOME_KEYS.includes(key);
-            const isHomePosition = key === 'f' || key === 'j';
-            const fingerIndex = entry.finger;
-            const fingerBgColor = FINGER_BG_COLORS[fingerIndex];
-
-            return (
-              <div
-                key={key}
-                className={`
-                  relative flex-1 max-w-12 min-w-0 h-9 sm:h-12 rounded-lg flex items-center justify-center
-                  font-mono text-sm sm:text-lg font-bold transition-all duration-150
-                  ${isCurrentKey
-                    ? `${fingerBgColor} text-gray-900 ring-2 ring-white shadow-lg`
-                    : 'bg-gray-700 text-gray-300'
-                  }
-                  ${isHomeKey && !isCurrentKey ? 'border-b-4 border-gray-500' : ''}
-                  ${isHomePosition && !isCurrentKey ? 'ring-2 ring-eric-gold/40' : ''}
-                `}
-                style={isCurrentKey ? {
-                  boxShadow: `0 0 20px ${FINGER_HEX_COLORS[fingerIndex]}80`,
-                } : undefined}
-              >
-                <span>
-                  {entry.shift && <span className="absolute top-0.5 right-1 text-[10px] opacity-70">{entry.shift}</span>}
-                  {/^[a-zäöü]$/.test(key) ? key.toUpperCase() : key}
-                </span>
-
-                {/* F and J bumps - more prominent */}
-                {isHomePosition && !isCurrentKey && (
-                  <div className="absolute bottom-1.5 w-5 h-1 bg-eric-gold/70 rounded-full" />
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ))}
-
-      <div className="flex justify-between gap-3 mt-2 text-xs text-gray-400" aria-label={t('Shifttoetsen')}>
-        {(['left','right'] as const).map(hand=><span key={hand} className={`rounded-md border px-3 py-1 ${guidance?.shiftHand===hand?'bg-eric-gold text-gray-900 border-white':'border-gray-600'}`}>{hand==='left'?t('Linker Shift'):t('Rechter Shift')} ⇧</span>)}
-      </div>
-      {/* Space bar */}
-      <div className="flex justify-center mt-2">
-        <div
-          className={`
-            w-1/2 h-10 rounded-lg flex items-center justify-center
-            font-mono text-sm transition-all duration-150
-            ${currentKey === ' '
-              ? 'bg-gray-500 text-white scale-105 shadow-lg'
-              : 'bg-gray-700 text-gray-400'
-            }
-          `}
-        >
-          <span>{' ' + t("SPATIE") + ' '} </span>
-        </div>
-      </div>
-
-      {guidance?.shift && <p role="status" className="mt-3 text-center text-sm text-white">{guidance.shiftHand === 'left' ? t("Houd linker Shift ingedrukt") : t("Houd rechter Shift ingedrukt")} + {guidance.key.toUpperCase()} → {currentKey}</p>}
-
-      {/* Hand illustrations */}
-      {showFingerHints && showHands && (
-        <div className="mt-6 pt-4 border-t border-gray-700">
-          {/* Hands - thumbs pointing toward center */}
-          <div className="flex justify-center items-center gap-4">
-            <div className="text-center">
-              <LeftHandSVG activeFingerIndex={currentFingerIndex !== null && currentFingerIndex <= 3 ? currentFingerIndex : null} />
-              <div className="text-gray-400 text-xs">{' ' + t("Linkerhand") + ' '}</div>
-            </div>
-            <div className="text-center">
-              <RightHandSVG activeFingerIndex={currentFingerIndex !== null && currentFingerIndex >= 4 && currentFingerIndex <= 7 ? currentFingerIndex : null} />
-              <div className="text-gray-400 text-xs">{' ' + t("Rechterhand") + ' '}</div>
-            </div>
+    <div className="training-keyboard" data-quiet={quiet} role="group" aria-label={t('Oefentoetsenbord')}>
+      <div className="keyboard-heading"><span>{t('Jouw toetsenbord')}</span><span>{COURSE_LABEL.split(' · ')[1]}</span></div>
+      <div className="keyboard-rows">
+        {KEYBOARDS[COURSE].rows.map((row, index) => (
+          <div key={index} className="keyboard-row" style={{ '--row-offset': `${[0, 2, 3.5, 7][index]}%` } as CSSProperties}>
+            {row.map(entry => keycap(entry.key, entry.finger, entry.shift))}
           </div>
-
-          {/* Home position tip */}
-          <div className="bg-eric-gold/10 rounded-lg p-3 text-center border border-eric-gold/30 mt-4">
-            <div className="flex items-center justify-center gap-2 text-eric-gold">
-              <span className="text-lg">💡</span>
-              <span className="text-sm font-medium">{' ' + t("Je wijsvingers starten altijd op") + ' '} <span className="font-bold">F</span>{" "}{' ' + t("en") + ' '}  <span className="font-bold">J</span>{' ' + t("— voel de streepjes!") + ' '} </span>
+        ))}
+      </div>
+      <div className="keyboard-bottom" aria-label={t('Shifttoetsen')}>
+        <span className="keyboard-shift" data-active={guidance?.shiftHand === 'left'}>⇧ <span>{t('Linker Shift')}</span></span>
+        {keycap(' ', 8)}
+        <span className="keyboard-shift" data-active={guidance?.shiftHand === 'right'}><span>{t('Rechter Shift')}</span> ⇧</span>
+      </div>
+      {guidance?.shift && <p role="status" className="keyboard-shift-guidance">{guidance.shiftHand === 'left' ? t('Houd linker Shift ingedrukt') : t('Houd rechter Shift ingedrukt')} + {guidance.key.toUpperCase()} → <strong>{currentKey}</strong></p>}
+      {showFingerHints && (
+        <div className="keyboard-coach">
+          <div className="keyboard-hands">
+            <div><Hand side="left" finger={finger !== null && (finger <= 3 || finger === 8) ? finger : null} shift={guidance?.shiftHand === 'left'} /><span>{t('Linkerhand')}</span></div>
+            <div className="keyboard-next" style={{ '--finger-color': finger === null ? '#e2c478' : FINGER_COLORS[finger] } as CSSProperties}>
+              <span>{t('Volgende toets')}</span><strong>{currentKey === ' ' ? '␣' : (/^[a-zäöü]$/.test(currentKey) ? currentKey.toUpperCase() : currentKey) || '✓'}</strong>
             </div>
+            <div><Hand side="right" finger={finger !== null && finger >= 4 ? finger : null} shift={guidance?.shiftHand === 'right'} /><span>{t('Rechterhand')}</span></div>
           </div>
+          <p className="keyboard-home-tip">{t('Je wijsvingers starten altijd op')} <strong>F</strong> {t('en')} <strong>J</strong> {t('— voel de streepjes!')}</p>
         </div>
       )}
     </div>

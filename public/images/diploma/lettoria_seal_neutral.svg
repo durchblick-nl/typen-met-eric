@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360">
+ <defs><radialGradient id="gold"><stop stop-color="#fff6bb"/><stop offset=".65" stop-color="#f4d36b"/><stop offset="1" stop-color="#c28e22"/></radialGradient></defs>
+ <path d="M180 9 198 24 221 17 234 37 258 36 265 60 289 67 288 91 309 104 302 127 318 145 306 166 318 187 302 205 309 228 288 241 289 265 265 272 258 296 234 295 221 315 198 308 180 323 162 308 139 315 126 295 102 296 95 272 71 265 72 241 51 228 58 205 42 187 54 166 42 145 58 127 51 104 72 91 71 67 95 60 102 36 126 37 139 17 162 24Z" fill="url(#gold)" stroke="#a77718" stroke-width="3"/>
+ <circle cx="180" cy="166" r="125" fill="none" stroke="#9d7422" stroke-width="3"/>
+ <circle cx="180" cy="166" r="115" fill="#fff9df" stroke="#c3983b" stroke-width="2"/>
+ <text x="180" y="105" text-anchor="middle" fill="#2d7d46" font-family="Georgia,serif" font-size="28" font-weight="bold" letter-spacing="3">LETTORIA</text>
+ <path d="m180 121 12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4Z" fill="#d4a525" stroke="#9d7422" stroke-width="2"/>
+ <text x="180" y="235" text-anchor="middle" fill="#8a641d" font-family="Arial,sans-serif" font-size="14">★  ★  ★</text>
+</svg>
