@@ -1,7 +1,8 @@
 'use client';
+import { t } from '@/lib/i18n';
 
-import { useComfortStore } from '@/components/settings/ComfortSettings';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useQuietMotion } from '@/components/settings/ComfortSettings';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Sparkles } from '@/components/ui/Sparkles';
 
@@ -31,9 +32,7 @@ const MOOD_EMOJIS: Record<EricMood, string> = {
 };
 
 export function Eric({ mood = 'happy', message, size = 'medium', stage }: EricProps) {
-  const calm = useComfortStore(state => state.calm);
-  const reduced = useReducedMotion();
-  const quiet = calm || reduced;
+  const quiet = useQuietMotion();
   const sizes = {
     small: { width: 80, height: 80 },
     medium: { width: 120, height: 120 },
@@ -69,7 +68,7 @@ export function Eric({ mood = 'happy', message, size = 'medium', stage }: EricPr
 
         <Image
           src={stage && stage !== 'adult' ? `/images/eric/eric-${stage}.png` : MOOD_IMAGES[mood]}
-          alt={`Eric de draak - ${mood}`}
+          alt={t("Eric de draak - {mood}",{mood})}
           width={currentSize.width}
           height={currentSize.height}
           priority

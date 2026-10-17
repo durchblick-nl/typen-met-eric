@@ -1,5 +1,7 @@
 'use client';
 
+import { t } from '@/lib/i18n';
+import { BASE_PATH, IS_GERMAN } from '@/lib/course';
 import { useEffect } from 'react';
 import * as CookieConsent from 'vanilla-cookieconsent';
 
@@ -35,7 +37,8 @@ function filterPageView(event: OpenPanelEvent): boolean {
   }
 
   const path = window.location.pathname;
-  if (!/^\/(?:kaart|oefenen|over|impressum|privacy|diploma|les\/(?:[0-9]|1[0-9]|2[0-5])|regio\/(?:grot|dorp|velden|woud|toppen|zee|kasteel))?\/?$/.test(path)) {
+  const localPath = BASE_PATH && path.startsWith(BASE_PATH + '/') ? path.slice(BASE_PATH.length) : path;
+  if (!/^\/(?:kaart|oefenen|over|impressum|privacy|diploma|les\/(?:[0-9]|1[0-9]|2[0-5])|regio\/(?:grot|dorp|velden|woud|toppen|zee|kasteel))?\/?$/.test(localPath)) {
     return false;
   }
 
@@ -103,36 +106,36 @@ export function PrivacyConsent() {
         modal.addEventListener('keydown', (event) => event.stopPropagation());
       },
       language: {
-        default: 'nl',
+        default: IS_GERMAN ? 'de' : 'nl',
         translations: {
-          nl: {
+          [IS_GERMAN ? 'de' : 'nl']: {
             consentModal: {
-              title: 'Jij kiest wat we meten.',
-              description: 'Met jouw toestemming telt OpenPanel welke pagina’s worden bezocht, zodat we Lettoria kunnen verbeteren. Je getypte tekst, voortgang en naam blijven op je apparaat. Ook zonder analyse kun je alles gebruiken. <a href="/privacy" class="cc__link">Privacy & cookies</a>',
-              acceptAllBtn: 'Analyse toestaan',
-              acceptNecessaryBtn: 'Alleen noodzakelijk',
-              showPreferencesBtn: 'Instellingen',
+              title: t("Jij kiest wat we meten."),
+              description: (IS_GERMAN ? 'Mit deiner Zustimmung zählt OpenPanel Seitenaufrufe, damit wir Lettoria verbessern können. Getippter Text, Fortschritt und Name bleiben auf deinem Gerät. Auch ohne Analyse kannst du alles nutzen.' : 'Met jouw toestemming telt OpenPanel paginaweergaven om Lettoria te verbeteren. Je getypte tekst, voortgang en naam blijven op je apparaat. Ook zonder analyse kun je alles gebruiken.') + ` <a href="${BASE_PATH}/privacy" class="cc__link">${t('Privacy & cookies')}</a>`,
+              acceptAllBtn: t("Analyse toestaan"),
+              acceptNecessaryBtn: t("Alleen noodzakelijk"),
+              showPreferencesBtn: t("Instellingen"),
             },
             preferencesModal: {
-              title: 'Jouw privacyinstellingen',
-              acceptAllBtn: 'Analyse toestaan',
-              acceptNecessaryBtn: 'Alleen noodzakelijk',
-              savePreferencesBtn: 'Keuze opslaan',
-              closeIconLabel: 'Sluiten',
+              title: t("Jouw privacyinstellingen"),
+              acceptAllBtn: t("Analyse toestaan"),
+              acceptNecessaryBtn: t("Alleen noodzakelijk"),
+              savePreferencesBtn: t("Keuze opslaan"),
+              closeIconLabel: t("Sluiten"),
               sections: [
                 {
-                  title: 'Noodzakelijke functies',
-                  description: 'Onthouden je privacykeuze en bewaren je lesvoortgang, oefencijfers, spelrecords, grotversiering en weergave- en geluidsinstellingen op dit apparaat. Altijd actief.',
+                  title: t("Noodzakelijke functies"),
+                  description: t("Onthouden je privacykeuze en bewaren je lesvoortgang, oefencijfers, spelrecords, grotversiering en weergave- en geluidsinstellingen op dit apparaat. Altijd actief."),
                   linkedCategory: 'necessary',
                 },
                 {
-                  title: 'Gebruiksanalyse',
-                  description: 'OpenPanel telt paginaweergaven, alleen met jouw toestemming. Geen opname van je scherm, geen getypte tekst en geen naam op je diploma. Uitschakelen herlaadt de pagina; lesvoortgang en spelrecords blijven bewaard, een lopende oefening begint opnieuw.',
+                  title: t("Gebruiksanalyse"),
+                  description: t("OpenPanel telt paginaweergaven, alleen met jouw toestemming. Geen opname van je scherm, geen getypte tekst en geen naam op je diploma. Uitschakelen herlaadt de pagina; lesvoortgang en spelrecords blijven bewaard, een lopende oefening begint opnieuw."),
                   linkedCategory: 'analytics',
                 },
                 {
-                  title: 'Meer informatie',
-                  description: '<a href="/privacy" class="cc__link">Lees onze privacyverklaring</a>. Je kunt deze instellingen altijd opnieuw openen via de footer.',
+                  title: t("Meer informatie"),
+                  description: `<a href="${BASE_PATH}/privacy" class="cc__link">${IS_GERMAN ? 'Datenschutzerklärung lesen' : 'Lees onze privacyverklaring'}</a>. ${IS_GERMAN ? 'Du kannst diese Einstellungen jederzeit über die Fußzeile öffnen.' : 'Je kunt deze instellingen altijd opnieuw openen via de footer.'}`,
                 },
               ],
             },
@@ -159,7 +162,7 @@ export function PrivacyConsent() {
   return null;
 }
 
-export function PrivacySettingsButton({ className, children = 'Privacyinstellingen' }: {
+export function PrivacySettingsButton({ className, children = t("Privacyinstellingen") }: {
   className?: string;
   children?: React.ReactNode;
 }) {

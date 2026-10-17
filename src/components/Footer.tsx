@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n';
 import Link from 'next/link';
 import { PrivacySettingsButton } from '@/components/privacy/PrivacyConsent';
 
@@ -8,24 +9,12 @@ export function Footer() {
         <footer className="py-12 px-4 bg-gray-50 border-t border-gray-100">
             <div className="max-w-4xl mx-auto text-center text-sm text-gray-600">
                 <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 mb-8 font-medium">
-                    <Link href="/over" className="hover:text-eric-green transition-colors">
-                        Over Lettoria
-                    </Link>
-                    <Link href="/kaart" className="hover:text-eric-green transition-colors">
-                        Wereldkaart
-                    </Link>
-                    <Link href="/oefenen" className="hover:text-eric-green transition-colors">
-                        Snel oefenen
-                    </Link>
-                    <Link href="/diploma" className="hover:text-eric-green transition-colors">
-                        Diploma
-                    </Link>
-                    <Link href="/impressum" className="hover:text-eric-green transition-colors">
-                        Colofon
-                    </Link>
-                    <Link href="/privacy" className="hover:text-eric-green transition-colors">
-                        Privacy & cookies
-                    </Link>
+                    <Link href="/over" className="hover:text-eric-green transition-colors">{' ' + t("Over Lettoria") + ' '} </Link>
+                    <Link href="/kaart" className="hover:text-eric-green transition-colors">{' ' + t("Wereldkaart") + ' '} </Link>
+                    <Link href="/oefenen" className="hover:text-eric-green transition-colors">{' ' + t("Snel oefenen") + ' '} </Link>
+                    <Link href="/diploma" className="hover:text-eric-green transition-colors">{' ' + t("Diploma") + ' '} </Link>
+                    <Link href="/impressum" className="hover:text-eric-green transition-colors">{' ' + t("Colofon") + ' '} </Link>
+                    <Link href="/privacy" className="hover:text-eric-green transition-colors">{' ' + t("Privacy & cookies") + ' '} </Link>
                     <PrivacySettingsButton className="hover:text-eric-green transition-colors" />
                 </div>
 
@@ -33,9 +22,7 @@ export function Footer() {
                     <span className="font-bold text-eric-green text-xl">Lettoria</span>
                 </div>
 
-                <p className="text-gray-500 mb-4">
-                    De leukste manier om te leren typen.
-                </p>
+                <p className="text-gray-500 mb-4">{' ' + t("De leukste manier om te leren typen.") + ' '} </p>
 
                 <div className="flex flex-col gap-2">
                     <p className="text-gray-400 text-xs">
@@ -49,7 +36,7 @@ export function Footer() {
                             Durchblick Consultancy BV
                         </a>
                     </p>
-                    <p className="text-gray-400 text-xs">Gemaakt met ❤️ voor alle kinderen.</p>
+                    <p className="text-gray-400 text-xs">{' ' + t("Gemaakt met ❤️ voor alle kinderen.") + ' '}</p>
                 </div>
             </div>
         </footer>

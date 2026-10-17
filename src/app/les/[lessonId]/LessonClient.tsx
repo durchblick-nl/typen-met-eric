@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useEffect, useState, useCallback } from 'react';
 import { getStars, type KeyStat } from '@/lib/stores/typingStore';
 import { ComfortSettings } from '@/components/settings/ComfortSettings';
@@ -226,8 +227,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
             ) : (
               <span className="text-2xl">{region.icon}</span>
             )}
-            <h1 className="text-xl font-bold text-eric-green">
-              Les {lessonId + 1}: {lesson.title}
+            <h1 className="text-xl font-bold text-eric-green">{' ' + t("Les") + ' '} {lessonId + 1}: {lesson.title}
             </h1>
           </div>
 
@@ -241,10 +241,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
         {phase === 'game' && <MagicFlight lessonId={lessonId} onNext={handleGameComplete} onExit={() => setPhase('complete')} isLastLesson={isLastLesson} />}
         <AnimatePresence mode="wait">
           {phase === 'warmup' && <motion.div key="warmup" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <h2 className="text-2xl text-eric-green font-bold mb-3">Een beetje extra aandacht</h2>
-            <p className="text-gray-600 mb-5">Neem je tijd. Deze oefening verandert je lessterren niet.</p>
+            <h2 className="text-2xl text-eric-green font-bold mb-3">{' ' + t("Een beetje extra aandacht") + ' '}</h2>
+            <p className="text-gray-600 mb-5">{' ' + t("Neem je tijd. Deze oefening verandert je lessterren niet.") + ' '}</p>
             <TypingArea /><div className="mt-5"><VirtualKeyboard lessonId={lessonId} /></div>
-            <div className="flex flex-wrap gap-3 mt-5"><button className="bg-eric-green text-white rounded-full px-5 py-3 font-semibold" onClick={handleRetry}>Probeer de les opnieuw</button><button className="underline text-eric-green" onClick={() => setPhase('complete')}>Terug naar je resultaat</button></div>
+            <div className="flex flex-wrap gap-3 mt-5"><button className="bg-eric-green text-white rounded-full px-5 py-3 font-semibold" onClick={handleRetry}>{' ' + t("Probeer de les opnieuw") + ' '}</button><button className="underline text-eric-green" onClick={() => setPhase('complete')}>{' ' + t("Terug naar je resultaat") + ' '}</button></div>
           </motion.div>}
           {/* Intro Phase */}
           {phase === 'intro' && (
@@ -264,7 +264,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                   <div className="relative aspect-[16/9] w-full">
                     <Image
                       src={lesson.storyImageUrl}
-                      alt="Story Illustration"
+                      alt={t("Story Illustration")}
                       fill
                       className="object-cover"
                     />
@@ -285,21 +285,21 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               </div>
 
               <div className="max-w-xl mx-auto mb-5 rounded-2xl bg-eric-green/5 border border-eric-green/15 p-4 text-center">
-                <p className="font-bold text-eric-green">{mastered ? `Arcadebaan ${lessonId + 1} is vrijgespeeld!` : `Drie sterren? Arcadebaan ${lessonId + 1} is jouw beloning!`}</p>
-                <p className="text-sm text-gray-600 mt-1">Kristallen pakken, rotsen ontwijken en met Eric naar een nieuw record vliegen.</p>
-                {mastered && <button className="mt-3 text-eric-green font-bold underline" onClick={handleStartArcade}>Speel kristaljacht</button>}
+                <p className="font-bold text-eric-green">{mastered ? t("Arcadebaan {n} is vrijgespeeld!",{n:lessonId+1}) : t("Drie sterren? Arcadebaan {n} is jouw beloning!",{n:lessonId+1})}</p>
+                <p className="text-sm text-gray-600 mt-1">{' ' + t("Kristallen pakken, rotsen ontwijken en met Eric naar een nieuw record vliegen.") + ' '}</p>
+                {mastered && <button className="mt-3 text-eric-green font-bold underline" onClick={handleStartArcade}>{' ' + t("Speel kristaljacht") + ' '}</button>}
               </div>
               {/* New keys + Start button in row */}
               <div className="flex flex-wrap items-center justify-center gap-4">
                 {lesson.newKeys.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500">Nieuw:</span>
+                    <span className="text-sm text-gray-500">{' ' + t("Nieuw:") + ' '}</span>
                     {lesson.newKeys.map((key) => (
                       <span
                         key={key}
                         className="w-10 h-10 bg-eric-gold text-gray-900 rounded-lg flex items-center justify-center text-lg font-bold font-mono shadow-lg"
                       >
-                        {key === ' ' ? '␣' : key.toUpperCase()}
+                        {key === ' ' ? '␣' : key === 'ß' ? 'ß' : key.toUpperCase()}
                       </span>
                     ))}
                   </div>
@@ -308,9 +308,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 <button
                   onClick={handleStartExercise}
                   className="inline-flex items-center px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-bold text-lg transition-all hover:scale-105 shadow-lg"
-                >
-                  Start de oefening!
-                  <KeyboardHint keyName="↵" />
+                >{' ' + t("Start de oefening!") + ' '} <KeyboardHint keyName="↵" />
                 </button>
               </div>
             </motion.div>
@@ -338,15 +336,15 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                   message={
                     exerciseComplete
                       ? accuracy >= 95
-                        ? 'Uitstekend!'
+                        ? t("Uitstekend!")
                         : accuracy >= 85
-                          ? 'Heel goed!'
+                          ? t("Heel goed!")
                           : accuracy >= 70
-                            ? 'Dat gaat al aardig!'
+                            ? t("Dat gaat al aardig!")
                             : accuracy >= 50
-                              ? 'Blijf oefenen, het komt goed!'
-                              : 'Oeps! Probeer het nog eens...'
-                      : 'Concentreer je... je kunt het!'
+                              ? t("Blijf oefenen, het komt goed!")
+                              : t("Oeps! Probeer het nog eens...")
+                      : t("Concentreer je... je kunt het!")
                   }
                 />
               </div>
@@ -385,9 +383,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               <button
                 onClick={handleContinue}
                 className="inline-flex items-center px-8 py-4 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-bold text-lg transition-all hover:scale-105 shadow-lg"
-              >
-                Bekijk je resultaat!
-                <KeyboardHint keyName="↵" />
+              >{' ' + t("Bekijk je resultaat!") + ' '} <KeyboardHint keyName="↵" />
               </button>
             </motion.div>
           )}
@@ -408,32 +404,28 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 mastered={mastered}
                 onArcade={handleStartArcade}
               />
-              {weakKeys.length > 0 && <div className="mb-6 text-gray-700"><p className="mb-3">Extra aandacht voor: <span className="font-mono font-bold">{weakKeys.map(key => key === ' ' ? '␣' : key).join(' · ')}</span></p><button className="text-eric-green underline font-semibold" onClick={() => { setTargetText(warmupText); setPhase('warmup'); }}>Oefen deze toetsen even apart</button></div>}
+              {weakKeys.length > 0 && <div className="mb-6 text-gray-700"><p className="mb-3">{' ' + t("Extra aandacht voor:") + ' '} <span className="font-mono font-bold">{weakKeys.map(key => key === ' ' ? '␣' : key).join(' · ')}</span></p><button className="text-eric-green underline font-semibold" onClick={() => { setTargetText(warmupText); setPhase('warmup'); }}>{' ' + t("Oefen deze toetsen even apart") + ' '}</button></div>}
               <div className="flex flex-wrap justify-center gap-4">
                 <button
                   onClick={handleBackToRegion}
                   className="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition-colors"
                 >
-                  {isLastLesson ? 'Terug naar kaart' : `Terug naar ${region.name}`}
+                  {isLastLesson ? t("Terug naar kaart") : t("Terug naar {name}",{name:region.name})}
                   <KeyboardHintDark keyName="Esc" />
                 </button>
 
-                {stars >= 3 && <button onClick={handleGameComplete} className="px-6 py-3 rounded-full border border-eric-green/30 font-semibold text-eric-green">{isLastLesson ? 'Naar de kaart' : 'Volgende les'}</button>}
+                {stars >= 3 && <button onClick={handleGameComplete} className="px-6 py-3 rounded-full border border-eric-green/30 font-semibold text-eric-green">{isLastLesson ? t("Naar de kaart") : t("Volgende les")}</button>}
                 {stars < 3 ? (
                   <button
                     onClick={handleRetry}
                     className="inline-flex items-center px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-full font-semibold transition-colors"
-                  >
-                    Opnieuw proberen
-                    <KeyboardHint keyName="↵" />
+                  >{' ' + t("Opnieuw proberen") + ' '} <KeyboardHint keyName="↵" />
                   </button>
                 ) : (
                   <button
                     onClick={handleStartGame}
                     className="inline-flex items-center px-6 py-3 border border-eric-green/30 text-eric-green hover:bg-eric-green/10 rounded-full font-semibold transition-colors"
-                  >
-                    Erics magievlucht
-                  </button>
+                  >{' ' + t("Erics magievlucht") + ' '} </button>
                 )}
               </div>
             </motion.div>

@@ -1,4 +1,5 @@
 "use client";
+import { t } from '@/lib/i18n';
 import { useState } from "react";
 import Image from "next/image";
 import { EricPortrait } from "@/components/eric/EricPortrait";
@@ -12,9 +13,9 @@ import { IllustratedProp, type PropName } from "./IllustratedProp";
 import { useQuietMotion } from "@/components/settings/ComfortSettings";
 
 const descriptions: Record<string, string> = {
-  plant: "Geef de grot meer leven.",
-  lantern: "Brengt warm licht in de grot.",
-  stars: "Laat de grot stralen.",
+  plant: t("Geef de grot meer leven."),
+  lantern: t("Brengt warm licht in de grot."),
+  stars: t("Laat de grot stralen."),
 };
 const placements: Record<string, string> = {
   plant: "absolute w-[26%] left-[6%] bottom-[23%]",
@@ -33,8 +34,8 @@ export function GrotRewards() {
     decorateGrot(id);
     setMessage(
       useGameStore.getState().activeDecoration === id
-        ? `${name} staat nu in Erics grot!`
-        : `${name} is opgeborgen. Je kunt hem weer kiezen.`,
+        ? t("{name} staat nu in Erics grot!", {name})
+        : t("{name} is opgeborgen. Je kunt hem weer kiezen.", {name}),
     );
   };
   return (
@@ -47,19 +48,15 @@ export function GrotRewards() {
         <h2
           id="grot-heading"
           className="text-3xl sm:text-4xl font-bold text-eric-green"
-        >
-          Erics grot
-        </h2>
-        <p className="text-gray-600 mt-2 mb-4">
-          Een thuis dat met je meegroeit.
-        </p>
+        >{' ' + t("Erics grot") + ' '} </h2>
+        <p className="text-gray-600 mt-2 mb-4">{' ' + t("Een thuis dat met je meegroeit.") + ' '} </p>
         <div
           data-testid="grot-scene"
           className="relative aspect-[8/5] overflow-hidden rounded-2xl bg-orange-100"
         >
           <Image
             src="/images/game/grot-home.webp"
-            alt="Erics gezellige grot met uitzicht op Lettoria"
+            alt={t("Erics gezellige grot met uitzicht op Lettoria")}
             fill
             className="object-cover"
           />
@@ -99,8 +96,7 @@ export function GrotRewards() {
         <div className="flex items-center gap-2 text-eric-green">
           <IllustratedProp name="gem" className="w-12" />
           <span data-testid="grot-balance" className="text-2xl font-bold">
-            {totalGems} kristallen
-          </span>
+            {totalGems}{' ' + t("kristallen") + ' '} </span>
         </div>
         <div className="flex items-center gap-3 my-4">
           <EricPortrait stage={growth.stage} className="w-[58px]" />
@@ -108,7 +104,7 @@ export function GrotRewards() {
             <h3 className="font-bold text-eric-green">{growth.name}</h3>
             <div
               role="progressbar"
-              aria-label="Erics groei"
+              aria-label={t("Erics groei")}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Math.round(growth.progress)}
@@ -121,8 +117,8 @@ export function GrotRewards() {
             </div>
             <p className="text-xs text-gray-600">
               {growth.remaining
-                ? `Nog ${growth.remaining} lessterren tot de volgende groei.`
-                : "Eric is uitgegroeid tot een grote draak!"}
+                ? t("Nog {n} lessterren tot de volgende groei.", {n:growth.remaining})
+                : t("Eric is uitgegroeid tot een grote draak!")}
             </p>
           </div>
         </div>
@@ -155,9 +151,9 @@ export function GrotRewards() {
                 >
                   {owned
                     ? selected
-                      ? "✓ Gekozen"
-                      : "Kiezen"
-                    : `${item.cost} kristallen`}
+                      ? t("✓ Gekozen")
+                      : t("Kiezen")
+                    : `${item.cost} ${t("kristallen")}`}
                 </button>
               </div>
             );
@@ -167,7 +163,7 @@ export function GrotRewards() {
           href={next ? `/les/${next.lesson.id}` : "/diploma"}
           className="mt-4 block text-center py-3 rounded-full border-2 border-eric-green text-eric-green font-bold hover:bg-eric-green/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
         >
-          {next ? "Op avontuur" : "Bekijk je diploma"}{" "}
+          {next ? t("Op avontuur") : t("Bekijk je diploma")}{" "}
           <span aria-hidden="true">→</span>
         </Link>
         <p
@@ -175,7 +171,7 @@ export function GrotRewards() {
           className="min-h-10 mt-3 text-xs text-gray-600 text-center"
         >
           {message ||
-            "Verdien kristallen in de bonusspellen. Je versiering blijft bewaard."}
+            t("Verdien kristallen in de bonusspellen. Je versiering blijft bewaard.")}
         </p>
       </div>
     </section>

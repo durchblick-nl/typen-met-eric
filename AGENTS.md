@@ -4,11 +4,11 @@ Repository instructions for coding agents working on Lettoria. Follow the user's
 
 ## Product and scope
 
-Lettoria is a free Dutch typing tutor for children aged 8–12. Eric the dragon guides the child through a story about restoring magic to seven regions. No account or payment is required. Production: `https://lettoria.nl`; staging: `https://typen.treehouse.ch`.
+Lettoria is a free Dutch/German typing tutor for children aged 8–12. Eric the dragon guides the child through a story about restoring magic to seven regions. No account or payment is required. Production: `https://lettoria.nl`; staging: `https://typen.treehouse.ch`.
 
-- Write child-facing copy in simple, encouraging Dutch. Keep engineering documentation in English unless requested otherwise.
+- Write child-facing copy in simple, encouraging Dutch or German for the selected course. Keep engineering documentation in English unless requested otherwise.
 - Protect the learning experience: accurate typing, correct finger use, readable targets and understandable feedback come before speed or spectacle.
-- Treat German/English support, Shift lessons and offline support as planned work, not implemented features. Check the code before making product claims.
+- Courses: NL QWERTY at `/`, Dutch Belgian AZERTY at `/be/`, German DE QWERTZ at `/de/` and German Swiss QWERTZ at `/ch/`. Shift guidance covers Belgian digits and punctuation; dedicated uppercase lessons, English and offline support remain planned. Check the code before making product claims.
 - Keep this file focused on working rules. Store detailed designs in `docs/`; do not add feature-completion checklists here.
 
 ## Setup and commands
@@ -18,7 +18,7 @@ Use npm and the committed `package-lock.json`. Match tool versions to `package.j
 ```bash
 npm ci                              # Install the locked dependencies when needed
 npm run dev                         # Local Next.js development server
-npm run build                       # Production build and static export into out/
+npm run build                       # Four production exports combined into out/
 npx tsc --noEmit --incremental false # Type check without a persistent cache
 npm test                            # Core regression tests (Node test runner + TypeScript compiler)
 npm run lint                        # next lint; see current limitation below
@@ -51,7 +51,7 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 ## Typing and progression contracts
 
 - Exercise text must use only keys taught up to that lesson. Check the whole curriculum when changing exercise data, including spaces, punctuation, digits and case.
-- The current curriculum and finger map assume Dutch QWERTY. Do not imply other keyboard layouts are supported. Keep target characters and finger guidance consistent.
+- `src/lib/course.ts`, `src/lib/keyboards.ts` and `src/lib/data/courseCurriculum.ts` bind locale, curriculum and finger guidance together. Keep taught characters, physical positions and Shift guidance consistent; do not substitute letters inside real words to change layouts.
 - Currently 95%+ cumulative lesson accuracy earns three stars and unlocks the next lesson; 85–94% earns two stars, below 85% one star. Any change to this policy is a product change, not a cosmetic adjustment.
 - Calculate accuracy from correct characters / all attempts, without rounding before star thresholds. Wrong attempts stay at the same target and count even after a correct retry. Show WPM only after 15 active seconds and 20 correct characters; exclude pauses and inter-key idle gaps above 10 seconds.
 - Do not count movement or passive survival as typing mastery. Focus warmups do not award lesson stars.
@@ -91,7 +91,7 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 - Analytics behavior and public privacy copy must agree. The user's explicit analytics request can change the former no-tracking policy; do not keep claiming that no statistics are collected after enabling analytics.
 - `src/components/privacy/PrivacyConsent.tsx` uses CookieConsent 3.1.0, matching roger.tips. Load OpenPanel only after analytics consent. Keep page URLs free of query strings/fragments and disable outgoing-link tracking, attribute tracking and replay. Consent withdrawal must stop tracking while preserving local progress; keep `/privacy` and the settings control accurate.
 - Public analytics client IDs may be included in browser code. Client secrets, credentials and private keys must never appear in code, logs, screenshots or documentation.
-- Preserve the Zustand persistence keys `typen-met-eric-progress` and `lettoria-game-store`; local quiet settings use `lettoria-comfort`. Changes to their schema require backwards-compatible hydration or an explicit migration; never reset real progress to make a feature work.
+- New courses suffix progress and game keys with `-be`, `-de` or `-ch`; never share mastery across different keyboards. Preserve the original NL Zustand persistence keys `typen-met-eric-progress` and `lettoria-game-store`; local quiet settings use `lettoria-comfort`. Changes to their schema require backwards-compatible hydration or an explicit migration; never reset real progress to make a feature work.
 - Isolate browser tests in a temporary profile. Do not clear or seed the user's real localStorage.
 
 ## Validation and delivery

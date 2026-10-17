@@ -11,7 +11,8 @@ const root = path.resolve(__dirname, "..");
 function sources() {
   const cache = new Map();
   function load(file) {
-    if (!path.extname(file)) file += ".ts";
+    if (!path.extname(file)) file = fs.existsSync(file + ".ts") ? file + ".ts" : path.join(file,"index.ts");
+    if (file.endsWith(".json")) return JSON.parse(fs.readFileSync(file,"utf8"));
     if (cache.has(file)) return cache.get(file).exports;
     const module = { exports: {} };
     cache.set(file, module);
@@ -25,6 +26,7 @@ function sources() {
     const code = ts.transpileModule(fs.readFileSync(file, "utf8"), {
       compilerOptions: {
         module: ts.ModuleKind.CommonJS,
+        esModuleInterop: true,
         target: ts.ScriptTarget.ES2020,
       },
     }).outputText;
@@ -555,4 +557,61 @@ test("the journey follows the first unmastered lesson even when saved progress h
   assert.match(arcadeLandscape("toppen"), /mountains/);
   assert.match(arcadeLandscape("zee"), /coast/);
   assert.match(arcadeLandscape("grot"), /track/);
+});
+
+test('all four curricula use only taught, physically mapped keys', () => {
+ const load=sources();
+ const {DUTCH_REGIONS}=load('lib/data/regions');
+ const {createCurriculum}=load('lib/data/courseCurriculum');
+ const {keyGuidance}=load('lib/keyboards');
+ for(const course of ['nl','be','de','ch']) {
+  const learned=new Set();
+  const problems=[];
+  const regions=createCurriculum(DUTCH_REGIONS,course);
+  assert.equal(regions.flatMap(r=>r.lessons).length,26);
+  for(const lesson of regions.flatMap(r=>r.lessons)) {
+   lesson.newKeys.forEach(k=>learned.add(k));
+   assert.ok(lesson.exercises.length>=5,`${course} lesson ${lesson.id}: too few exercises`);
+   for(const text of lesson.exercises)for(const char of text){
+    if(!learned.has(char))problems.push(`${course} lesson ${lesson.id}: untaught ${char} in ${text}`);
+    assert.ok(keyGuidance(char,course),`${course}: unmapped ${char}`);
+   }
+   if(course==='ch')assert.ok(!JSON.stringify(lesson).includes('ß'));
+  }
+  assert.deepEqual([...new Set(problems)],[]);
+ }
+});
+test('Belgian AZERTY shift and distinct DE/CH keyboards match physical positions',()=>{
+ const {KEYBOARDS,keyGuidance}=sources()('lib/keyboards');
+ assert.equal(KEYBOARDS.be.rows[1].map(k=>k.key).join(''),'azertyuiop');
+ assert.equal(KEYBOARDS.be.rows[2].map(k=>k.key).join(''),'qsdfghjklmù');
+ assert.deepEqual(keyGuidance('.', 'be'),{key:';',finger:5,shift:true,shiftHand:'left'});
+ assert.equal(keyGuidance('1','be').shift,true);
+ assert.equal(keyGuidance('m','be').finger,7);
+ assert.equal(keyGuidance('z','de').finger,4);
+ assert.equal(keyGuidance('y','ch').finger,0);
+ assert.ok(keyGuidance('ß','de'));
+ assert.equal(keyGuidance('ß','ch'),undefined);
+});
+
+test('regional courses keep progress separate and their bonus targets use learned keys',()=>{
+ const old=process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+ try {
+  for(const course of ['nl','be','de','ch']){
+   process.env.NEXT_PUBLIC_LETTORIA_COURSE=course;
+   const load=sources();const {storageKey}=load('lib/course');
+   assert.equal(storageKey('typen-met-eric-progress'),course==='nl'?'typen-met-eric-progress':`typen-met-eric-progress-${course}`);
+   assert.equal(storageKey('lettoria-game-store'),course==='nl'?'lettoria-game-store':`lettoria-game-store-${course}`);
+   const {REGIONS}=load('lib/data/regions');const {flightTargets,MAGIC_WORDS}=load('lib/magicFlight');const {arcadeCourse}=load('lib/arcadeFlight');
+   const learned=new Set();for(const lesson of REGIONS.flatMap(r=>r.lessons)){
+    lesson.newKeys.forEach(k=>learned.add(k));
+    for(const target of flightTargets(lesson.id))for(const char of target)assert.ok(learned.has(char),`${course} magic target: ${target}`);
+    assert.ok(arcadeCourse(lesson.id).keys.every(k=>learned.has(k)));
+   }
+   if(course==='de'||course==='ch'){assert.ok(MAGIC_WORDS.includes('wald'));assert.ok(!MAGIC_WORDS.includes('draak'));}
+   const {t}=load('lib/i18n');
+   if(course==='ch')assert.equal(t('Sluiten'),'Schliessen');
+   if(course==='de')assert.equal(t('Sluiten'),'Schließen');
+  }
+ }finally{if(old===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=old;}
 });

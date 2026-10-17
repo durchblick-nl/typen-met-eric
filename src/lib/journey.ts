@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n';
 import { REGIONS } from "./data/regions";
 
 export function nextJourneyLesson(lessonStars: Record<number, number>) {
@@ -20,10 +21,10 @@ export function ericGrowth(stars: number) {
     stage,
     name:
       stage === "baby"
-        ? "Jonge draak"
+        ? t("Jonge draak")
         : stage === "teen"
-          ? "Groeiende draak"
-          : "Grote draak",
+          ? t("Groeiende draak")
+          : t("Grote draak"),
     remaining: next === null ? 0 : next - earned,
     progress: next === null ? 100 : ((earned - start) / (next - start)) * 100,
   };

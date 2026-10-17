@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n';
 import { REGIONS } from "./data/regions";
 export const ARCADE_DURATION_MS = 75000;
 export const ARCADE_HIT_DEPTH = 0.86;
@@ -129,7 +130,7 @@ export function typeArcade(state: ArcadeState, key: string): ArcadeState {
       attempts: state.attempts + 1,
       streak: 0,
       feedback: {
-        text: "Typ een letter die je op de baan ziet.",
+        text: t("Typ een letter die je op de baan ziet."),
         kind: "hint",
         until: state.elapsedMs + 1100,
       },
@@ -157,7 +158,7 @@ export function typeArcade(state: ArcadeState, key: string): ArcadeState {
     },
     feedback: {
       text: triggerTurbo
-        ? "TURBO! Dubbele punten en een magisch schild!"
+        ? t("TURBO! Dubbele punten en een magisch schild!")
         : perfect
           ? `Perfect! +${points}`
           : `Raak! +${points}`,
@@ -197,7 +198,7 @@ export function advanceArcade(
         next.collected++;
         next.score += turbo ? 50 : 25;
         next.feedback = {
-          text: turbo ? "Kristal! +50" : "Kristal! +25",
+          text: turbo ? t("Kristal! +50") : t("Kristal! +25"),
           kind: "good",
           until: next.elapsedMs + 900,
         };
@@ -212,7 +213,7 @@ export function advanceArcade(
         next.streak = 0;
         next.invulnerableUntil = next.elapsedMs + 1800;
         next.feedback = {
-          text: "Een rots! Wissel van baan met ← of →.",
+          text: t("Een rots! Wissel van baan met ← of →."),
           kind: "hit",
           until: next.elapsedMs + 1400,
         };

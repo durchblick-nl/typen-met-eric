@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AbilityConfig } from '@/lib/data/raceAbilities';
 
@@ -24,7 +25,7 @@ export function AbilityBar({ abilities, cooldowns, activeAbility }: AbilityBarPr
         const cooldown = cooldowns[key] || 0;
         const isOnCooldown = cooldown > 0;
         const isActive = activeAbility === key;
-        const displayKey = key === ' ' ? 'SPATIE' : key.toUpperCase();
+        const displayKey = key === ' ' ? t("SPATIE") : key.toUpperCase();
 
         return (
           <motion.div

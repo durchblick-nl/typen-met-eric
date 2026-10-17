@@ -1,34 +1,10 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useTypingStore } from '@/lib/stores/typingStore';
 
-// Keyboard layout (Dutch QWERTY) with number row
-const KEYBOARD_ROWS = [
-  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-  ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-  ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'],
-  ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.'],
-];
-
-// Finger assignments for each key
-// 0 = left pinky, 1 = left ring, 2 = left middle, 3 = left index
-// 4 = right index, 5 = right middle, 6 = right ring, 7 = right pinky
-const FINGER_MAP: Record<string, number> = {
-  // Number row
-  '1': 0, '2': 1, '3': 2, '4': 3, '5': 3,
-  '6': 4, '7': 4, '8': 5, '9': 6, '0': 7,
-  // Top row
-  'q': 0, 'w': 1, 'e': 2, 'r': 3, 't': 3,
-  'y': 4, 'u': 4, 'i': 5, 'o': 6, 'p': 7,
-  // Home row
-  'a': 0, 's': 1, 'd': 2, 'f': 3, 'g': 3,
-  'h': 4, 'j': 4, 'k': 5, 'l': 6, ';': 7,
-  // Bottom row
-  'z': 0, 'x': 1, 'c': 2, 'v': 3, 'b': 3,
-  'n': 4, 'm': 4, ',': 5, '.': 6,
-  // Space
-  ' ': 8, // Thumbs
-};
+import { COURSE } from '@/lib/course';
+import { KEYBOARDS, keyGuidance } from '@/lib/keyboards';
 
 // Finger colors - background classes
 const FINGER_BG_COLORS: Record<number, string> = {
@@ -56,7 +32,7 @@ const FINGER_HEX_COLORS: Record<number, string> = {
 };
 
 // Home row keys (have bumps on F and J)
-const HOME_KEYS = ['a', 's', 'd', 'f', 'j', 'k', 'l', ';'];
+const HOME_KEYS = KEYBOARDS[COURSE].homeKeys;
 
 // Left Hand SVG - viewed from above, fingers pointing UP toward keyboard
 function LeftHandSVG({ activeFingerIndex }: { activeFingerIndex: number | null }) {
@@ -197,7 +173,8 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
 
   // Get the current key to press
   const currentKey = highlightKey || targetText[currentIndex]?.toLowerCase() || '';
-  const currentFingerIndex = currentKey ? FINGER_MAP[currentKey] : null;
+  const guidance = keyGuidance(currentKey);
+  const currentFingerIndex = guidance?.finger ?? null;
 
   // Always show hands
   const showHands = true;
@@ -205,17 +182,18 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
   return (
     <div className="bg-gray-800/95 backdrop-blur w-full max-w-xl min-w-0 rounded-2xl p-2 sm:p-4 shadow-xl border border-gray-700 box-glow">
       {/* Main keyboard rows */}
-      {KEYBOARD_ROWS.map((row, rowIndex) => (
+      {KEYBOARDS[COURSE].rows.map((row, rowIndex) => (
         <div key={rowIndex} className="flex justify-center gap-1 mb-1">
           {/* Add offset for home and bottom rows */}
           {rowIndex === 2 && <div className="w-[3%] shrink-0" />}
           {rowIndex === 3 && <div className="w-[6%] shrink-0" />}
 
-          {row.map((key) => {
-            const isCurrentKey = key === currentKey;
+          {row.map((entry) => {
+            const key = entry.key;
+            const isCurrentKey = key === guidance?.key;
             const isHomeKey = HOME_KEYS.includes(key);
             const isHomePosition = key === 'f' || key === 'j';
-            const fingerIndex = FINGER_MAP[key];
+            const fingerIndex = entry.finger;
             const fingerBgColor = FINGER_BG_COLORS[fingerIndex];
 
             return (
@@ -236,7 +214,8 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
                 } : undefined}
               >
                 <span>
-                  {key === ';' ? ';' : key.toUpperCase()}
+                  {entry.shift && <span className="absolute top-0.5 right-1 text-[10px] opacity-70">{entry.shift}</span>}
+                  {/^[a-zäöü]$/.test(key) ? key.toUpperCase() : key}
                 </span>
 
                 {/* F and J bumps - more prominent */}
@@ -249,6 +228,9 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
         </div>
       ))}
 
+      <div className="flex justify-between gap-3 mt-2 text-xs text-gray-400" aria-label={t('Shifttoetsen')}>
+        {(['left','right'] as const).map(hand=><span key={hand} className={`rounded-md border px-3 py-1 ${guidance?.shiftHand===hand?'bg-eric-gold text-gray-900 border-white':'border-gray-600'}`}>{hand==='left'?t('Linker Shift'):t('Rechter Shift')} ⇧</span>)}
+      </div>
       {/* Space bar */}
       <div className="flex justify-center mt-2">
         <div
@@ -261,11 +243,11 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
             }
           `}
         >
-          <span>
-            SPATIE
-          </span>
+          <span>{' ' + t("SPATIE") + ' '} </span>
         </div>
       </div>
+
+      {guidance?.shift && <p role="status" className="mt-3 text-center text-sm text-white">{guidance.shiftHand === 'left' ? t("Houd linker Shift ingedrukt") : t("Houd rechter Shift ingedrukt")} + {guidance.key.toUpperCase()} → {currentKey}</p>}
 
       {/* Hand illustrations */}
       {showFingerHints && showHands && (
@@ -274,11 +256,11 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
           <div className="flex justify-center items-center gap-4">
             <div className="text-center">
               <LeftHandSVG activeFingerIndex={currentFingerIndex !== null && currentFingerIndex <= 3 ? currentFingerIndex : null} />
-              <div className="text-gray-400 text-xs">Linkerhand</div>
+              <div className="text-gray-400 text-xs">{' ' + t("Linkerhand") + ' '}</div>
             </div>
             <div className="text-center">
               <RightHandSVG activeFingerIndex={currentFingerIndex !== null && currentFingerIndex >= 4 && currentFingerIndex <= 7 ? currentFingerIndex : null} />
-              <div className="text-gray-400 text-xs">Rechterhand</div>
+              <div className="text-gray-400 text-xs">{' ' + t("Rechterhand") + ' '}</div>
             </div>
           </div>
 
@@ -286,9 +268,7 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey, lessonId
           <div className="bg-eric-gold/10 rounded-lg p-3 text-center border border-eric-gold/30 mt-4">
             <div className="flex items-center justify-center gap-2 text-eric-gold">
               <span className="text-lg">💡</span>
-              <span className="text-sm font-medium">
-                Je wijsvingers starten altijd op <span className="font-bold">F</span> en <span className="font-bold">J</span> — voel de streepjes!
-              </span>
+              <span className="text-sm font-medium">{' ' + t("Je wijsvingers starten altijd op") + ' '} <span className="font-bold">F</span>{" "}{' ' + t("en") + ' '}  <span className="font-bold">J</span>{' ' + t("— voel de streepjes!") + ' '} </span>
             </div>
           </div>
         </div>

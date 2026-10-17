@@ -1,3 +1,4 @@
+import { storageKey } from '../course';
 import { create } from 'zustand';
 import type { KeyStat } from './typingStore';
 import { persist } from 'zustand/middleware';
@@ -117,7 +118,7 @@ export const useProgressStore = create<ProgressState>()(
       },
     }),
     {
-      name: 'typen-met-eric-progress',
+      name: storageKey('typen-met-eric-progress'),
     }
   )
 );

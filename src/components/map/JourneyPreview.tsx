@@ -1,4 +1,5 @@
 "use client";
+import { t } from '@/lib/i18n';
 import { EricPortrait } from "@/components/eric/EricPortrait";
 import Link from "next/link";
 import { useProgressStore } from "@/lib/stores/progressStore";
@@ -15,18 +16,18 @@ export function JourneyPreview() {
     >
       <EricPortrait
         stage={growth.stage}
-        label="Eric gaat met je mee"
+        label={t("Eric gaat met je mee")}
         className="w-28 sm:w-36"
       />
       <div className="flex-1 text-center sm:text-left">
         <p className="text-sm font-semibold text-eric-green">
-          {next ? "Jouw volgende avontuur" : "Lettoria is weer vol magie!"}
+          {next ? t("Jouw volgende avontuur") : t("Lettoria is weer vol magie!")}
         </p>
         <h2
           id="journey-heading"
           className="text-2xl sm:text-3xl font-bold text-eric-green mt-1"
         >
-          {next?.lesson.title || "Alle lessen met drie sterren!"}
+          {next?.lesson.title || t("Alle lessen met drie sterren!")}
         </h2>
         <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-2">
           {next?.lesson.newKeys.length ? (
@@ -41,8 +42,8 @@ export function JourneyPreview() {
           ) : (
             <span className="text-sm text-gray-600">
               {next
-                ? "Gebruik je geleerde toetsen."
-                : "Eric is trots op je. Je diploma wacht op je."}
+                ? t("Gebruik je geleerde toetsen.")
+                : t("Eric is trots op je. Je diploma wacht op je.")}
             </span>
           )}
         </div>
@@ -51,7 +52,7 @@ export function JourneyPreview() {
         href={next ? `/les/${next.lesson.id}` : "/diploma"}
         className="shrink-0 rounded-full bg-eric-green text-white font-bold px-6 py-3 hover:bg-eric-green/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
       >
-        {next ? "Verder met Eric" : "Bekijk je diploma"}{" "}
+        {next ? t("Verder met Eric") : t("Bekijk je diploma")}{" "}
         <span aria-hidden="true">→</span>
       </Link>
     </section>

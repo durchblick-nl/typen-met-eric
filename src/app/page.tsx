@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -70,9 +71,7 @@ export default function Home() {
           initial="hidden"
           animate="show"
         >
-          <motion.div variants={item} className="inline-block bg-eric-gold/20 text-eric-green font-bold px-6 py-2 rounded-full text-sm md:text-base mb-6 border border-eric-gold/30 backdrop-blur-sm">
-            ✨ 100% Gratis - Geen registratie nodig ✨
-          </motion.div>
+          <motion.div variants={item} className="inline-block bg-eric-gold/20 text-eric-green font-bold px-6 py-2 rounded-full text-sm md:text-base mb-6 border border-eric-gold/30 backdrop-blur-sm">{' ' + t("✨ 100% Gratis - Geen registratie nodig ✨") + ' '} </motion.div>
 
           <motion.h1
             variants={item}
@@ -81,13 +80,9 @@ export default function Home() {
             Lettoria
           </motion.h1>
 
-          <motion.p variants={item} className="text-xl md:text-3xl text-gray-700 mb-4 font-bold">
-            Gratis typecursus voor kinderen
-          </motion.p>
+          <motion.p variants={item} className="text-xl md:text-3xl text-gray-700 mb-4 font-bold">{' ' + t("Gratis typecursus voor kinderen") + ' '} </motion.p>
 
-          <motion.p variants={item} className="text-base md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Leer je kind blind typen met 10 vingers in de magische wereld van Lettoria.
-            Spelenderwijs leren, samen met <span className="text-eric-green font-bold">Eric de draak</span>.
+          <motion.p variants={item} className="text-base md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">{' ' + t("Leer je kind blind typen met 10 vingers in de magische wereld van Lettoria. Spelenderwijs leren, samen met") + ' '} <span className="text-eric-green font-bold">{' ' + t("Eric de draak") + ' '}</span>.
           </motion.p>
 
           {/* Eric Image */}
@@ -100,7 +95,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-eric-gold/20 blur-3xl rounded-full transform scale-75"></div>
             <Image
               src="/images/eric/eric-happy.png"
-              alt="Eric de draak - je gids in Lettoria"
+              alt={t("Eric de draak - je gids in Lettoria")}
               width={220}
               height={220}
               className="mx-auto drop-shadow-2xl relative z-10"
@@ -114,31 +109,24 @@ export default function Home() {
               className="group relative inline-flex items-center justify-center"
             >
               <div className="absolute transition-all duration-200 rounded-full -inset-1 bg-gradient-to-r from-eric-green to-eric-belly opacity-70 blur group-hover:opacity-100 group-hover:blur-md"></div>
-              <span className="relative inline-flex items-center bg-eric-green hover:bg-eric-green/90 text-white font-bold py-4 px-10 rounded-full text-xl transition-all hover:scale-105 shadow-xl">
-                Start gratis met typen
-                <KeyboardHint keyName="↵" />
+              <span className="relative inline-flex items-center bg-eric-green hover:bg-eric-green/90 text-white font-bold py-4 px-10 rounded-full text-xl transition-all hover:scale-105 shadow-xl">{' ' + t("Start gratis met typen") + ' '} <KeyboardHint keyName="↵" />
               </span>
             </Link>
             <Link
               href="/over"
               className="inline-flex items-center bg-white hover:bg-gray-50 text-eric-green font-bold py-4 px-10 rounded-full text-xl transition-all hover:scale-105 shadow-md border-2 border-eric-green"
-            >
-              Info voor ouders
-              <KeyboardHintDark keyName="I" />
+            >{' ' + t("Info voor ouders") + ' '} <KeyboardHintDark keyName="I" />
             </Link>
           </motion.div>
 
           {/* Trust badges */}
           <motion.div variants={item} className="flex flex-wrap justify-center gap-6 text-sm md:text-base text-gray-600 font-medium">
             <div className="flex items-center gap-2 bg-white/50 px-4 py-2 rounded-full border border-gray-100 shadow-sm">
-              <span className="text-eric-green text-lg">✓</span> Geen kosten
-            </div>
+              <span className="text-eric-green text-lg">✓</span>{' ' + t("Geen kosten") + ' '} </div>
             <div className="flex items-center gap-2 bg-white/50 px-4 py-2 rounded-full border border-gray-100 shadow-sm">
-              <span className="text-eric-green text-lg">✓</span> Geen account nodig
-            </div>
+              <span className="text-eric-green text-lg">✓</span>{' ' + t("Geen account nodig") + ' '} </div>
             <div className="flex items-center gap-2 bg-white/50 px-4 py-2 rounded-full border border-gray-100 shadow-sm">
-              <span className="text-eric-green text-lg">✓</span> Voortgang op je apparaat
-            </div>
+              <span className="text-eric-green text-lg">✓</span>{' ' + t("Voortgang op je apparaat") + ' '} </div>
           </motion.div>
         </motion.div>
       </section>
@@ -153,17 +141,16 @@ export default function Home() {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-extrabold text-gray-800 mb-4">
-              Waarom <span className="text-eric-green">Lettoria?</span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-gray-800 mb-4">{' ' + t("Waarom") + ' '} <span className="text-eric-green">{' ' + t("Lettoria?") + ' '}</span>
             </h2>
-            <p className="text-lg text-gray-600">Speciaal gemaakt om typen leuk te maken</p>
+            <p className="text-lg text-gray-600">{' ' + t("Speciaal gemaakt om typen leuk te maken") + ' '}</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { emoji: "💰", title: "100% Gratis", desc: "Andere typecursussen kosten €150 of meer. Lettoria is en blijft volledig gratis. Geen addertjes onder het gras." },
-              { emoji: "🔒", title: "Jij kiest", desc: "Geen registratie of e-mail nodig. Je voortgang blijft op je apparaat. Pagina-analyse met OpenPanel gebeurt alleen met jouw toestemming." },
-              { emoji: "🎮", title: "Gamification", desc: "Een magisch avontuur waar je levels uitspeelt. Verdien badges, ontgrendel nieuwe gebieden en vier je successen." }
+              { emoji: "💰", title: t("100% Gratis"), desc: t("Andere typecursussen kosten €150 of meer. Lettoria is en blijft volledig gratis. Geen addertjes onder het gras.") },
+              { emoji: "🔒", title: t("Jij kiest"), desc: t("Geen registratie of e-mail nodig. Je voortgang blijft op je apparaat. Pagina-analyse met OpenPanel gebeurt alleen met jouw toestemming.") },
+              { emoji: "🎮", title: t("Gamification"), desc: t("Een magisch avontuur waar je levels uitspeelt. Verdien badges, ontgrendel nieuwe gebieden en vier je successen.") }
             ].map((feature, idx) => (
               <motion.div
                 key={idx}
@@ -194,17 +181,15 @@ export default function Home() {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">
-              Superkrachten voor op school ⚡
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">{' ' + t("Superkrachten voor op school ⚡") + ' '} </h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8">
             {[
-              { icon: "⏱️", title: "Meer tijd", desc: "Sneller typen betekent meer tijd om na te denken bij schooltoetsen en werkstukken." },
-              { icon: "🎯", title: "Betere focus", desc: "Focus op de inhoud in plaats van zoeken naar letters. Dit leidt tot betere teksten." },
-              { icon: "📚", title: "Taalvaardigheid", desc: "Regelmatig typen verbetert spelling en woordenschat op een natuurlijke, ongedwongen manier." },
-              { icon: "🚀", title: "Toekomst", desc: "Blind typen is een essentiële skill waar je kind de rest van zijn leven profijt van heeft." }
+              { icon: "⏱️", title: t("Meer tijd"), desc: t("Sneller typen betekent meer tijd om na te denken bij schooltoetsen en werkstukken.") },
+              { icon: "🎯", title: t("Betere focus"), desc: t("Focus op de inhoud in plaats van zoeken naar letters. Dit leidt tot betere teksten.") },
+              { icon: "📚", title: t("Taalvaardigheid"), desc: t("Regelmatig typen verbetert spelling en woordenschat op een natuurlijke, ongedwongen manier.") },
+              { icon: "🚀", title: t("Toekomst"), desc: t("Blind typen is een essentiële skill waar je kind de rest van zijn leven profijt van heeft.") }
             ].map((benefit, idx) => (
               <motion.div
                 key={idx}
@@ -241,16 +226,14 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-3xl md:text-5xl font-bold text-center mb-16"
-          >
-            Hoe werkt het avontuur?
-          </motion.h2>
+          >{' ' + t("Hoe werkt het avontuur?") + ' '} </motion.h2>
 
           <div className="grid md:grid-cols-4 gap-8">
             {[
-              { step: "1", title: "Start Direct", desc: "Geen gedoe met accounts. Klik op start en je avontuur begint meteen." },
-              { step: "2", title: "Ontdek de Wereld", desc: "Reis door 7 unieke regio's, van het Diepe Woud tot de Hoge Toppen." },
-              { step: "3", title: "Volg het Verhaal", desc: "Elke les begint met een verhaaltje. Help Eric magische problemen op te lossen." },
-              { step: "4", title: "Word Meester", desc: "Na 26 lessen typ je blind en ontvang je jouw officiële diploma!" }
+              { step: "1", title: t("Start Direct"), desc: t("Geen gedoe met accounts. Klik op start en je avontuur begint meteen.") },
+              { step: "2", title: t("Ontdek de Wereld"), desc: t("Reis door 7 unieke regio's, van het Diepe Woud tot de Hoge Toppen.") },
+              { step: "3", title: t("Volg het Verhaal"), desc: t("Elke les begint met een verhaaltje. Help Eric magische problemen op te lossen.") },
+              { step: "4", title: t("Word Meester"), desc: t("Na 26 lessen typ je blind en ontvang je jouw officiële diploma!") }
             ].map((item, idx) => (
               <motion.div
                 key={idx}
@@ -289,7 +272,7 @@ export default function Home() {
               >
                 <Image
                   src="/images/diploma/lettoria_seal.png"
-                  alt="Lettoria Typmeester Siegel"
+                  alt={t("Lettoria Typmeester Siegel")}
                   width={180}
                   height={180}
                   className="drop-shadow-xl"
@@ -297,19 +280,13 @@ export default function Home() {
               </motion.div>
             </div>
             <div className="text-center md:text-left">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                Verdien je <span className="text-eric-green">Diploma</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">{' ' + t("Verdien je") + ' '} <span className="text-eric-green">{' ' + t("Diploma") + ' '}</span>
               </h2>
-              <p className="text-gray-600 text-lg mb-6">
-                Na het voltooien van alle 26 lessen met 3 sterren ontvang je een officieel
-                Lettoria Typmeester diploma. Een prachtige beloning voor al je harde werk!
-              </p>
+              <p className="text-gray-600 text-lg mb-6">{' ' + t("Na het voltooien van alle 26 lessen met 3 sterren ontvang je een officieel Lettoria Typmeester diploma. Een prachtige beloning voor al je harde werk!") + ' '} </p>
               <Link
                 href="/diploma"
                 className="inline-flex items-center text-eric-green font-bold hover:underline"
-              >
-                Bekijk je diploma voortgang →
-              </Link>
+              >{' ' + t("Bekijk je diploma voortgang →") + ' '} </Link>
             </div>
           </motion.div>
         </div>
@@ -323,21 +300,15 @@ export default function Home() {
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
-              Klaar om te beginnen?
-            </h2>
-            <p className="text-gray-600 mb-10 text-lg">
-              De wereld ligt aan je voeten (en vingers). Eric wacht op je!
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{' ' + t("Klaar om te beginnen?") + ' '} </h2>
+            <p className="text-gray-600 mb-10 text-lg">{' ' + t("De wereld ligt aan je voeten (en vingers). Eric wacht op je!") + ' '} </p>
 
             <Link
               href="/kaart"
               className="group relative inline-flex items-center justify-center"
             >
               <div className="absolute transition-all duration-200 rounded-full -inset-1 bg-eric-green opacity-70 blur group-hover:opacity-100 group-hover:blur-md"></div>
-              <span className="relative inline-flex items-center bg-eric-green hover:bg-eric-green/90 text-white font-bold py-5 px-12 rounded-full text-xl transition-all hover:scale-105 shadow-xl">
-                Speel nu gratis
-                <KeyboardHint keyName="↵" />
+              <span className="relative inline-flex items-center bg-eric-green hover:bg-eric-green/90 text-white font-bold py-5 px-12 rounded-full text-xl transition-all hover:scale-105 shadow-xl">{' ' + t("Speel nu gratis") + ' '} <KeyboardHint keyName="↵" />
               </span>
             </Link>
           </motion.div>

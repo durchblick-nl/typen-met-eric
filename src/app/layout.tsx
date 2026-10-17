@@ -1,3 +1,6 @@
+import { t } from '@/lib/i18n';
+import { COURSE_URL, LANGUAGE } from '@/lib/course';
+import { CourseSelector } from '@/components/settings/CourseSelector';
 import type { Metadata } from "next";
 import "./globals.css";
 import "vanilla-cookieconsent/dist/cookieconsent.css";
@@ -5,9 +8,9 @@ import { ComfortProvider } from '@/components/settings/ComfortSettings';
 import { PrivacyConsent } from '@/components/privacy/PrivacyConsent';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://lettoria.nl'),
+  metadataBase: new URL(COURSE_URL),
   title: {
-    default: "Lettoria - Gratis typecursus voor kinderen",
+    default: t("Lettoria - Gratis typecursus voor kinderen"),
     template: "%s | Lettoria",
   },
   icons: {
@@ -25,18 +28,18 @@ export const metadata: Metadata = {
     ],
   },
   description:
-    "Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers in de magische wereld van Lettoria. Geen registratie, geen kosten. Je voortgang blijft lokaal op je apparaat. Spelenderwijs leren typen met Eric de draak.",
+    t("Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers in de magische wereld van Lettoria. Geen registratie, geen kosten. Je voortgang blijft lokaal op je apparaat. Spelenderwijs leren typen met Eric de draak."),
   keywords: [
-    "typecursus kinderen",
-    "gratis typen leren",
-    "blind typen kinderen",
-    "10 vinger typen",
-    "typeles basisschool",
-    "typen oefenen gratis",
-    "online typecursus",
-    "typen voor kinderen",
+    t("typecursus kinderen"),
+    t("gratis typen leren"),
+    t("blind typen kinderen"),
+    t("10 vinger typen"),
+    t("typeles basisschool"),
+    t("typen oefenen gratis"),
+    t("online typecursus"),
+    t("typen voor kinderen"),
     "lettoria",
-    "typen met eric",
+    t("typen met eric"),
   ],
   authors: [{ name: "Lettoria" }],
   creator: "Lettoria",
@@ -51,30 +54,31 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "nl_NL",
-    url: "https://lettoria.nl",
+    locale: LANGUAGE.replace('-', '_'),
+    url: COURSE_URL,
     siteName: "Lettoria",
-    title: "Lettoria - Gratis typecursus voor kinderen",
+    title: t("Lettoria - Gratis typecursus voor kinderen"),
     description:
-      "Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers in de magische wereld van Lettoria met Eric de draak.",
+      t("Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers in de magische wereld van Lettoria met Eric de draak."),
     images: [
       {
         url: "/images/posters/eric-hero.png",
         width: 1200,
         height: 630,
-        alt: "Eric de draak - Lettoria typecursus",
+        alt: t("Eric de draak - Lettoria typecursus"),
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lettoria - Gratis typecursus voor kinderen",
+    title: t("Lettoria - Gratis typecursus voor kinderen"),
     description:
-      "Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met Eric de draak.",
+      t("Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met Eric de draak."),
     images: ["/images/posters/eric-hero.png"],
   },
   alternates: {
-    canonical: "https://lettoria.nl",
+    canonical: COURSE_URL,
+    languages: {'nl-NL':'https://lettoria.nl/','nl-BE':'https://lettoria.nl/be/','de-DE':'https://lettoria.nl/de/','de-CH':'https://lettoria.nl/ch/'},
   },
   category: "education",
 };
@@ -85,8 +89,8 @@ const jsonLd = {
   "@type": "WebApplication",
   name: "Lettoria",
   description:
-    "Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers.",
-  url: "https://lettoria.nl",
+    t("Gratis online typecursus voor kinderen van 8-12 jaar. Leer blind typen met 10 vingers."),
+  url: COURSE_URL,
   applicationCategory: "EducationalApplication",
   operatingSystem: "Web Browser",
   offers: {
@@ -101,33 +105,33 @@ const jsonLd = {
     suggestedMinAge: 8,
     suggestedMaxAge: 12,
   },
-  inLanguage: "nl",
+  inLanguage: LANGUAGE,
   isAccessibleForFree: true,
   creator: {
     "@type": "Organization",
     name: "Lettoria",
-    url: "https://lettoria.nl",
+    url: COURSE_URL,
   },
 };
 
 const jsonLdCourse = {
   "@context": "https://schema.org",
   "@type": "Course",
-  name: "Gratis typecursus voor kinderen",
+  name: t("Gratis typecursus voor kinderen"),
   description:
-    "Leer blind typen met 10 vingers in de magische wereld van Lettoria. 26 lessen van thuisrij tot meesterschap.",
+    t("Leer blind typen met 10 vingers in de magische wereld van Lettoria. 26 lessen van thuisrij tot meesterschap."),
   provider: {
     "@type": "Organization",
     name: "Lettoria",
-    url: "https://lettoria.nl",
+    url: COURSE_URL,
   },
   isAccessibleForFree: true,
-  inLanguage: "nl",
+  inLanguage: LANGUAGE,
   audience: {
     "@type": "EducationalAudience",
     educationalRole: "student",
   },
-  teaches: "Blind typen met 10 vingers",
+  teaches: t("Blind typen met 10 vingers"),
   numberOfLessons: 26,
 };
 
@@ -137,7 +141,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="nl">
+    <html lang={LANGUAGE}>
       <head>
         {/* JSON-LD structured data - static content, safe to inject */}
         <script
@@ -150,6 +154,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-perkament min-h-screen">
+        <CourseSelector />
         <ComfortProvider>{children}</ComfortProvider>
         <PrivacyConsent />
       </body>

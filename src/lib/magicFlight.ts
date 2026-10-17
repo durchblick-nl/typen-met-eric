@@ -1,7 +1,9 @@
+import { IS_GERMAN, regionalGerman } from './course';
+import { t } from '@/lib/i18n';
 import { REGIONS } from "./data/regions";
 export const FLIGHT_DURATION_MS = 60000;
 export const FLIGHT_GOAL = 40;
-export const MAGIC_WORDS = [
+const DUTCH_WORDS = [
   "jas",
   "sla",
   "als",
@@ -91,6 +93,7 @@ export const MAGIC_WORDS = [
   "pyjama",
   "quiz",
 ] as const;
+export const MAGIC_WORDS: readonly string[] = IS_GERMAN ? ['als','all','fall','saal','das','da','dass','kalk','fass','hals','glas','kahl','sag','die','eis','heide','fee','gehe','hell','der','uhr','rad','ruhe','hase','raus','zeit','reiter','katze','tier','opa','rot','tür','topf','quark','wer','wasser','wolke','quelle','am','meer','warm','maus','reis','magie','max','name','hände','mäuse','mond','rund','wald','vier','viel','von','eric','klein','fliegt','bär','bäume','boot','zauberwald','kristalle','schatzkarte','delfine','ritter','leuchtturm','abenteuer','schlosstor','groß','straße'].map(regionalGerman) : DUTCH_WORDS;
 export interface FlightState {
   correct: number;
   attempts: number;
@@ -172,7 +175,7 @@ export function flightElapsed(
   return Math.min(FLIGHT_DURATION_MS, elapsed + Math.max(0, now - previous));
 }
 export const GROT_DECORATIONS = [
-  { id: "plant", name: "Magische plant", icon: "🌿", cost: 8 },
-  { id: "lantern", name: "Gouden lantaarn", icon: "🏮", cost: 16 },
-  { id: "stars", name: "Sterrenhemel", icon: "✨", cost: 24 },
+  { id: "plant", name: t("Magische plant"), icon: "🌿", cost: 8 },
+  { id: "lantern", name: t("Gouden lantaarn"), icon: "🏮", cost: 16 },
+  { id: "stars", name: t("Sterrenhemel"), icon: "✨", cost: 24 },
 ] as const;

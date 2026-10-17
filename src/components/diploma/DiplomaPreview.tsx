@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import Image from 'next/image';
 
 interface DiplomaPreviewProps {
@@ -8,7 +9,7 @@ interface DiplomaPreviewProps {
 }
 
 export function DiplomaPreview({ name, date }: DiplomaPreviewProps) {
-  const displayName = name.trim() || 'Jouw naam hier';
+  const displayName = name.trim() || t("Jouw naam hier");
 
   return (
     <div className="w-full aspect-[1.414/1] bg-perkament rounded-lg shadow-lg overflow-hidden relative">
@@ -38,11 +39,9 @@ export function DiplomaPreview({ name, date }: DiplomaPreviewProps) {
 
         {/* Title */}
         <h2 className="text-2xl md:text-4xl font-bold text-eric-green tracking-widest mb-1">
-          DIPLOMA
+          {' ' + t("DIPLOMA") + ' '}
         </h2>
-        <p className="text-[10px] md:text-xs text-gray-500 mb-3">
-          Lettoria Typmeester
-        </p>
+        <p className="text-[10px] md:text-xs text-gray-500 mb-3">{' ' + t("Lettoria Typmeester") + ' '} </p>
 
         {/* Name */}
         <div className="border-b-2 border-eric-green px-4 md:px-8 py-1 mb-2">
@@ -52,25 +51,21 @@ export function DiplomaPreview({ name, date }: DiplomaPreviewProps) {
         </div>
 
         {/* Achievement */}
-        <p className="text-[9px] md:text-xs text-gray-600 mb-2 leading-relaxed max-w-[80%]">
-          heeft alle 26 lessen van Lettoria succesvol voltooid
-          <br />
-          en is nu een officiële Typmeester!
-        </p>
+        <p className="text-[9px] md:text-xs text-gray-600 mb-2 leading-relaxed max-w-[80%]">{' ' + t("heeft alle 26 lessen van Lettoria succesvol voltooid") + ' '} <br />{' ' + t("en is nu een officiële Typmeester!") + ' '} </p>
 
         {/* Stats */}
         <div className="flex gap-4 md:gap-8 mb-2">
           <div className="text-center">
             <div className="text-base md:text-xl font-bold text-eric-green">26</div>
-            <div className="text-[8px] md:text-[10px] text-gray-500">Lessen</div>
+            <div className="text-[8px] md:text-[10px] text-gray-500">{' ' + t("Lessen") + ' '}</div>
           </div>
           <div className="text-center">
             <div className="text-base md:text-xl font-bold text-eric-green">78</div>
-            <div className="text-[8px] md:text-[10px] text-gray-500">Sterren</div>
+            <div className="text-[8px] md:text-[10px] text-gray-500">{' ' + t("Sterren") + ' '}</div>
           </div>
           <div className="text-center">
             <div className="text-base md:text-xl font-bold text-eric-green">7</div>
-            <div className="text-[8px] md:text-[10px] text-gray-500">Regio&apos;s</div>
+            <div className="text-[8px] md:text-[10px] text-gray-500">{' ' + t("Regio's") + ' '}</div>
           </div>
         </div>
 
@@ -92,7 +87,7 @@ export function DiplomaPreview({ name, date }: DiplomaPreviewProps) {
         <div className="w-full flex items-end justify-between px-2 md:px-4 mt-auto">
           {/* Date */}
           <div className="text-left">
-            <p className="text-[7px] md:text-[9px] text-gray-400">Uitgereikt op</p>
+            <p className="text-[7px] md:text-[9px] text-gray-400">{' ' + t("Uitgereikt op") + ' '}</p>
             <p className="text-[8px] md:text-[10px] text-gray-600">{date}</p>
           </div>
 
@@ -106,15 +101,15 @@ export function DiplomaPreview({ name, date }: DiplomaPreviewProps) {
                 className="object-contain"
               />
             </div>
-            <p className="text-[8px] md:text-[10px] font-bold text-eric-green">Eric de Draak</p>
-            <p className="text-[6px] md:text-[8px] text-gray-400">Beschermer van Lettoria</p>
+            <p className="text-[8px] md:text-[10px] font-bold text-eric-green">{' ' + t("Eric de Draak") + ' '}</p>
+            <p className="text-[6px] md:text-[8px] text-gray-400">{' ' + t("Beschermer van Lettoria") + ' '}</p>
           </div>
 
           {/* Seal */}
           <div className="relative w-12 h-12 md:w-20 md:h-20 mb-1">
             <Image
               src="/images/diploma/lettoria_seal.png"
-              alt="Lettoria Siegel"
+              alt={t("Lettoria Siegel")}
               fill
               className="object-contain"
             />

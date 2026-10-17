@@ -1,18 +1,22 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
+import { COURSE } from '@/lib/course';
+import { KEYBOARDS } from '@/lib/keyboards';
 import { useTypingStore } from '@/lib/stores/typingStore';
 import { TypingArea, VirtualKeyboard, LiveStats } from '@/components/typing';
 import { Eric } from '@/components/eric';
 import Link from 'next/link';
 
 // Sample exercises for the tutorial
+const HOME = KEYBOARDS[COURSE].homeKeys.join('');
 const EXERCISES = [
-  { text: 'fff jjj fff jjj', hint: 'Begin met je wijsvingers op F en J. Voel je de bultjes?' },
-  { text: 'fjfj fjfj fjfj', hint: 'Wissel tussen F en J. Houd je vingers op de thuisrij!' },
-  { text: 'asdf jkl;', hint: 'Nu alle vingers! Links: A S D F, Rechts: J K L ;' },
-  { text: 'fj dk sl a;', hint: 'Oefening baart kunst! Blijf oefenen.' },
-  { text: 'asdfjkl;', hint: 'De hele thuisrij in een keer!' },
+  { text: 'fff jjj fff jjj', hint: t("Begin met je wijsvingers op F en J. Voel je de bultjes?") },
+  { text: 'fjfj fjfj fjfj', hint: t("Wissel tussen F en J. Houd je vingers op de thuisrij!") },
+  { text: HOME.slice(0,4)+' '+HOME.slice(4), hint: COURSE === 'be' ? 'Nu alle vingers! Links: Q S D F, rechts: J K L M.' : COURSE === 'nl' ? t("Nu alle vingers! Links: A S D F, Rechts: J K L ;") : 'Jetzt alle Finger! Links: A S D F, rechts: J K L Ö.' },
+  { text: 'fj dk sl '+HOME[0]+HOME[7], hint: t("Oefening baart kunst! Blijf oefenen.") },
+  { text: HOME, hint: t("De hele thuisrij in een keer!") },
 ];
 
 export default function OefenenPage() {
@@ -55,13 +59,13 @@ export default function OefenenPage() {
 
   const getEricMessage = () => {
     if (showCelebration && accuracy >= 90) {
-      return 'Geweldig! Je bent een natuurtalent!';
+      return t("Geweldig! Je bent een natuurtalent!");
     }
     if (showCelebration && accuracy >= 70) {
-      return 'Goed gedaan! Met oefening word je nog beter!';
+      return t("Goed gedaan! Met oefening word je nog beter!");
     }
     if (showCelebration) {
-      return 'Niet opgeven! Probeer het nog eens.';
+      return t("Niet opgeven! Probeer het nog eens.");
     }
     return currentExercise.hint;
   };
@@ -74,12 +78,8 @@ export default function OefenenPage() {
           <Link
             href="/"
             className="text-eric-green hover:text-eric-green/80 transition-colors"
-          >
-            &larr; Terug
-          </Link>
-          <h1 className="text-2xl font-bold text-eric-green">
-            Les {exerciseIndex + 1}: Thuisrij
-          </h1>
+          >{' ' + t("← Terug") + ' '} </Link>
+          <h1 className="text-2xl font-bold text-eric-green">{' ' + t("Les") + ' '} {exerciseIndex + 1}{' ' + t(": Thuisrij") + ' '} </h1>
           <div className="text-sm text-gray-500">
             {exerciseIndex + 1} / {EXERCISES.length}
           </div>
@@ -106,14 +106,12 @@ export default function OefenenPage() {
             <button
               onClick={handleRetry}
               className="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-full font-semibold transition-colors"
-            >
-              Opnieuw
-            </button>
+            >{' ' + t("Opnieuw") + ' '} </button>
             <button
               onClick={handleNext}
               className="px-6 py-3 bg-eric-green hover:bg-eric-green/90 text-white rounded-full font-semibold transition-colors"
             >
-              {exerciseIndex < EXERCISES.length - 1 ? 'Volgende' : 'Opnieuw beginnen'}
+              {exerciseIndex < EXERCISES.length - 1 ? t("Volgende") : t("Opnieuw beginnen")}
             </button>
           </div>
         )}
@@ -125,9 +123,7 @@ export default function OefenenPage() {
 
         {/* Instructions */}
         {!isComplete && targetText && (
-          <p className="text-center text-gray-500 text-sm mt-6">
-            Kijk niet naar je toetsenbord! Voel de bultjes op F en J.
-          </p>
+          <p className="text-center text-gray-500 text-sm mt-6">{' ' + t("Kijk niet naar je toetsenbord! Voel de bultjes op F en J.") + ' '} </p>
         )}
       </div>
     </main>

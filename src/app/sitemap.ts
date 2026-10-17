@@ -1,3 +1,4 @@
+import { COURSE_URL, COURSE, COURSE_IDS } from '@/lib/course';
 import { MetadataRoute } from 'next';
 
 export const dynamic = 'force-static';
@@ -9,7 +10,7 @@ const regions = ['grot', 'dorp', 'velden', 'woud', 'toppen', 'zee', 'kasteel'];
 const lessons = Array.from({ length: 26 }, (_, i) => i);
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://lettoria.nl';
+    const baseUrl = COURSE_URL;
     const lastModified = new Date();
 
     // Main pages
@@ -74,5 +75,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.7,
     }));
 
-    return [...mainPages, ...regionPages, ...lessonPages];
+    const pages = [...mainPages, ...regionPages, ...lessonPages];
+    return COURSE === 'nl' ? pages.flatMap(page => COURSE_IDS.map(id => ({
+        ...page,
+        url: id === 'nl' ? page.url : page.url.replace('https://lettoria.nl', `https://lettoria.nl/${id}`),
+    }))) : pages;
 }

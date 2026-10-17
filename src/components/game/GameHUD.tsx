@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore, GAME_CONFIG, COMBO_TIERS } from '@/lib/stores/gameStore';
 import { useEffect, useState } from 'react';
@@ -64,9 +65,7 @@ export function GameHUD({ lessonId }: GameHUDProps) {
             {/* Energy bar */}
             <div className="relative">
               <div className="text-xs text-cyan-300 font-black mb-1 tracking-[0.22em]"
-                style={{ textShadow: '0 0 10px currentColor' }}>
-                ENERGIE
-              </div>
+                style={{ textShadow: '0 0 10px currentColor' }}>{' ' + t("ENERGIE") + ' '} </div>
               <div className={`h-4 bg-black/50 rounded-full overflow-hidden border border-white/20 shadow-lg ${getEnergyGlow()}`}>
                 <motion.div
                   className={`h-full bg-gradient-to-r ${getEnergyColor()} rounded-full`}
@@ -141,13 +140,13 @@ export function GameHUD({ lessonId }: GameHUDProps) {
               >
                 {totalGems.toLocaleString()}
               </span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-100/60">munten</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-100/60">{' ' + t("munten") + ' '}</span>
             </div>
 
             {/* Score display - LED style */}
             <div className="bg-black/75 rounded-xl px-4 py-2 border border-cyan-300/35"
               style={{ boxShadow: '0 0 24px rgba(6, 182, 212, 0.32), inset 0 0 24px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.12)' }}>
-              <div className="text-xs text-cyan-400/70 tracking-widest mb-1">SCORE</div>
+              <div className="text-xs text-cyan-400/70 tracking-widest mb-1">{' ' + t("SCORE") + ' '}</div>
               <motion.div
                 className="font-mono text-3xl font-bold text-cyan-300"
                 style={{ textShadow: '0 0 20px currentColor, 0 0 40px currentColor' }}
@@ -159,8 +158,7 @@ export function GameHUD({ lessonId }: GameHUDProps) {
                 {score.toLocaleString()}
               </motion.div>
               {highScore > 0 && (
-                <div className="text-xs text-purple-400/70 mt-1">
-                  BEST: {highScore.toLocaleString()}
+                <div className="text-xs text-purple-400/70 mt-1">{' ' + t("BEST:") + ' '} {highScore.toLocaleString()}
                 </div>
               )}
             </div>
@@ -174,7 +172,7 @@ export function GameHUD({ lessonId }: GameHUDProps) {
                 style={{ boxShadow: '0 0 15px rgba(168, 85, 247, 0.3)' }}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-purple-300 text-sm">COMBO</span>
+                  <span className="text-purple-300 text-sm">{' ' + t("COMBO") + ' '}</span>
                   <motion.span
                     className="font-mono text-xl font-bold text-yellow-300"
                     style={{ textShadow: '0 0 10px currentColor' }}

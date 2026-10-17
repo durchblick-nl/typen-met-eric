@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useProgressStore } from '@/lib/stores/progressStore';
 import { getRegionById } from '@/lib/data/regions';
 import { Eric } from '@/components/eric';
@@ -39,9 +40,7 @@ export function RegioClient({ regionId }: RegioClientProps) {
           <Link
             href="/kaart"
             className="text-eric-green hover:text-eric-green/80 transition-colors"
-          >
-            &larr; Kaart
-          </Link>
+          >{' ' + t("← Kaart") + ' '} </Link>
 
           <div className="text-center">
             {region.imageUrl ? (
@@ -105,7 +104,7 @@ export function RegioClient({ regionId }: RegioClientProps) {
                       <h3 className="font-bold text-gray-800">{lesson.title}</h3>
                       <p className="text-sm text-gray-500">{lesson.description}</p>
                       {needsMoreStars && (
-                        <p className="text-xs text-accent mt-1">Nog oefenen voor 3 sterren!</p>
+                        <p className="text-xs text-accent mt-1">{' ' + t("Nog oefenen voor 3 sterren!") + ' '}</p>
                       )}
                       {lesson.newKeys.length > 0 && (
                         <div className="flex gap-1 mt-1">
@@ -114,7 +113,7 @@ export function RegioClient({ regionId }: RegioClientProps) {
                               key={key}
                               className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono"
                             >
-                              {key === ' ' ? 'SPATIE' : key.toUpperCase()}
+                              {key === ' ' ? t("SPATIE") : key === 'ß' ? 'ß' : key.toUpperCase()}
                             </span>
                           ))}
                         </div>
@@ -151,7 +150,7 @@ export function RegioClient({ regionId }: RegioClientProps) {
                           }
                         `}
                       >
-                        {completed && stars === 3 ? 'Opnieuw' : needsMoreStars ? 'Herhalen' : 'Start'}
+                        {completed && stars === 3 ? t("Opnieuw") : needsMoreStars ? t("Herhalen") : t("Start")}
                       </Link>
                     )}
                   </div>
@@ -164,8 +163,8 @@ export function RegioClient({ regionId }: RegioClientProps) {
         {region.lessons.length === 0 && (
           <div className="text-center py-12 text-gray-500">
             <span className="text-4xl mb-4 block">🚧</span>
-            <p>Deze regio is nog in ontwikkeling!</p>
-            <p className="text-sm">Kom later terug voor nieuwe lessen.</p>
+            <p>{' ' + t("Deze regio is nog in ontwikkeling!") + ' '}</p>
+            <p className="text-sm">{' ' + t("Kom later terug voor nieuwe lessen.") + ' '}</p>
           </div>
         )}
       </div>

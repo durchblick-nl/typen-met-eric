@@ -1,4 +1,5 @@
 "use client";
+import { t } from '@/lib/i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -255,14 +256,14 @@ export function ArcadeFlight({
   const feedback =
     state.feedback && state.feedback.until > state.elapsedMs
       ? state.feedback.text
-      : "Typ de letters. Pak kristallen. Ontwijk de rotsen.";
+      : t("Typ de letters. Pak kristallen. Ontwijk de rotsen.");
   const sceneFilter = course.regionId === "woud" ? "saturate(1.15)" : undefined;
   return (
     <section
       ref={dialog}
       role="dialog"
       aria-modal="true"
-      aria-label="Erics kristaljacht"
+      aria-label={t("Erics kristaljacht")}
       tabIndex={-1}
       className="fixed inset-0 z-50 bg-perkament overflow-y-auto p-4 sm:p-7 outline-none"
       onKeyDown={(event) => {
@@ -290,55 +291,45 @@ export function ArcadeFlight({
       <div className="max-w-6xl mx-auto">
         <header className="flex flex-wrap items-start justify-between gap-3 mb-5">
           <div>
-            <p className="text-sm text-eric-green font-semibold">
-              ARCADEBAAN {lessonId + 1} · {course.name}
+            <p className="text-sm text-eric-green font-semibold">{' ' + t("ARCADEBAAN") + ' '} {lessonId + 1} · {course.name}
             </p>
-            <h1 className="text-3xl sm:text-4xl text-eric-green font-extrabold mt-1">
-              Erics kristaljacht
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Typ, verzamel en vlieg naar een nieuw record.
-            </p>
+            <h1 className="text-3xl sm:text-4xl text-eric-green font-extrabold mt-1">{' ' + t("Erics kristaljacht") + ' '} </h1>
+            <p className="text-gray-600 mt-1">{' ' + t("Typ, verzamel en vlieg naar een nieuw record.") + ' '} </p>
           </div>
           <div className="flex gap-2">
             {phase === "playing" && (
-              <button className={button} onClick={pause}>
-                Pauze
-              </button>
+              <button className={button} onClick={pause}>{' ' + t("Pauze") + ' '} </button>
             )}
-            <button className={button} onClick={onExit}>
-              Afsluiten
-            </button>
+            <button className={button} onClick={onExit}>{' ' + t("Afsluiten") + ' '} </button>
           </div>
         </header>
         <div
           className="grid grid-cols-4 gap-2 sm:gap-5 text-center mb-4"
-          aria-label="Spelstand"
+          aria-label={t("Spelstand")}
         >
           <div className="rounded-xl bg-white/80 py-2">
-            <p className="text-xs text-gray-600">Score</p>
+            <p className="text-xs text-gray-600">{' ' + t("Score") + ' '}</p>
             <strong
               data-testid="arcade-score"
               className="text-xl sm:text-2xl text-eric-green tabular-nums"
             >
               {state.score}
             </strong>
-            <p className="text-xs text-gray-600">
-              Record {recordToBeat || "—"}
+            <p className="text-xs text-gray-600">{' ' + t("Record") + ' '} {recordToBeat || "—"}
             </p>
           </div>
           <div className="rounded-xl bg-white/80 py-2">
-            <p className="text-xs text-gray-600">Reeks</p>
+            <p className="text-xs text-gray-600">{' ' + t("Reeks") + ' '}</p>
             <strong className="text-xl sm:text-2xl text-eric-green">
               {state.streak}
             </strong>
-            <p className="text-xs text-gray-600">Beste {state.bestStreak}</p>
+            <p className="text-xs text-gray-600">{' ' + t("Beste") + ' '} {state.bestStreak}</p>
           </div>
           <div className="rounded-xl bg-white/80 py-2">
-            <p className="text-xs text-gray-600">Levens</p>
+            <p className="text-xs text-gray-600">{' ' + t("Levens") + ' '}</p>
             <strong
               data-testid="arcade-hearts"
-              aria-label={`${state.hearts} levens`}
+              aria-label={t("{n} levens", {n:state.hearts})}
               className="text-xl sm:text-2xl text-red-700 tracking-widest"
             >
               {"♥".repeat(Math.max(0, state.hearts))}
@@ -348,7 +339,7 @@ export function ArcadeFlight({
             </strong>
           </div>
           <div className="rounded-xl bg-white/80 py-2">
-            <p className="text-xs text-gray-600">Tijd</p>
+            <p className="text-xs text-gray-600">{' ' + t("Tijd") + ' '}</p>
             <strong
               data-testid="arcade-time"
               className="font-mono text-xl sm:text-2xl text-eric-green tabular-nums"
@@ -363,7 +354,7 @@ export function ArcadeFlight({
         >
           <Image
             src={arcadeLandscape(course.regionId)}
-            alt="Een magische vliegroute door Lettoria"
+            alt={t("Een magische vliegroute door Lettoria")}
             fill
             className="object-cover"
             style={{ filter: sceneFilter }}
@@ -391,7 +382,7 @@ export function ArcadeFlight({
           </svg>
           <div className="absolute top-4 left-1/2 -translate-x-1/2 w-56 max-w-[80%] z-20 bg-perkament/95 rounded-full border-2 border-eric-gold px-3 py-1.5">
             <div className="flex justify-between text-xs font-bold text-eric-green mb-1">
-              <span>{turbo ? "TURBO + SCHILD" : "Turbo"}</span>
+              <span>{turbo ? t("TURBO + SCHILD") : t("Turbo")}</span>
               <span>
                 {turbo
                   ? `${Math.ceil((state.turboUntil - state.elapsedMs) / 1000)}s`
@@ -435,7 +426,7 @@ export function ArcadeFlight({
                 ) : (
                   <IllustratedProp
                     name={object.kind === "gem" ? "gem" : "rock"}
-                    label={object.kind === "gem" ? "Kristal" : "Rots"}
+                    label={object.kind === "gem" ? t("Kristal") : t("Rots")}
                     className={object.kind === "gem" ? "w-16" : "w-20"}
                   />
                 )}
@@ -492,88 +483,57 @@ export function ArcadeFlight({
               <div className="bg-perkament/95 max-w-lg w-full max-h-full overflow-y-auto rounded-3xl p-5 sm:p-7 shadow-xl border border-eric-gold text-center">
                 {phase === "ready" && (
                   <>
-                    <p className="text-xs font-bold text-eric-green mb-2">
-                      DRIE STERREN. DEZE BAAN IS VAN JOU!
-                    </p>
-                    <h2 className="text-2xl sm:text-3xl text-eric-green font-bold mb-3">
-                      Klaar voor de kristaljacht?
-                    </h2>
-                    <p className="text-gray-700 mb-3">
-                      Met <kbd>←</kbd> en <kbd>→</kbd> wissel je van baan. Pak
-                      kristallen en ontwijk de rotsen. Typ de letters om
-                      magische doelen te raken.
-                    </p>
-                    <p className="text-gray-700 mb-3">
-                      Zes goede letters op rij? Turbo! Dan krijg je dubbele
-                      punten en een schild. Doelen bij de gouden lijn geven
-                      extra punten.
-                    </p>
-                    <p className="text-sm text-gray-600 mb-5">
-                      3 levens · maximaal 75 seconden · eigen toetsenbord nodig
-                    </p>
+                    <p className="text-xs font-bold text-eric-green mb-2">{' ' + t("DRIE STERREN. DEZE BAAN IS VAN JOU!") + ' '} </p>
+                    <h2 className="text-2xl sm:text-3xl text-eric-green font-bold mb-3">{' ' + t("Klaar voor de kristaljacht?") + ' '} </h2>
+                    <p className="text-gray-700 mb-3">{' ' + t("Met") + ' '} <kbd>←</kbd>{' ' + t("en") + ' '} <kbd>→</kbd>{' ' + t("wissel je van baan. Pak kristallen en ontwijk de rotsen. Typ de letters om magische doelen te raken.") + ' '} </p>
+                    <p className="text-gray-700 mb-3">{' ' + t("Zes goede letters op rij? Turbo! Dan krijg je dubbele punten en een schild. Doelen bij de gouden lijn geven extra punten.") + ' '} </p>
+                    <p className="text-sm text-gray-600 mb-5">{' ' + t("3 levens · maximaal 75 seconden · eigen toetsenbord nodig") + ' '} </p>
                     <button
                       className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
                       onClick={start}
-                    >
-                      Start de kristaljacht
-                    </button>
+                    >{' ' + t("Start de kristaljacht") + ' '} </button>
                   </>
                 )}
                 {phase === "paused" && (
                   <>
-                    <h2 className="text-3xl text-eric-green font-bold mb-3">
-                      Even pauze
-                    </h2>
-                    <p className="text-gray-700 mb-5">
-                      De hele baan staat stil. Ga verder wanneer jij wilt.
-                    </p>
+                    <h2 className="text-3xl text-eric-green font-bold mb-3">{' ' + t("Even pauze") + ' '} </h2>
+                    <p className="text-gray-700 mb-5">{' ' + t("De hele baan staat stil. Ga verder wanneer jij wilt.") + ' '} </p>
                     <button
                       className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
                       onClick={resume}
-                    >
-                      Verder vliegen
-                    </button>
+                    >{' ' + t("Verder vliegen") + ' '} </button>
                   </>
                 )}
                 {phase === "ended" && (
                   <>
                     <h2 className="text-3xl text-eric-green font-bold mb-2">
                       {result?.record
-                        ? "Een nieuw record!"
+                        ? t("Een nieuw record!")
                         : state.hearts > 0
-                          ? "De finish is bereikt!"
-                          : "Goed gevlogen!"}
+                          ? t("De finish is bereikt!")
+                          : t("Goed gevlogen!")}
                     </h2>
                     <p className="text-4xl font-extrabold text-eric-green mb-2">
-                      {state.score} punten
-                    </p>
+                      {state.score}{' ' + t("punten") + ' '} </p>
                     <p className="text-gray-600 text-sm mb-2">
-                      {state.hits} magische doelen · {state.collected}{" "}
-                      kristallen · beste reeks {state.bestStreak}
+                      {state.hits}{' ' + t("magische doelen ·") + ' '} {state.collected}{" "}{' ' + t("kristallen · beste reeks") + ' '} {state.bestStreak}
                     </p>
                     <p className="font-bold text-eric-green mb-4">
-                      +{result?.gems ?? 0} kristallen voor Erics grot
-                    </p>
+                      +{result?.gems ?? 0}{' ' + t("kristallen voor Erics grot") + ' '} </p>
                     {nextLesson && (
-                      <p className="text-sm text-gray-700 mb-4">
-                        Volgende uitdaging: les {lessonId + 2},{" "}
-                        {nextLesson.title}. Met drie sterren speel je arcadebaan{" "}
-                        {lessonId + 2} vrij.
-                      </p>
+                      <p className="text-sm text-gray-700 mb-4">{' ' + t("Volgende uitdaging: les") + ' '} {lessonId + 2},{" "}
+                        {nextLesson.title}{' ' + t(". Met drie sterren speel je arcadebaan") + ' '}{" "}
+                        {lessonId + 2}{' ' + t("vrij.") + ' '} </p>
                     )}
                     <div className="flex flex-wrap gap-2 justify-center">
                       <button
                         className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
                         onClick={onNext}
                       >
-                        {isLastLesson ? "Naar de kaart" : "Volgende les"}
+                        {isLastLesson ? t("Naar de kaart") : t("Volgende les")}
                       </button>
-                      <button className={button} onClick={start}>
-                        Nog een race
-                      </button>
-                      <Link className={button} href="/kaart#erics-grot">
-                        Naar Erics grot
-                      </Link>
+                      <button className={button} onClick={start}>{' ' + t("Nog een race") + ' '} </button>
+                      <Link className={button} href="/kaart#erics-grot">{' ' + t("Naar Erics grot") + ' '} </Link>
                     </div>
                   </>
                 )}
@@ -587,34 +547,28 @@ export function ArcadeFlight({
         >
           {phase === "playing"
             ? feedback
-            : "← → Wissel van baan · Typ de letters voor magie"}
+            : t("← → Wissel van baan · Typ de letters voor magie")}
         </p>
         <footer className="flex flex-wrap justify-between items-center gap-4 mt-3">
-          <p className="text-sm text-gray-600">
-            Je lessterren staan vast. Hier speel je voor je eigen record.
-          </p>
+          <p className="text-sm text-gray-600">{' ' + t("Je lessterren staan vast. Hier speel je voor je eigen record.") + ' '} </p>
           <div className="flex flex-wrap items-center gap-4">
             <ComfortSettings onChange={() => dialog.current?.focus()} />
             <button
               className="text-sm text-eric-green underline"
               aria-pressed={musicEnabled}
               onClick={toggleMusic}
-            >
-              Muziek {musicEnabled ? "aan" : "uit"}
+            >{' ' + t("Muziek") + ' '} {musicEnabled ? t("aan") : t("uit")}
             </button>
             <button
               className="text-sm text-eric-green underline"
               aria-pressed={sound}
               onClick={toggleSound}
-            >
-              Effecten {sound ? "aan" : "uit"}
+            >{' ' + t("Effecten") + ' '} {sound ? t("aan") : t("uit")}
             </button>
           </div>
         </footer>
         {musicError && (
-          <p role="status" className="mt-2 text-sm text-gray-600">
-            De muziek kon niet starten. Probeer het nog eens met de muziekknop.
-          </p>
+          <p role="status" className="mt-2 text-sm text-gray-600">{' ' + t("De muziek kon niet starten. Probeer het nog eens met de muziekknop.") + ' '} </p>
         )}
       </div>
     </section>

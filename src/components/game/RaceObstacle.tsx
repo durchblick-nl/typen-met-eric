@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useEffect, useMemo, useRef } from 'react';
 import { ObstacleType, LANE_POSITIONS } from '@/lib/data/raceAbilities';
@@ -288,9 +289,7 @@ function ObstacleShape({
             <span className="w-5 h-5 mb-0.5 rotate-45 border border-white/70" />
           )}
           {letter && (
-            <span className="text-[9px] px-1.5 py-0.5 mb-0.5 rounded bg-black/45 border border-cyan-300/60 tracking-wide leading-none text-cyan-100">
-              TYP
-            </span>
+            <span className="text-[9px] px-1.5 py-0.5 mb-0.5 rounded bg-black/45 border border-cyan-300/60 tracking-wide leading-none text-cyan-100">{' ' + t("TYP") + ' '} </span>
           )}
           {letter && (
             <span

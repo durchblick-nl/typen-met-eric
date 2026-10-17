@@ -1,7 +1,7 @@
 'use client';
 
-import { useComfortStore } from '@/components/settings/ComfortSettings';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useQuietMotion } from '@/components/settings/ComfortSettings';
+import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 interface SparklesProps {
@@ -30,8 +30,7 @@ export function Sparkles({
     maxSize = 6,
     overflow = false
 }: SparklesProps) {
-    const calm = useComfortStore(state => state.calm);
-    const reduced = useReducedMotion();
+    const quiet = useQuietMotion();
     const [sparkles, setSparkles] = useState<Sparkle[]>([]);
 
     useEffect(() => {
@@ -49,7 +48,7 @@ export function Sparkles({
         setSparkles(newSparkles);
     }, [count, color, minSize, maxSize]);
 
-    if (calm || reduced) return null;
+    if (quiet) return null;
     return (
         <div className={`absolute inset-0 pointer-events-none ${overflow ? '' : 'overflow-hidden'}`}>
             {sparkles.map((sparkle) => (

@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import {
   Document,
   Page,
@@ -220,7 +221,7 @@ interface DiplomaDocumentProps {
 }
 
 export function DiplomaDocument({ name, date }: DiplomaDocumentProps) {
-  const displayName = name.trim() || 'Typkampioen';
+  const displayName = name.trim() || t("Typkampioen");
 
   return (
     <Document>
@@ -246,8 +247,8 @@ export function DiplomaDocument({ name, date }: DiplomaDocumentProps) {
 
           {/* Title */}
           <View style={styles.titleSection}>
-            <Text style={styles.title}>DIPLOMA</Text>
-            <Text style={styles.subtitle}>Lettoria Typmeester</Text>
+            <Text style={styles.title}>{' ' + t("DIPLOMA") + ' '}</Text>
+            <Text style={styles.subtitle}>{' ' + t("Lettoria Typmeester") + ' '}</Text>
           </View>
 
           {/* Name with underline */}
@@ -258,23 +259,21 @@ export function DiplomaDocument({ name, date }: DiplomaDocumentProps) {
           </View>
 
           {/* Achievement text */}
-          <Text style={styles.achievementText}>
-            heeft alle 26 lessen van Lettoria succesvol voltooid en is nu een officiële Typmeester!
-          </Text>
+          <Text style={styles.achievementText}>{' ' + t("heeft alle 26 lessen van Lettoria succesvol voltooid en is nu een officiële Typmeester!") + ' '} </Text>
 
           {/* Stats */}
           <View style={styles.statsSection}>
             <View style={styles.statBox}>
               <Text style={styles.statValue}>26</Text>
-              <Text style={styles.statLabel}>Lessen</Text>
+              <Text style={styles.statLabel}>{' ' + t("Lessen") + ' '}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statValue}>78</Text>
-              <Text style={styles.statLabel}>Sterren</Text>
+              <Text style={styles.statLabel}>{' ' + t("Sterren") + ' '}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statValue}>7</Text>
-              <Text style={styles.statLabel}>Regio&apos;s</Text>
+              <Text style={styles.statLabel}>{' ' + t("Regio's") + ' '}</Text>
             </View>
           </View>
 
@@ -296,15 +295,15 @@ export function DiplomaDocument({ name, date }: DiplomaDocumentProps) {
           <View style={styles.footerSection}>
             {/* Date */}
             <View style={styles.dateColumn}>
-              <Text style={styles.dateLabel}>Uitgereikt op</Text>
+              <Text style={styles.dateLabel}>{' ' + t("Uitgereikt op") + ' '}</Text>
               <Text style={styles.dateValue}>{date}</Text>
             </View>
 
             {/* Eric's signature */}
             <View style={styles.signatureColumn}>
               <Image src="/images/eric/eric-happy.png" style={styles.signatureImage} />
-              <Text style={styles.signatureName}>Eric de Draak</Text>
-              <Text style={styles.signatureTitle}>Beschermer van Lettoria</Text>
+              <Text style={styles.signatureName}>{' ' + t("Eric de Draak") + ' '}</Text>
+              <Text style={styles.signatureTitle}>{' ' + t("Beschermer van Lettoria") + ' '}</Text>
             </View>
 
             {/* Seal */}

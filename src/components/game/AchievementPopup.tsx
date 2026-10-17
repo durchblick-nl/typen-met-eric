@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { motion } from 'framer-motion';
 import { getAchievement } from '@/lib/data/achievements';
 import { useEffect } from 'react';
@@ -51,9 +52,7 @@ export function AchievementPopup({ achievementId, onClose }: AchievementPopupPro
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="text-yellow-400 text-sm font-bold tracking-widest mb-1">
-            ACHIEVEMENT ONTGRENDELD!
-          </div>
+          <div className="text-yellow-400 text-sm font-bold tracking-widest mb-1">{' ' + t("ACHIEVEMENT ONTGRENDELD!") + ' '} </div>
         </motion.div>
 
         {/* Icon */}
@@ -104,9 +103,7 @@ export function AchievementPopup({ achievementId, onClose }: AchievementPopupPro
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-        >
-          Druk op Enter om verder te gaan
-        </motion.p>
+        >{' ' + t("Druk op Enter om verder te gaan") + ' '} </motion.p>
       </motion.div>
     </motion.div>
   );

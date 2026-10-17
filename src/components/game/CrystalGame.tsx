@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useState, useEffect, useCallback, useRef, type PointerEvent as ReactPointerEvent, type TouchEvent as ReactTouchEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RaceObstacle } from './RaceObstacle';
@@ -82,7 +83,7 @@ export function CrystalGame({
 
   // UI state
   const [ericMood, setEricMood] = useState<'happy' | 'encouraging' | 'celebrating' | 'worried'>('happy');
-  const [ericMessage, setEricMessage] = useState('Klaar voor de race!');
+  const [ericMessage, setEricMessage] = useState(t("Klaar voor de race!"));
   const [gameState, setGameState] = useState<'intro' | 'playing' | 'paused' | 'gameover' | 'complete'>('intro');
   const [gameResult, setGameResult] = useState<{ newHighScore: boolean; gemsEarned: number; stars: number } | null>(null);
   const [scorePopups, setScorePopups] = useState<ScorePopupData[]>([]);
@@ -434,7 +435,7 @@ export function CrystalGame({
         triggerHitResult('hit');
         burstAtLane(obstacle.lane, '#fbbf24', 15);
         setEricMood('encouraging');
-        setEricMessage('Munt gepakt!');
+        setEricMessage(t("Munt gepakt!"));
         safeTimeout(() => { if (gameState === 'playing') setEricMood('happy'); }, 800);
       } else if (obstacle.type === 'bomb') {
         if (!isInvincible) {
@@ -446,7 +447,7 @@ export function CrystalGame({
           burstAtLane(obstacle.lane, '#ef4444', 40);
           setPlayerStateTemporary('hit', 500);
           setEricMood('worried');
-          setEricMessage('BOEM! Ontwijk de bom!');
+          setEricMessage(t("BOEM! Ontwijk de bom!"));
           safeTimeout(() => { if (gameState === 'playing') setEricMood('encouraging'); }, 1500);
         }
       } else if (obstacle.type === 'ice') {
@@ -458,12 +459,12 @@ export function CrystalGame({
           setIsSlowing(true);
           setSpeedMultiplier(0.5);
           setEricMood('worried');
-          setEricMessage('Bevroren!');
+          setEricMessage(t("Bevroren!"));
           safeTimeout(() => {
             setIsSlowing(false);
             setSpeedMultiplier(isSprintingRef.current ? 1.5 : 1);
             if (gameState === 'playing') setEricMood('encouraging');
-            setEricMessage('Weer ontdooid!');
+            setEricMessage(t("Weer ontdooid!"));
           }, 2000);
         }
       } else {
@@ -474,7 +475,7 @@ export function CrystalGame({
           triggerHitResult('miss');
           setPlayerStateTemporary('hit', 300);
           setEricMood('worried');
-          setEricMessage('Oeps, gemist!');
+          setEricMessage(t("Oeps, gemist!"));
           safeTimeout(() => { if (gameState === 'playing') setEricMood('encouraging'); }, 1000);
         }
       }
@@ -521,7 +522,7 @@ export function CrystalGame({
     setSpeedMultiplier(0.5);
     flashAbility('s');
     playPowerUp();
-    setEricMessage('Slow-mo!');
+    setEricMessage(t("Slow-mo!"));
 
     safeTimeout(() => {
       setIsSlowing(false);
@@ -540,7 +541,7 @@ export function CrystalGame({
     setPlayerState('sprinting');
     flashAbility('l');
     playPowerUp();
-    setEricMessage('Snel!');
+    setEricMessage(t("Snel!"));
 
     safeTimeout(() => {
       setIsSprinting(false);
@@ -591,22 +592,22 @@ export function CrystalGame({
         showScreenFlash('#fbbf24');
         triggerShake(3, 200);
         setEricMood('celebrating');
-        setEricMessage('2x-blok geraakt!');
+        setEricMessage(t("2x-blok geraakt!"));
       } else if (matchingObstacle.type === 'ice') {
         setEricMood('encouraging');
-        setEricMessage('IJs vernietigd!');
+        setEricMessage(t("IJs vernietigd!"));
       } else {
         const comboTier = getCurrentComboTier();
         if (comboTier.multiplier >= 5) {
           setEricMood('celebrating');
-          setEricMessage('MEGA! Ongelooflijk!');
+          setEricMessage(t("MEGA! Ongelooflijk!"));
         } else if (comboTier.multiplier >= 3) {
           setEricMood('celebrating');
-          const messages = ['Super!', 'Fantastisch!', 'Ga zo door!'];
+          const messages = [t("Super!"), t("Fantastisch!"), t("Ga zo door!")];
           setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
         } else {
           setEricMood('encouraging');
-          const messages = ['Mooi!', 'Ja!', 'Top!', 'Yes!'];
+          const messages = [t("Mooi!"), 'Ja!', t("Top!"), t("Yes!")];
           setEricMessage(messages[Math.floor(Math.random() * messages.length)]);
         }
       }
@@ -620,7 +621,7 @@ export function CrystalGame({
       playWrong();
       triggerHitResult('miss');
       setEricMood('worried');
-      setEricMessage('Verkeerde toets!');
+      setEricMessage(t("Verkeerde toets!"));
       safeTimeout(() => {
         if (gameState === 'playing') setEricMood('encouraging');
       }, 800);
@@ -782,7 +783,7 @@ export function CrystalGame({
     if (feverMeter >= 100 && !isFeverMode && gameState === 'playing') {
       activateFever();
       setEricMood('celebrating');
-      setEricMessage('TURBO MODUS!');
+      setEricMessage(t("TURBO MODUS!"));
     }
   }, [feverMeter, isFeverMode, activateFever, gameState]);
 
@@ -812,7 +813,7 @@ export function CrystalGame({
       if (result) {
         playGameOver();
         setEricMood('worried');
-        setEricMessage('Geen energie meer...');
+        setEricMessage(t("Geen energie meer..."));
       }
     }
   }, [energy, gameState, playGameOver, finalizeRun]);
@@ -825,7 +826,7 @@ export function CrystalGame({
       if (!result) return;
       playVictory();
       setEricMood('celebrating');
-      setEricMessage('FANTASTISCH! 3 Sterren!');
+      setEricMessage(t("FANTASTISCH! 3 Sterren!"));
       if (completeTimeoutRef.current) clearTimeout(completeTimeoutRef.current);
       completeTimeoutRef.current = setTimeout(() => {
         completeTimeoutRef.current = null;
@@ -882,7 +883,7 @@ export function CrystalGame({
     setGameState('playing');
     setGameResult(null);
     setEricMood('happy');
-    setEricMessage('Klaar voor de race!');
+    setEricMessage(t("Klaar voor de race!"));
     setHitResult(null);
     setShakeIntensity(0);
     setZoomPulse(false);
@@ -944,7 +945,7 @@ export function CrystalGame({
     : urgentBomb
       ? {
           tone: 'danger' as const,
-          text: `BOM ${LANE_LABELS[urgentBomb.obstacle.lane]}! Verplaats nu.`,
+          text: t("BOM {lane}! Verplaats nu.",{lane:LANE_LABELS[urgentBomb.obstacle.lane]}),
         }
         : urgentLetter
           ? {
@@ -954,16 +955,16 @@ export function CrystalGame({
         : energy < 30
           ? {
             tone: 'info' as const,
-            text: 'Pak gouden munten voor energie',
+            text: t("Pak gouden munten voor energie"),
           }
           : isAssistMode
             ? {
                 tone: 'info' as const,
-                text: 'Rustig ritme: kijk 1 obstakel vooruit',
+                text: t("Rustig ritme: kijk 1 obstakel vooruit"),
               }
             : {
                 tone: 'info' as const,
-                text: 'Munt = pakken, letter = typen',
+                text: t("Munt = pakken, letter = typen"),
               };
 
   return (
@@ -1112,9 +1113,7 @@ export function CrystalGame({
               className="rounded-2xl border border-cyan-300/35 bg-black/65 px-4 py-3 shadow-2xl backdrop-blur-md"
               style={{ boxShadow: '0 0 28px rgba(6,182,212,0.2), inset 0 0 18px rgba(255,255,255,0.06)' }}
             >
-              <div className="mb-2 text-center text-[11px] font-black uppercase tracking-[0.24em] text-cyan-200">
-                Typ deze letters
-              </div>
+              <div className="mb-2 text-center text-[11px] font-black uppercase tracking-[0.24em] text-cyan-200">{' ' + t("Typ deze letters") + ' '} </div>
               <div className="flex items-center justify-center gap-3">
                 {typingThreats.map(({ obstacle, progress }) => (
                   <motion.div
@@ -1161,13 +1160,13 @@ export function CrystalGame({
               ? 'bg-red-600/80 hover:bg-red-500/80'
               : 'bg-gray-700/80 hover:bg-gray-600/80'
           }`}
-          title={!soundEnabled && !musicEnabled ? 'Geluid aan' : 'Stil'}
+          title={!soundEnabled && !musicEnabled ? t("Geluid aan") : t("Stil")}
         >
           <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-black/40 text-cyan-200">
             {!soundEnabled && !musicEnabled ? 'MUTE' : 'AUDIO'}
           </span>
           <span className="text-white text-xs font-medium">
-            {!soundEnabled && !musicEnabled ? 'Aan' : 'Stil'}
+            {!soundEnabled && !musicEnabled ? t("Aan") : t("Stil")}
           </span>
         </button>
       </div>
@@ -1183,7 +1182,7 @@ export function CrystalGame({
           >
             <div className="flex items-center gap-2">
               <span className="text-white font-bold">
-                {isSprinting ? 'Sprint!' : 'Slow-mo'}
+                {isSprinting ? t("Sprint!") : t("Slow-mo")}
               </span>
             </div>
           </motion.div>
@@ -1212,24 +1211,20 @@ export function CrystalGame({
               <motion.h2
                 className="relative text-4xl font-black text-cyan-200 mb-4 tracking-[0.12em]"
                 style={{ textShadow: '0 0 18px currentColor, 0 0 48px rgba(6,182,212,0.5)' }}
-              >
-                ERIC&apos;S RACE
-              </motion.h2>
+              >{' ' + t("ERIC'S RACE") + ' '} </motion.h2>
 
               <div className="relative text-left text-white/90 space-y-3 mb-4 rounded-2xl border border-white/10 bg-black/25 p-4">
-                <p className="uppercase tracking-wider text-cyan-300/90 text-xs">Doelen Deze Run</p>
-                <p>- Pak gouden munten met Eric: die geven energie en punten.</p>
-                <p>- Typ letterblokken weg. Niet vangen, want dan verlies je energie.</p>
-                <p>- Er staan maximaal 3 letters tegelijk op het scherm.</p>
-                <p>- Ontwijk bommen met de bewegings-toetsen.</p>
-                <p className="text-cyan-200">
-                  Doel: {scoreTargets.star3.toLocaleString()} punten voor 3 sterren.
-                </p>
+                <p className="uppercase tracking-wider text-cyan-300/90 text-xs">{' ' + t("Doelen Deze Run") + ' '}</p>
+                <p>{' ' + t("- Pak gouden munten met Eric: die geven energie en punten.") + ' '}</p>
+                <p>{' ' + t("- Typ letterblokken weg. Niet vangen, want dan verlies je energie.") + ' '}</p>
+                <p>{' ' + t("- Er staan maximaal 3 letters tegelijk op het scherm.") + ' '}</p>
+                <p>{' ' + t("- Ontwijk bommen met de bewegings-toetsen.") + ' '}</p>
+                <p className="text-cyan-200">{' ' + t("Doel:") + ' '} {scoreTargets.star3.toLocaleString()}{' ' + t("punten voor 3 sterren.") + ' '} </p>
               </div>
 
               {/* Show available abilities */}
               <div className="bg-black/30 rounded-lg p-3 mb-4">
-                <div className="text-xs text-cyan-400/70 tracking-widest mb-2">BEWEGINGS-VAARDIGHEDEN</div>
+                <div className="text-xs text-cyan-400/70 tracking-widest mb-2">{' ' + t("BEWEGINGS-VAARDIGHEDEN") + ' '}</div>
                 <div className="flex flex-wrap justify-center gap-2">
                   {Object.entries(introAbilities).map(([key, config]) => {
                     const displayKey = key === ' ' ? 'SPC' : key.toUpperCase();
@@ -1247,18 +1242,14 @@ export function CrystalGame({
                 </div>
               </div>
 
-              <div className="text-purple-300/70 text-sm mb-4">
-                Druk op <kbd className="bg-black/50 px-2 py-1 rounded text-white">ESC</kbd> om te pauzeren
-              </div>
+              <div className="text-purple-300/70 text-sm mb-4">{' ' + t("Druk op") + ' '} <kbd className="bg-black/50 px-2 py-1 rounded text-white">ESC</kbd>{' ' + t("om te pauzeren") + ' '} </div>
 
               <motion.button
                 onClick={handleStartGame}
                 className="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl font-bold text-xl text-white hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg hover:shadow-cyan-500/30"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-              >
-                START RACE
-              </motion.button>
+              >{' ' + t("START RACE") + ' '} </motion.button>
             </motion.div>
           </motion.div>
         )}
@@ -1284,13 +1275,9 @@ export function CrystalGame({
                 className="text-4xl font-black text-white mb-2"
                 initial={{ y: -10 }}
                 animate={{ y: 0 }}
-              >
-                PAUZE
-              </motion.h2>
+              >{' ' + t("PAUZE") + ' '} </motion.h2>
 
-              <p className="text-slate-300 mb-6">
-                Druk op <kbd className="bg-black/50 px-2 py-1 rounded text-white">ESC</kbd> of klik om verder te spelen
-              </p>
+              <p className="text-slate-300 mb-6">{' ' + t("Druk op") + ' '} <kbd className="bg-black/50 px-2 py-1 rounded text-white">ESC</kbd>{' ' + t("of klik om verder te spelen") + ' '} </p>
 
               <div className="flex gap-3 justify-center">
                 <motion.button
@@ -1298,17 +1285,13 @@ export function CrystalGame({
                   className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl font-bold text-white hover:from-green-500 hover:to-emerald-500 transition-all"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                >
-                  Verder
-                </motion.button>
+                >{' ' + t("Verder") + ' '} </motion.button>
                 <motion.button
                   onClick={onComplete}
                   className="px-6 py-3 bg-gradient-to-r from-slate-600 to-slate-700 rounded-xl font-bold text-white hover:from-slate-500 hover:to-slate-600 transition-all"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                >
-                  Stoppen
-                </motion.button>
+                >{' ' + t("Stoppen") + ' '} </motion.button>
               </div>
             </motion.div>
           </motion.div>
@@ -1340,7 +1323,7 @@ export function CrystalGame({
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                {gameState === 'complete' ? 'GEWELDIG!' : 'GAME OVER'}
+                {gameState === 'complete' ? 'GEWELDIG!' : t("GAME OVER")}
               </motion.h2>
 
               <motion.div
@@ -1349,7 +1332,7 @@ export function CrystalGame({
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.4, type: 'spring' }}
               >
-                <div className="text-cyan-400/70 text-sm tracking-widest">SCORE</div>
+                <div className="text-cyan-400/70 text-sm tracking-widest">{' ' + t("SCORE") + ' '}</div>
                 <div
                   className="font-mono text-5xl font-bold text-cyan-300"
                   style={{ textShadow: '0 0 20px currentColor' }}
@@ -1361,9 +1344,7 @@ export function CrystalGame({
                     className="text-yellow-400 text-sm mt-1 font-bold"
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ repeat: Infinity, duration: 0.5 }}
-                  >
-                    NIEUW RECORD!
-                  </motion.div>
+                  >{' ' + t("NIEUW RECORD!") + ' '} </motion.div>
                 )}
               </motion.div>
 
@@ -1393,21 +1374,20 @@ export function CrystalGame({
                 transition={{ delay: 0.7 }}
               >
                 <span className="text-2xl">+{gameResult.gemsEarned}</span>
-                <span className="text-lg ml-1">munten</span>
+                <span className="text-lg ml-1">{' ' + t("munten") + ' '}</span>
               </motion.div>
 
               {gameState === 'gameover' && (
                 <div className="mb-6 rounded-lg bg-black/30 border border-white/10 p-3 text-left text-sm text-slate-200">
-                  <div>Gemiste letters: {missedCount}</div>
-                  <div>Bommen geraakt: {bombHitCount}</div>
-                  <div>Verkeerde toetsen: {wrongKeyCount}</div>
-                  <div className="mt-2 text-cyan-200">
-                    Tip: {
+                  <div>{' ' + t("Gemiste letters:") + ' '} {missedCount}</div>
+                  <div>{' ' + t("Bommen geraakt:") + ' '} {bombHitCount}</div>
+                  <div>{' ' + t("Verkeerde toetsen:") + ' '} {wrongKeyCount}</div>
+                  <div className="mt-2 text-cyan-200">{' ' + t("Tip:") + ' '} {
                       bombHitCount >= missedCount && bombHitCount >= wrongKeyCount
-                        ? 'Kijk 1 baan vooruit en verplaats eerder met F/J.'
+                        ? t("Kijk 1 baan vooruit en verplaats eerder met F/J.")
                         : wrongKeyCount >= missedCount
-                          ? 'Typ rustiger: alleen letters die je op het scherm ziet.'
-                          : 'Focus op de dichtstbijzijnde letter en negeer de rest.'
+                          ? t("Typ rustiger: alleen letters die je op het scherm ziet.")
+                          : t("Focus op de dichtstbijzijnde letter en negeer de rest.")
                     }
                   </div>
                 </div>
@@ -1422,16 +1402,12 @@ export function CrystalGame({
                 <button
                   onClick={handleRestart}
                   className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold text-white hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg hover:shadow-purple-500/30"
-                >
-                  Opnieuw spelen
-                </button>
+                >{' ' + t("Opnieuw spelen") + ' '} </button>
                 {gameState === 'complete' && (
                   <button
                     onClick={handleContinueFromComplete}
                     className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl font-bold text-white hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg hover:shadow-cyan-500/30"
-                  >
-                    Verder
-                  </button>
+                  >{' ' + t("Verder") + ' '} </button>
                 )}
               </motion.div>
             </motion.div>

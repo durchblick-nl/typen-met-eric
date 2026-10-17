@@ -1,8 +1,9 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useProgressStore } from '@/lib/stores/progressStore';
-import { motion, useReducedMotion } from 'framer-motion';
-import { useComfortStore } from '@/components/settings/ComfortSettings';
+import { motion } from 'framer-motion';
+import { useQuietMotion } from '@/components/settings/ComfortSettings';
 import { REGIONS, Region } from '@/lib/data/regions';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -13,8 +14,7 @@ interface WorldMapProps {
 }
 
 export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
-  const calm = useComfortStore(state => state.calm);
-  const reduced = useReducedMotion();
+  const quiet = useQuietMotion();
   const lessonStars = useProgressStore(state => state.lessonStars);
   const restored = (region: Region) => region.lessons.every(lesson => lessonStars[lesson.id] === 3);
   const isRegionUnlocked = (region: Region) => perfectLessons >= region.requiredLessons;
@@ -29,7 +29,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
       <div className="absolute inset-0">
         <Image
           src="/images/map/world-map-bg.png"
-          alt="Map of Lettoria"
+          alt={t("Map of Lettoria")}
           fill
           className="object-cover"
           style={{ filter: `saturate(${.25 + perfectLessons / 26 * .75})` }}
@@ -138,7 +138,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
                   {current && (
                     <motion.div
                       className="absolute inset-0 bg-eric-gold rounded-full blur-xl"
-                      animate={{ opacity: calm || reduced ? .4 : [0.5, 1, 0.5] }}
+                      animate={{ opacity: quiet ? .4 : [0.5, 1, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
                       style={{ transform: 'scale(1.5)' }}
                     />
@@ -198,9 +198,7 @@ export function WorldMap({ perfectLessons, currentLesson }: WorldMapProps) {
 
       {/* Map title */}
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-        <h2 className="text-xl font-bold text-eric-green bg-white/80 px-4 py-1 rounded-full shadow">
-          🗺️ Lettoria
-        </h2>
+        <h2 className="text-xl font-bold text-eric-green bg-white/80 px-4 py-1 rounded-full shadow">{' ' + t("🗺️ Lettoria") + ' '} </h2>
       </div>
     </div>
   );

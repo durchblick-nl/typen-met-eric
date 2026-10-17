@@ -1,3 +1,4 @@
+import { createCurriculum } from './courseCurriculum';
 export interface Lesson {
   id: number;
   title: string;
@@ -21,7 +22,7 @@ export interface Region {
   requiredLessons: number;
 }
 
-export const REGIONS: Region[] = [
+export const DUTCH_REGIONS: Region[] = [
   {
     id: 'grot',
     name: "Eric's Grot",
@@ -453,6 +454,8 @@ export const REGIONS: Region[] = [
     ],
   },
 ];
+
+export const REGIONS: Region[] = createCurriculum(DUTCH_REGIONS);
 
 export function getRegionById(id: string): Region | undefined {
   return REGIONS.find((r) => r.id === id);

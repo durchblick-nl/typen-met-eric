@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { GrotRewards } from '@/components/game/GrotRewards';
 import { ComfortSettings } from '@/components/settings/ComfortSettings';
 import { WorldMap } from '@/components/map';
@@ -28,13 +29,9 @@ export default function KaartPage() {
           <Link
             href="/"
             className="text-eric-green hover:text-eric-green/80 transition-colors"
-          >
-            &larr; Home
-          </Link>
+          >{' ' + t("← Home") + ' '} </Link>
 
-          <h1 className="text-2xl font-bold text-eric-green">
-            Wereldkaart
-          </h1>
+          <h1 className="text-2xl font-bold text-eric-green">{' ' + t("Wereldkaart") + ' '} </h1>
 
           {/* Stats */}
           <div className="flex items-center gap-4 text-sm">
@@ -64,8 +61,8 @@ export default function KaartPage() {
         {/* Progress bar */}
         <div className="mt-8 max-w-md mx-auto">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>Voortgang</span>
-            <span>{threeStarLessons} / {TOTAL_LESSONS} lessen met 3 sterren</span>
+            <span>{' ' + t("Voortgang") + ' '}</span>
+            <span>{threeStarLessons} / {TOTAL_LESSONS}{' ' + t("lessen met 3 sterren") + ' '}</span>
           </div>
           <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
             <div
@@ -84,14 +81,14 @@ export default function KaartPage() {
             >
               <Image
                 src="/images/diploma/lettoria_seal.png"
-                alt="Diploma"
+                alt={t("Diploma")}
                 width={60}
                 height={60}
                 className="flex-shrink-0"
               />
               <div>
-                <div className="font-bold text-lg">Je diploma is klaar!</div>
-                <div className="text-white/90 text-sm">Klik hier om je diploma te downloaden</div>
+                <div className="font-bold text-lg">{' ' + t("Je diploma is klaar!") + ' '}</div>
+                <div className="text-white/90 text-sm">{' ' + t("Klik hier om je diploma te downloaden") + ' '}</div>
               </div>
             </Link>
           ) : (
@@ -101,14 +98,14 @@ export default function KaartPage() {
             >
               <Image
                 src="/images/diploma/lettoria_seal.png"
-                alt="Diploma"
+                alt={t("Diploma")}
                 width={50}
                 height={50}
                 className="flex-shrink-0 opacity-50"
               />
               <div>
-                <div className="font-bold text-gray-700">Diploma</div>
-                <div className="text-gray-500 text-sm">{threeStarLessons} / {TOTAL_LESSONS} lessen met 3 sterren</div>
+                <div className="font-bold text-gray-700">{' ' + t("Diploma") + ' '}</div>
+                <div className="text-gray-500 text-sm">{threeStarLessons} / {TOTAL_LESSONS}{' ' + t("lessen met 3 sterren") + ' '}</div>
               </div>
             </Link>
           )}

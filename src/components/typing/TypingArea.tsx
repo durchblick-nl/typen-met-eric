@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useTypingStore } from '@/lib/stores/typingStore';
 import { useEffect, useRef } from 'react';
 import { useKeyboard } from '@/lib/hooks/useKeyboard';
@@ -37,8 +38,8 @@ export function TypingArea() {
   return (
     <div ref={area} tabIndex={-1} className="outline-none bg-white/95 backdrop-blur rounded-2xl p-6 shadow-xl border-2 border-eric-gold/50 box-glow transition-all duration-300 hover:shadow-2xl hover:border-eric-gold">
       <div className="flex items-center justify-between gap-3 mb-4">
-        <p className="text-sm text-gray-600" role="status">{isPaused ? 'Gepauzeerd. Je voortgang blijft staan.' : lastWrong ? 'Probeer dezelfde toets nog eens. Je kunt het!' : 'Typ dit. Een fout? Probeer dezelfde toets opnieuw.'}</p>
-        {(!isComplete || isPaused) && <button className="text-eric-green font-semibold shrink-0" onClick={() => { setPaused(!isPaused); area.current?.focus(); }}>{isPaused ? 'Verder typen' : 'Pauze'}</button>}
+        <p className="text-sm text-gray-600" role="status">{isPaused ? t("Gepauzeerd. Je voortgang blijft staan.") : lastWrong ? t("Probeer dezelfde toets nog eens. Je kunt het!") : t("Typ dit. Een fout? Probeer dezelfde toets opnieuw.")}</p>
+        {(!isComplete || isPaused) && <button className="text-eric-green font-semibold shrink-0" onClick={() => { setPaused(!isPaused); area.current?.focus(); }}>{isPaused ? t("Verder typen") : t("Pauze")}</button>}
       </div>
 
       <div className="font-mono text-2xl leading-relaxed tracking-wide mb-6 min-h-[80px]">

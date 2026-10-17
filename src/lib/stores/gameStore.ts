@@ -1,3 +1,5 @@
+import { t } from '@/lib/i18n';
+import { storageKey } from '../course';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { arcadeReward } from '@/lib/arcadeFlight';
@@ -10,9 +12,9 @@ export type PowerUpType = 'shield' | 'slowmo' | 'magnet' | null;
 // Combo thresholds and multipliers
 export const COMBO_TIERS = [
   { threshold: 0, multiplier: 1, name: null },
-  { threshold: 5, multiplier: 2, name: 'Mooi!' },
-  { threshold: 10, multiplier: 3, name: 'Super!' },
-  { threshold: 20, multiplier: 4, name: 'Geweldig!' },
+  { threshold: 5, multiplier: 2, name: t("Mooi!") },
+  { threshold: 10, multiplier: 3, name: t("Super!") },
+  { threshold: 20, multiplier: 4, name: t("Geweldig!") },
   { threshold: 30, multiplier: 5, name: 'MEGA!' },
 ] as const;
 
@@ -429,7 +431,7 @@ export const useGameStore = create<GameState>()(
       },
     }),
     {
-      name: 'lettoria-game-store',
+      name: storageKey('lettoria-game-store'),
       partialize: (state) => ({
         grotDecorations: state.grotDecorations,
         activeDecoration: state.activeDecoration,

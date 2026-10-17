@@ -1,4 +1,5 @@
 "use client";
+import { t } from '@/lib/i18n';
 import { useEffect, useState } from "react";
 import { MotionConfig } from "framer-motion";
 import { create } from "zustand";
@@ -52,8 +53,7 @@ export function ComfortSettings({ onChange }: { onChange?: () => void } = {}) {
           e.target.blur();
           onChange?.();
         }}
-      />
-      Rustige weergave{osCalm ? " (apparaatinstelling)" : ""}
+      />{' ' + t("Rustige weergave") + ' '}{osCalm ? t(" (apparaatinstelling)") : ""}
     </label>
   );
 }

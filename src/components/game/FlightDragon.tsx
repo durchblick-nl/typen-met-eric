@@ -1,4 +1,5 @@
 "use client";
+import { t } from '@/lib/i18n';
 // All poses derive from the same simulation clock as the race. No independent
 // animation timer can continue while the game is paused or finished.
 export function FlightDragon({
@@ -23,7 +24,7 @@ export function FlightDragon({
   return (
     <div
       role="img"
-      aria-label="Eric vliegt met bewegende vleugels en staart"
+      aria-label={t("Eric vliegt met bewegende vleugels en staart")}
       className="relative w-full aspect-[1/1.12]"
       style={{
         filter: turbo ? "drop-shadow(0 0 8px #ffd44a)" : undefined,

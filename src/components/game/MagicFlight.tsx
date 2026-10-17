@@ -1,4 +1,5 @@
 "use client";
+import { t } from '@/lib/i18n';
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -176,7 +177,7 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
       tabIndex={-1}
       role="dialog"
       aria-modal="true"
-      aria-label="Erics magievlucht"
+      aria-label={t("Erics magievlucht")}
       onKeyDown={(event) => {
         if (event.key !== "Tab") return;
         const controls = [
@@ -203,34 +204,23 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
       <div className="max-w-6xl mx-auto">
         <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
-            <p className="text-eric-green text-sm font-semibold mb-1">
-              LETTORIA · BONUSAVONTUUR
-            </p>
-            <h1 className="text-3xl sm:text-4xl font-bold text-eric-green">
-              Erics magievlucht
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Elke goede toets brengt de magie terug.
-            </p>
+            <p className="text-eric-green text-sm font-semibold mb-1">{' ' + t("LETTORIA · BONUSAVONTUUR") + ' '} </p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-eric-green">{' ' + t("Erics magievlucht") + ' '} </h1>
+            <p className="text-gray-600 mt-2">{' ' + t("Elke goede toets brengt de magie terug.") + ' '} </p>
           </div>
           <div className="flex gap-2">
             {phase === "playing" && (
-              <button className={button} onClick={pause}>
-                Pauze
-              </button>
+              <button className={button} onClick={pause}>{' ' + t("Pauze") + ' '} </button>
             )}
-            <button className={button} onClick={onExit}>
-              Afsluiten
-            </button>
+            <button className={button} onClick={onExit}>{' ' + t("Afsluiten") + ' '} </button>
           </div>
         </header>
         <div className="flex items-center gap-3 sm:gap-6 mb-4 text-eric-green font-bold">
-          <span className="shrink-0">
-            ✦ Magie {flight.correct} / {FLIGHT_GOAL}
+          <span className="shrink-0">{' ' + t("✦ Magie") + ' '} {flight.correct} / {FLIGHT_GOAL}
           </span>
           <div
             role="progressbar"
-            aria-label="Magie"
+            aria-label={t("Magie")}
             aria-valuenow={flight.correct}
             aria-valuemin={0}
             aria-valuemax={FLIGHT_GOAL}
@@ -241,14 +231,14 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
               style={{ width: `${progress * 100}%` }}
             />
           </div>
-          <span className="font-mono tabular-nums" aria-label="Tijd over">
+          <span className="font-mono tabular-nums" aria-label={t("Tijd over")}>
             {timeLabel}
           </span>
         </div>
         <div className="relative min-h-[430px] sm:min-h-[470px] rounded-3xl border-4 border-eric-gold/30 overflow-hidden bg-green-100">
           <Image
             src="/images/map/world-map-bg.png"
-            alt="De magische wereld van Lettoria"
+            alt={t("De magische wereld van Lettoria")}
             fill
             className="object-cover"
             style={{ filter: `saturate(${0.35 + progress * 0.65})` }}
@@ -257,7 +247,7 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
           <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/20 to-transparent" />
           <div
             className="absolute top-5 right-5 flex gap-3 sm:gap-5"
-            aria-label={`${checkpoint} van 3 plekken verlicht`}
+            aria-label={t("{n} van 3 plekken verlicht", {n:checkpoint})}
           >
             {["dorp", "woud", "kasteel"].map((place, index) => (
               <div
@@ -266,7 +256,7 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
               >
                 <Image
                   src={`/images/map/icon-${place}.png`}
-                  alt={["Het dorp", "Het woud", "Het kasteel"][index]}
+                  alt={[t("Het dorp"), t("Het woud"), t("Het kasteel")][index]}
                   width={44}
                   height={44}
                   className={index < checkpoint ? "" : "grayscale opacity-60"}
@@ -281,7 +271,7 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
           >
             <Image
               src={`/images/eric/${ericImage}.png`}
-              alt="Eric helpt je de magie terug te brengen"
+              alt={t("Eric helpt je de magie terug te brengen")}
               width={280}
               height={280}
               priority
@@ -297,33 +287,23 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
             <div className="w-full max-w-lg rounded-3xl bg-perkament/95 border border-eric-gold/60 p-6 sm:p-10 text-center shadow-lg">
               {phase === "ready" && (
                 <>
-                  <h2 className="text-2xl font-bold text-eric-green mb-3">
-                    Geef Eric zijn magie terug
-                  </h2>
-                  <p className="text-gray-700 mb-5">
-                    Typ de letters op het scherm. Na 40 goede toetsen, of 60
-                    seconden, is je vlucht klaar. Een fout? Probeer dezelfde
-                    toets nog eens.
-                  </p>
-                  <p className="text-sm text-gray-600 mb-5">
-                    Gebruik je eigen toetsenbord. Er zijn geen stuurtoetsen.
-                  </p>
+                  <h2 className="text-2xl font-bold text-eric-green mb-3">{' ' + t("Geef Eric zijn magie terug") + ' '} </h2>
+                  <p className="text-gray-700 mb-5">{' ' + t("Typ de letters op het scherm. Na 40 goede toetsen, of 60 seconden, is je vlucht klaar. Een fout? Probeer dezelfde toets nog eens.") + ' '} </p>
+                  <p className="text-sm text-gray-600 mb-5">{' ' + t("Gebruik je eigen toetsenbord. Er zijn geen stuurtoetsen.") + ' '} </p>
                   <button
                     className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
                     onClick={start}
-                  >
-                    Start de vlucht
-                  </button>
+                  >{' ' + t("Start de vlucht") + ' '} </button>
                 </>
               )}
               {phase === "playing" && (
                 <>
                   <p className="text-eric-green font-semibold mb-3">
                     {target === " "
-                      ? "Typ de spatie"
+                      ? t("Typ de spatie")
                       : target.length > 1
-                        ? "Typ het woord"
-                        : "Typ de letter"}
+                        ? t("Typ het woord")
+                        : t("Typ de letter")}
                   </p>
                   <div
                     data-testid="flight-target"
@@ -346,64 +326,49 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
                   </div>
                   <p role="status" className="mt-5 text-gray-700 min-h-12">
                     {flight.wrong
-                      ? "Bijna! Probeer de onderstreepte toets nog eens."
+                      ? t("Bijna! Probeer de onderstreepte toets nog eens.")
                       : flight.streak && flight.streak % 5 === 0
-                        ? "Mooi ritme! Erics magie groeit."
-                        : "Kijk naar het scherm. Je vingers weten de weg."}
+                        ? t("Mooi ritme! Erics magie groeit.")
+                        : t("Kijk naar het scherm. Je vingers weten de weg.")}
                   </p>
                 </>
               )}
               {phase === "paused" && (
                 <>
-                  <h2 className="text-3xl font-bold text-eric-green mb-4">
-                    Even rust
-                  </h2>
-                  <p className="text-gray-700 mb-6">
-                    De tijd en de magie staan stil. Ga verder wanneer jij wilt.
-                  </p>
+                  <h2 className="text-3xl font-bold text-eric-green mb-4">{' ' + t("Even rust") + ' '} </h2>
+                  <p className="text-gray-700 mb-6">{' ' + t("De tijd en de magie staan stil. Ga verder wanneer jij wilt.") + ' '} </p>
                   <button
                     className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
                     onClick={resume}
-                  >
-                    Verder vliegen
-                  </button>
+                  >{' ' + t("Verder vliegen") + ' '} </button>
                 </>
               )}
               {phase === "ended" && (
                 <>
                   <h2 className="text-3xl font-bold text-eric-green mb-3">
                     {flight.correct >= FLIGHT_GOAL
-                      ? "De magie is terug!"
-                      : "Goed gevlogen!"}
+                      ? t("De magie is terug!")
+                      : t("Goed gevlogen!")}
                   </h2>
                   <p className="text-gray-700 mb-3">
-                    {flight.correct} goede toetsen ·{" "}
+                    {flight.correct}{' ' + t("goede toetsen ·") + ' '}{" "}
                     {flight.attempts
                       ? Math.floor((flight.correct / flight.attempts) * 100)
-                      : 0}
-                    % nauwkeurig
-                  </p>
+                      : 0}{' ' + t("% nauwkeurig") + ' '} </p>
                   <p className="font-bold text-eric-green mb-2">
-                    +{reward?.gems ?? 0} kristallen voor Erics grot
-                  </p>
+                    +{reward?.gems ?? 0}{' ' + t("kristallen voor Erics grot") + ' '} </p>
                   {reward?.record && (
-                    <p className="text-sm text-gray-600 mb-2">
-                      Je beste magievlucht voor deze les!
-                    </p>
+                    <p className="text-sm text-gray-600 mb-2">{' ' + t("Je beste magievlucht voor deze les!") + ' '} </p>
                   )}
-                  <p className="text-sm text-gray-600 mb-5">
-                    Een fijn moment voor een pauze. Jij kiest wat volgt.
-                  </p>
+                  <p className="text-sm text-gray-600 mb-5">{' ' + t("Een fijn moment voor een pauze. Jij kiest wat volgt.") + ' '} </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     <button
                       className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
                       onClick={onNext}
                     >
-                      {isLastLesson ? "Naar de kaart" : "Volgende les"}
+                      {isLastLesson ? t("Naar de kaart") : t("Volgende les")}
                     </button>
-                    <button className={button} onClick={start}>
-                      Nog een vlucht
-                    </button>
+                    <button className={button} onClick={start}>{' ' + t("Nog een vlucht") + ' '} </button>
                   </div>
                 </>
               )}
@@ -412,8 +377,8 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
         </div>
         <footer className="flex flex-wrap justify-between gap-4 items-center mt-5 text-eric-green">
           <p>
-            <strong>{flight.score}</strong> punten · Reeks{" "}
-            <strong>{flight.streak}</strong> · Beste reeks{" "}
+            <strong>{flight.score}</strong>{' ' + t("punten · Reeks") + ' '}{" "}
+            <strong>{flight.streak}</strong>{' ' + t("· Beste reeks") + ' '}{" "}
             <strong>{flight.bestStreak}</strong>
           </p>
           <div className="flex gap-4 items-center">
@@ -422,14 +387,11 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
               className="text-sm underline"
               aria-pressed={sound}
               onClick={toggleSound}
-            >
-              Geluid {sound ? "aan" : "uit"}
+            >{' ' + t("Geluid") + ' '} {sound ? t("aan") : t("uit")}
             </button>
           </div>
         </footer>
-        <p className="text-center text-sm text-gray-600 mt-5">
-          Een avontuur duurt maximaal 60 seconden. Esc pauzeert de vlucht.
-        </p>
+        <p className="text-center text-sm text-gray-600 mt-5">{' ' + t("Een avontuur duurt maximaal 60 seconden. Esc pauzeert de vlucht.") + ' '} </p>
       </div>
     </section>
   );

@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n';
 // Race game ability system: maps learned letters to movement abilities
 
 export interface AbilityConfig {
@@ -11,13 +12,13 @@ export interface AbilityConfig {
 
 // Movement keys — these letters become abilities instead of obstacle-letters
 export const MOVEMENT_KEYS: Record<string, AbilityConfig> = {
-  'f': { action: 'move_left', label: 'Links', icon: '←', minLesson: 0, cooldown: 0, duration: 0 },
-  'j': { action: 'move_right', label: 'Rechts', icon: '→', minLesson: 0, cooldown: 0, duration: 0 },
+  'f': { action: 'move_left', label: t("Links"), icon: '←', minLesson: 0, cooldown: 0, duration: 0 },
+  'j': { action: 'move_right', label: t("Rechts"), icon: '→', minLesson: 0, cooldown: 0, duration: 0 },
   's': { action: 'slow', label: 'Slow', icon: '⏱', minLesson: 2, cooldown: 8000, duration: 2000 },
-  'l': { action: 'sprint', label: 'Snel', icon: '⚡', minLesson: 2, cooldown: 8000, duration: 2000 },
-  'd': { action: 'dash_left', label: 'Dash ←', icon: '⇐', minLesson: 3, cooldown: 0, duration: 400 },
-  'k': { action: 'dash_right', label: 'Dash →', icon: '⇒', minLesson: 3, cooldown: 0, duration: 400 },
-  ' ': { action: 'jump', label: 'Spring', icon: '⬆', minLesson: 5, cooldown: 0, duration: 600 },
+  'l': { action: 'sprint', label: t("Snel"), icon: '⚡', minLesson: 2, cooldown: 8000, duration: 2000 },
+  'd': { action: 'dash_left', label: t("Dash ←"), icon: '⇐', minLesson: 3, cooldown: 0, duration: 400 },
+  'k': { action: 'dash_right', label: t("Dash →"), icon: '⇒', minLesson: 3, cooldown: 0, duration: 400 },
+  ' ': { action: 'jump', label: t("Spring"), icon: '⬆', minLesson: 5, cooldown: 0, duration: 600 },
 };
 
 export type ObstacleType = 'letter' | 'bomb' | 'gem' | 'gold' | 'ice';

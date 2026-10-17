@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -61,7 +62,7 @@ export default function DiplomaPage() {
       saveAs(blob, fileName);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Er ging iets mis bij het maken van de PDF. Probeer het opnieuw.');
+      alert(t("Er ging iets mis bij het maken van de PDF. Probeer het opnieuw."));
     } finally {
       setIsGenerating(false);
     }
@@ -73,7 +74,7 @@ export default function DiplomaPage() {
       <main className="min-h-screen bg-perkament flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-eric-green border-t-transparent mx-auto mb-4" />
-          <p className="text-gray-600">Laden...</p>
+          <p className="text-gray-600">{' ' + t("Laden...") + ' '}</p>
         </div>
       </main>
     );
@@ -84,9 +85,7 @@ export default function DiplomaPage() {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/kaart" className="text-eric-green hover:text-eric-green/80 transition-colors">
-            &larr; Terug naar kaart
-          </Link>
+          <Link href="/kaart" className="text-eric-green hover:text-eric-green/80 transition-colors">{' ' + t("← Terug naar kaart") + ' '} </Link>
         </div>
       </div>
 
@@ -117,18 +116,14 @@ export default function DiplomaPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 className="text-3xl md:text-4xl font-bold text-eric-green mt-6 mb-2"
-              >
-                Gefeliciteerd!
-              </motion.h1>
+              >{' ' + t("Gefeliciteerd!") + ' '} </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
                 className="text-lg text-gray-600 mb-6"
-              >
-                Je hebt alle 26 lessen met 3 sterren voltooid! Je bent nu een echte Typmeester!
-              </motion.p>
+              >{' ' + t("Je hebt alle 26 lessen met 3 sterren voltooid! Je bent nu een echte Typmeester!") + ' '} </motion.p>
             </div>
 
             {/* Name input */}
@@ -138,18 +133,14 @@ export default function DiplomaPage() {
               transition={{ delay: 0.5 }}
               className="bg-white rounded-2xl p-6 shadow-sm"
             >
-              <label htmlFor="name" className="block text-lg font-bold text-gray-800 mb-2">
-                Jouw naam op het diploma
-              </label>
-              <p className="text-sm text-gray-500 mb-4">
-                Vul je voornaam in om je persoonlijke diploma te maken.
-              </p>
+              <label htmlFor="name" className="block text-lg font-bold text-gray-800 mb-2">{' ' + t("Jouw naam op het diploma") + ' '} </label>
+              <p className="text-sm text-gray-500 mb-4">{' ' + t("Vul je voornaam in om je persoonlijke diploma te maken.") + ' '} </p>
               <input
                 type="text"
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Voornaam"
+                placeholder={t("Voornaam")}
                 className="w-full text-2xl font-bold text-center py-4 px-6 border-2 border-gray-200 rounded-xl focus:border-eric-green focus:outline-none transition-colors"
                 maxLength={30}
               />
@@ -162,7 +153,7 @@ export default function DiplomaPage() {
               transition={{ delay: 0.6 }}
               className="bg-white rounded-2xl p-4 md:p-6 shadow-sm"
             >
-              <h2 className="text-lg font-bold text-gray-800 mb-4">Voorbeeld van je diploma</h2>
+              <h2 className="text-lg font-bold text-gray-800 mb-4">{' ' + t("Voorbeeld van je diploma") + ' '}</h2>
               <DiplomaPreview name={name} date={todayFormatted} />
             </motion.div>
 
@@ -183,18 +174,16 @@ export default function DiplomaPage() {
                     <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    PDF wordt gemaakt...
-                  </span>
+                    </svg>{' ' + t("PDF wordt gemaakt...") + ' '} </span>
                 ) : (
-                  '📄 Download je diploma als PDF'
+                  t("📄 Download je diploma als PDF")
                 )}
               </button>
 
               <p className="text-sm text-gray-500 mt-4">
                 {hasValidName
-                  ? 'Je diploma wordt direct gedownload. Bewaar het of print het uit!'
-                  : 'Vul eerst je naam in om het diploma te downloaden.'}
+                  ? t("Je diploma wordt direct gedownload. Bewaar het of print het uit!")
+                  : t("Vul eerst je naam in om het diploma te downloaden.")}
               </p>
             </motion.div>
           </motion.div>
@@ -209,21 +198,19 @@ export default function DiplomaPage() {
             <div className="text-center">
               <Eric
                 mood="encouraging"
-                message="Je kunt hier je diploma ophalen zodra je alle 26 lessen met 3 sterren hebt voltooid!"
+                message={t("Je kunt hier je diploma ophalen zodra je alle 26 lessen met 3 sterren hebt voltooid!")}
               />
             </div>
 
             {/* Progress section */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-                Je voortgang naar het diploma
-              </h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">{' ' + t("Je voortgang naar het diploma") + ' '} </h1>
 
               {/* Progress bar */}
               <div className="mb-6">
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
-                  <span>Lessen met 3 sterren</span>
-                  <span className="font-bold">{threeStarLessons} van {TOTAL_LESSONS}</span>
+                  <span>{' ' + t("Lessen met 3 sterren") + ' '}</span>
+                  <span className="font-bold">{threeStarLessons}{' ' + t("van") + ' '} {TOTAL_LESSONS}</span>
                 </div>
                 <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
                   <motion.div
@@ -234,8 +221,7 @@ export default function DiplomaPage() {
                   />
                 </div>
                 <p className="text-right text-sm text-gray-500 mt-1">
-                  {completionPercentage}% voltooid
-                </p>
+                  {completionPercentage}{' ' + t("% voltooid") + ' '} </p>
               </div>
 
               {/* Stats */}
@@ -244,35 +230,31 @@ export default function DiplomaPage() {
                   <div className="text-2xl md:text-3xl font-bold text-eric-green">
                     {completedLessons.length}
                   </div>
-                  <div className="text-xs md:text-sm text-gray-600">Lessen voltooid</div>
+                  <div className="text-xs md:text-sm text-gray-600">{' ' + t("Lessen voltooid") + ' '}</div>
                 </div>
                 <div className="bg-perkament rounded-xl p-4 text-center">
                   <div className="text-2xl md:text-3xl font-bold text-eric-gold">
                     {threeStarLessons}
                   </div>
-                  <div className="text-xs md:text-sm text-gray-600">Met 3 sterren</div>
+                  <div className="text-xs md:text-sm text-gray-600">{' ' + t("Met 3 sterren") + ' '}</div>
                 </div>
                 <div className="bg-perkament rounded-xl p-4 text-center">
                   <div className="text-2xl md:text-3xl font-bold text-accent">
                     {totalStars}/{MAX_STARS}
                   </div>
-                  <div className="text-xs md:text-sm text-gray-600">Totaal sterren</div>
+                  <div className="text-xs md:text-sm text-gray-600">{' ' + t("Totaal sterren") + ' '}</div>
                 </div>
               </div>
 
               {/* What's needed */}
               <div className="bg-eric-green/10 rounded-xl p-4 mb-6">
-                <h3 className="font-bold text-eric-green mb-2">Wat moet je nog doen?</h3>
+                <h3 className="font-bold text-eric-green mb-2">{' ' + t("Wat moet je nog doen?") + ' '}</h3>
                 <ul className="text-sm text-gray-700 space-y-1">
                   {threeStarLessons < TOTAL_LESSONS && (
-                    <li>
-                      • Voltooi nog {TOTAL_LESSONS - threeStarLessons} les(sen) met 3 sterren (95%+ nauwkeurigheid)
-                    </li>
+                    <li>{' ' + t("• Voltooi nog") + ' '} {TOTAL_LESSONS - threeStarLessons}{' ' + t("les(sen) met 3 sterren (95%+ nauwkeurigheid)") + ' '} </li>
                   )}
                   {completedLessons.length < TOTAL_LESSONS && (
-                    <li>
-                      • Maak nog {TOTAL_LESSONS - completedLessons.length} nieuwe les(sen) af
-                    </li>
+                    <li>{' ' + t("• Maak nog") + ' '} {TOTAL_LESSONS - completedLessons.length}{' ' + t("nieuwe les(sen) af") + ' '} </li>
                   )}
                 </ul>
               </div>
@@ -281,22 +263,16 @@ export default function DiplomaPage() {
               <Link
                 href="/kaart"
                 className="block w-full bg-eric-green hover:bg-eric-green/90 text-white font-bold py-4 rounded-xl text-center text-lg transition-all hover:scale-[1.02]"
-              >
-                Ga verder met oefenen
-              </Link>
+              >{' ' + t("Ga verder met oefenen") + ' '} </Link>
             </div>
 
             {/* Teaser */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">
-                Dit wordt jouw diploma!
-              </h2>
+              <h2 className="text-lg font-bold text-gray-800 mb-4">{' ' + t("Dit wordt jouw diploma!") + ' '} </h2>
               <div className="opacity-50">
                 <DiplomaPreview name="???" date={todayFormatted} />
               </div>
-              <p className="text-center text-sm text-gray-500 mt-4">
-                Voltooi alle lessen om je gepersonaliseerde diploma te krijgen!
-              </p>
+              <p className="text-center text-sm text-gray-500 mt-4">{' ' + t("Voltooi alle lessen om je gepersonaliseerde diploma te krijgen!") + ' '} </p>
             </div>
           </motion.div>
         )}
