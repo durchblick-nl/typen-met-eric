@@ -3,6 +3,7 @@ import { t } from '@/lib/i18n';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Metadata } from 'next';
+import { LearningApproach } from '@/components/typing/LearningApproach';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
@@ -30,7 +31,7 @@ export default function OverPage() {
       <section className="py-12 px-4 text-center">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold text-eric-green mb-4">{' ' + t("Over Lettoria") + ' '}</h1>
-          <p className="text-lg text-gray-700">{' ' + t("De gratis typecursus voor kinderen die écht werkt.") + ' '} </p>
+          <p className="text-lg text-gray-700">{' ' + t("Stap voor stap leren typen, samen met Eric.") + ' '} </p>
         </div>
       </section>
 
@@ -54,6 +55,8 @@ export default function OverPage() {
               </div>
             </div>
           </div>
+
+          <LearningApproach />
 
           {/* 100% Free */}
           <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
@@ -138,11 +141,11 @@ export default function OverPage() {
               </div>
               <div className="border-l-4 border-lettoria-zee pl-4">
                 <h3 className="font-bold text-gray-800">{' ' + t("De Zee") + ' '}</h3>
-                <p className="text-gray-600 text-sm">{' ' + t("Snelheidsoefeningen en woordspelletjes") + ' '}</p>
+                <p className="text-gray-600 text-sm">{' ' + t('Hoofdletters, namen en zinnen') + ' '}</p>
               </div>
               <div className="border-l-4 border-lettoria-kasteel pl-4">
                 <h3 className="font-bold text-gray-800">{' ' + t("Kasteel Compleet") + ' '}</h3>
-                <p className="text-gray-600 text-sm">{' ' + t("De ultieme meesterschapstest") + ' '}</p>
+                <p className="text-gray-600 text-sm">{' ' + t("Toepassen wat je hebt geoefend") + ' '}</p>
               </div>
             </div>
           </div>
@@ -181,12 +184,12 @@ export default function OverPage() {
             <div className="space-y-6">
               <div>
                 <h3 className="font-bold text-gray-800 mb-2">{' ' + t("Vanaf welke leeftijd kan mijn kind beginnen?") + ' '} </h3>
-                <p className="text-gray-600 text-sm">{' ' + t("We raden aan om te starten vanaf ongeveer 8 jaar. Dan zijn de motoriek en concentratie meestal voldoende ontwikkeld voor blind typen.") + ' '} </p>
+                <p className="text-gray-600 text-sm">{' ' + t("Lettoria is ontworpen voor kinderen van 8–12 jaar. Kijk samen of je kind de toetsen ontspannen kan bereiken en de opdrachten begrijpt. Ieder kind leert in een eigen tempo.") + ' '} </p>
               </div>
 
               <div>
                 <h3 className="font-bold text-gray-800 mb-2">{' ' + t("Hoe lang duurt de cursus?") + ' '}</h3>
-                <p className="text-gray-600 text-sm">{' ' + t("Lettoria heeft 26 lessen verdeeld over 7 regio's. De meeste kinderen kunnen in 10-15 weken de cursus afronden met 15-20 minuten oefenen per dag.") + ' '} </p>
+                <p className="text-gray-600 text-sm">{' ' + t("Er zijn 26 lessen in 7 regio’s. Oefen liever regelmatig een kort stukje dan alles achter elkaar. Neem een pauze als je moe wordt. Er is geen vaste einddatum.") + ' '} </p>
               </div>
 
               <div>

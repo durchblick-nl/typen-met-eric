@@ -722,7 +722,7 @@ test('bonus journeys preserve mastery and find the first reachable lesson in eve
       assert.equal(bonusJourney(25, { ...complete, 7: 2 }).suggested.lessonId, 7);
       assert.equal(bonusJourney(25, { ...complete, 25: 2 }).currentMastered, false);
       assert.equal(bonusJourney(25, { ...complete, 25: 2 }).suggested.lessonId, 25);
-      assert.deepEqual(bonusJourney(19, complete).current.focusKeys, []);
+      assert.deepEqual(bonusJourney(23, complete).current.focusKeys, []);
       assert.equal(bonusJourney(-1, complete), undefined);
       assert.equal(bonusJourney(999, complete), undefined);
       assert.equal(ARCADE_DURATION_MS, 75000);
@@ -758,4 +758,140 @@ test('every course teaches and exercises the full lowercase alphabet', () => {
     if (previous === undefined) delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;
     else process.env.NEXT_PUBLIC_LETTORIA_COURSE = previous;
   }
+});
+
+test('structured practice preserves lessons and schedules three later retrievals for every introduced key', () => {
+  const load = sources();
+  const { DUTCH_REGIONS } = load('lib/data/regions');
+  const { createCurriculum } = load('lib/data/courseCurriculum');
+  const original = JSON.stringify(DUTCH_REGIONS);
+  for (const course of ['nl', 'be', 'de', 'ch']) {
+    const lessons = createCurriculum(DUTCH_REGIONS, course).flatMap(region => region.lessons);
+    assert.deepEqual(lessons.map(lesson => lesson.id), Array.from({length: 26}, (_, id) => id));
+    for (const [position, lesson] of lessons.entries()) {
+      assert.equal(lesson.practiceSteps.length, lesson.exercises.length);
+      if (lesson.newKeys.length) {
+        assert.equal(lesson.practiceSteps[0].kind, 'movement');
+        assert.equal(lesson.practiceSteps[1].kind, 'mix');
+        for (const key of lesson.newKeys) {
+          assert.ok(lesson.exercises[0].includes(key));
+          assert.ok(lesson.exercises[1].includes(key));
+          const later = lessons.slice(position + 1).filter(next => next.practiceSteps.some((step, i) =>
+            step.kind === 'review' && step.reviewOf === lesson.id && next.exercises[i].includes(key)));
+          assert.equal(later.length, 3, `${course} ${key}: three separate later lessons`);
+        }
+      }
+      for (const [i, step] of lesson.practiceSteps.entries()) {
+        if (step.kind === 'review') {
+          assert.ok(step.reviewOf < lesson.id);
+          assert.ok(lesson.exercises[i].length <= 100, `${course} lesson ${lesson.id}: short retrieval`);
+        }
+      }
+    }
+  }
+  assert.equal(JSON.stringify(DUTCH_REGIONS), original, 'course construction must not modify base data');
+});
+
+test('retrieval uses real regional words and changes combinations without introducing unknown characters', () => {
+  const { reviewText } = sources()('lib/data/practiceSequence');
+  const de = new Set('abcdefghijklmnopqrstuvwxyzäöüß .,;0123456789');
+  assert.equal(reviewText(['ß'], de, 'de'), 'die straße');
+  assert.equal(reviewText(['ß'], de, 'de', 1), 'groß');
+  assert.equal(reviewText(['q'], de, 'nl'), 'quiz');
+  const early = new Set('fjq');
+  assert.equal(reviewText(['q'], early, 'be'), 'qfqj');
+  assert.equal(reviewText(['q'], early, 'be', 1), 'jqfq');
+  assert.equal(reviewText([' '], new Set('fj '), 'nl'), 'f j');
+});
+
+test('personal practice uses only reachable taught keys and valid local counters in every course', () => {
+  const load = sources();
+  const { DUTCH_REGIONS } = load('lib/data/regions');
+  const { createCurriculum } = load('lib/data/courseCurriculum');
+  const { personalPractice } = load('lib/personalPractice');
+  for (const course of ['nl', 'be', 'de', 'ch']) {
+    const regions = createCurriculum(DUTCH_REGIONS, course), lessons = regions.flatMap(r => r.lessons);
+    const learned = new Set(), stars = {};
+    for (const lesson of lessons) {
+      lesson.newKeys.forEach(key => learned.add(key));
+      const stats = Object.fromEntries([...learned].map(key => [key, { attempts: 10, errors: 2 }]));
+      stats['!'] = { attempts: 4, errors: 3 };
+      const plan = personalPractice(stats, stars, lesson.id, regions, course);
+      assert.ok(plan.keys.length > 0 && plan.keys.length <= 3);
+      assert.equal(plan.exercises.length, 3);
+      for (const text of plan.exercises) {
+        assert.ok(text.length > 0 && text.length <= 100);
+        for (const key of text) assert.ok(learned.has(key), `${course}/${lesson.id}: untaught ${key}`);
+        for (const key of plan.keys) assert.ok(text.includes(key), `${course}/${lesson.id}: missing focus ${key}`);
+      }
+      stars[lesson.id] = 3;
+    }
+    const stats = {f:{attempts:10,errors:1},q:{attempts:100,errors:99},'!':{attempts:1,errors:1}};
+    assert.deepEqual(personalPractice(stats, {25:3}, 0, regions, course).keys, ['f'], 'a late saved mastery must not skip a gap');
+    assert.deepEqual(personalPractice({}, {}, 0, regions, course).exercises, []);
+  }
+});
+
+test('personal practice freezes baselines, rejects invalid counters and accumulates attempts without stars', () => {
+  storage();
+  const load = sources(), { personalPractice, mergePracticeStats } = load('lib/personalPractice');
+  const { REGIONS } = load('lib/data/regions');
+  const stars = Object.fromEntries(REGIONS.flatMap(r=>r.lessons).map(l=>[l.id,3]));
+  const stats = {q:{attempts:10,errors:8},x:{attempts:20,errors:4},y:{attempts:5,errors:0},f:{attempts:0,errors:1},j:{attempts:4,errors:5},a:{attempts:Infinity,errors:1},s:{attempts:2.5,errors:1},k:null};
+  const plan = personalPractice(stats, stars);
+  assert.deepEqual(plan.keys, ['q','x']);
+  stats.q.errors = 9;
+  assert.equal(plan.baseline.q.errors, 8);
+  const first = {q:{attempts:4,errors:1}}, next = {q:{attempts:2,errors:0},x:{attempts:3,errors:1}};
+  assert.deepEqual(mergePracticeStats(first,next), {q:{attempts:6,errors:1},x:{attempts:3,errors:1}});
+  assert.deepEqual(first, {q:{attempts:4,errors:1}});
+  const store = load('lib/stores/progressStore').useProgressStore;
+  store.getState().completeLesson(0,3);
+  const before = {...store.getState().lessonStars};
+  store.getState().recordPractice(first);
+  store.getState().recordPractice(next);
+  assert.deepEqual(store.getState().lessonStars,before);
+  assert.equal(store.getState().totalStars,3);
+  assert.deepEqual(store.getState().keyStats.q,{attempts:6,errors:1});
+  const stored = JSON.parse(localStorage.getItem('typen-met-eric-progress')).state;
+  assert.deepEqual(stored.keyStats.q,{attempts:6,errors:1});
+  assert.equal('typedChars' in stored,false);
+  assert.equal('targetText' in stored,false);
+});
+
+test('the final lesson ends with a complete Eric story covering every lowercase letter and digit in all courses', () => {
+  const load = sources();
+  const { DUTCH_REGIONS } = load('lib/data/regions');
+  const { createCurriculum } = load('lib/data/courseCurriculum');
+  const { finalStory } = load('lib/data/finalStory');
+  for (const course of ['nl','be','de','ch']) {
+    const lessons = createCurriculum(DUTCH_REGIONS,course).flatMap(r=>r.lessons);
+    const last = lessons.at(-1), story = finalStory(course);
+    assert.deepEqual(last.exercises.slice(-story.length),story);
+    assert.ok(last.practiceSteps.slice(-story.length).every(step=>step.kind==='story'));
+    assert.ok(last.practiceSteps.slice(0,-story.length).every(step=>step.kind==='review'));
+    const text=story.join(' '), alphabet='abcdefghijklmnopqrstuvwxyz0123456789'+(course==='de'?'äöüß':course==='ch'?'äöü':'');
+    for (const key of alphabet) assert.ok(text.toLowerCase().includes(key),`${course}: story missing ${key}`);
+    assert.ok(story.every(part=>part.length<=100));
+    assert.ok(text.includes('Eric'));
+    if (course==='ch') assert.ok(!text.includes('ß'));
+  }
+});
+
+test('uppercase lessons introduce opposite-hand Shift before names and the final story', () => {
+ const load=sources(), {DUTCH_REGIONS}=load('lib/data/regions'),{createCurriculum}=load('lib/data/courseCurriculum'),{keyGuidance}=load('lib/keyboards');
+ for (const course of ['nl','be','de','ch']) {
+  const lessons=createCurriculum(DUTCH_REGIONS,course).flatMap(r=>r.lessons);
+  const caps=lessons.flatMap(l=>l.newKeys).filter(key=>/^[A-ZÄÖÜ]$/.test(key));
+  for(const key of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')assert.ok(caps.includes(key),`${course}: missing uppercase ${key}`);
+  for(const key of lessons[19].newKeys){const help=keyGuidance(key,course);assert.equal(help.shiftHand,'left');assert.ok(help.finger>=4);}
+  for(const key of lessons[20].newKeys){const help=keyGuidance(key,course);assert.equal(help.shiftHand,'right');assert.ok(help.finger<=3);}
+  assert.ok(lessons.slice(0,19).every(l=>l.newKeys.every(key=>!/^[A-ZÄÖÜ]$/.test(key))));
+  if(course==='de'||course==='ch')assert.deepEqual(lessons[21].newKeys,['Ä','Ö','Ü']);
+  for(const key of 'ÄÖÜ') {
+   const help=keyGuidance(key,course);
+   if(course==='ch'){assert.equal(help.capsLock,true);assert.equal(help.shift,false);assert.equal(help.shiftHand,null);}
+   if(course==='de'){assert.equal(help.shift,true);assert.equal(help.shiftHand,'left');}
+  }
+ }
 });

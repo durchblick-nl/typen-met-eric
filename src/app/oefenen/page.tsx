@@ -1,11 +1,13 @@
 'use client';
 
 import { t } from '@/lib/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { COURSE } from '@/lib/course';
 import { KEYBOARDS } from '@/lib/keyboards';
 import { useTypingStore } from '@/lib/stores/typingStore';
 import { TypingArea, VirtualKeyboard, LiveStats } from '@/components/typing';
+import { PersonalPractice } from '@/components/typing/PersonalPractice';
+import { useProgressStore } from '@/lib/stores/progressStore';
 import { Eric } from '@/components/eric';
 import Link from 'next/link';
 
@@ -19,7 +21,7 @@ const EXERCISES = [
   { text: HOME, hint: t("De hele thuisrij in een keer!") },
 ];
 
-export default function OefenenPage() {
+function HomePractice() {
   const { setTargetText, isComplete, accuracy, reset, targetText } = useTypingStore();
   const [exerciseIndex, setExerciseIndex] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -71,7 +73,7 @@ export default function OefenenPage() {
   };
 
   return (
-    <main className="min-h-screen bg-perkament p-4 md:p-8">
+    <section className="p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -79,7 +81,7 @@ export default function OefenenPage() {
             href="/"
             className="text-eric-green hover:text-eric-green/80 transition-colors"
           >{' ' + t("← Terug") + ' '} </Link>
-          <h1 className="text-2xl font-bold text-eric-green">{' ' + t("Les") + ' '} {exerciseIndex + 1}{' ' + t(": Thuisrij") + ' '} </h1>
+          <h2 className="text-2xl font-bold text-eric-green">{' ' + t("Les") + ' '} {exerciseIndex + 1}{' ' + t(": Thuisrij") + ' '} </h2>
           <div className="text-sm text-gray-500">
             {exerciseIndex + 1} / {EXERCISES.length}
           </div>
@@ -126,6 +128,38 @@ export default function OefenenPage() {
           <p className="text-center text-gray-500 text-sm mt-6">{' ' + t("Kijk niet naar je toetsenbord! Voel de bultjes op F en J.") + ' '} </p>
         )}
       </div>
-    </main>
+    </section>
   );
+}
+
+
+export default function OefenenPage() {
+  const [mode, setMode] = useState<'home' | 'personal'>('home');
+  const [hydrated, setHydrated] = useState(false);
+  const returnFocus = useRef(false);
+  const personalButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const ready = () => {
+      setHydrated(true);
+      if (window.location.hash === '#persoonlijk') setMode('personal');
+    };
+    if (useProgressStore.persist.hasHydrated()) ready();
+    return useProgressStore.persist.onFinishHydration(ready);
+  }, []);
+  useEffect(() => {
+    if (mode !== 'home' || !returnFocus.current) return;
+    returnFocus.current = false;
+    const frame = requestAnimationFrame(() => personalButton.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [mode]);
+  return <main className="min-h-screen bg-perkament p-4 md:p-8">
+    <div className="max-w-4xl mx-auto mb-6">
+      <h1 className="text-3xl font-bold text-eric-green mb-4">{t('Snel oefenen')}</h1>
+      <nav aria-label={t('Kies je oefening')} className="flex flex-wrap gap-3">
+        <button aria-pressed={mode === 'home'} onClick={() => setMode('home')} className="rounded-full px-5 py-3 border border-eric-green/30 text-eric-green font-semibold aria-pressed:bg-eric-green aria-pressed:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-eric-green">{t('Thuisrij oefenen')}</button>
+        <button ref={personalButton} disabled={!hydrated} aria-pressed={mode === 'personal'} onClick={() => setMode('personal')} className="rounded-full px-5 py-3 border border-eric-green/30 text-eric-green font-semibold aria-pressed:bg-eric-green aria-pressed:text-white disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-eric-green">{t('Jouw toetsentraining')}</button>
+      </nav>
+    </div>
+    {mode === 'personal' ? <PersonalPractice onExit={() => { returnFocus.current = true; setMode('home'); }} /> : <HomePractice />}
+  </main>;
 }

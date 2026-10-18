@@ -415,6 +415,7 @@ export function ArcadeFlight({
                   >
                     {object.key === " " ? "␣" : object.key}
                     <IllustratedProp name={object.challenge} label={object.challenge === 'gem' ? t('Kristal') : t('Rots')} className="absolute -bottom-2 -right-2 w-8 sm:w-10" />
+                    {keyGuidance(object.key)?.capsLock && <span className="absolute -top-2 -right-1 rounded-full border border-eric-gold bg-perkament px-1.5 text-base leading-6" title={t('Caps Lock-combinatie')} aria-label={t('Caps Lock-combinatie')}>⇪</span>}
                     {object.key !== undefined && keyGuidance(object.key)?.shift && <span className="absolute -top-2 -right-1 rounded-full border border-eric-gold bg-perkament px-1.5 text-base leading-6" title={t('Shift-combinatie')} aria-label={t('Shift-combinatie')}>⇧</span>}
                 </div>
               </div>

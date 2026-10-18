@@ -11,12 +11,13 @@ export const KEYBOARDS: Record<CourseId, KeyboardLayout> = {
   nl: layout([numbers,[...'qwertyuiop'],[...'asdfghjkl;'],[...'zxcvbnm,.']]),
   be: layout([[...'&é"\'(§è!çà'],[...'azertyuiop'],[...'qsdfghjklmù'],[...'wxcvbn,;:=']],{'&':'1','é':'2','"':'3',"'":'4','(':'5','§':'6','è':'7','!':'8','ç':'9','à':'0',';':'.',',':'?',':':'/','=':'+'}),
   de: layout([[...numbers,'ß'],[...'qwertzuiopü'],[...'asdfghjklöä'],[...'yxcvbnm,.-']]),
-  ch: layout([[...numbers,"'"],[...'qwertzuiopü'],[...'asdfghjklöä'],[...'yxcvbnm,.-']]),
+  ch: layout([[...numbers,"'"],[...'qwertzuiopü'],[...'asdfghjklöä'],[...'yxcvbnm,.-']],{'ü':'è','ö':'é','ä':'à'}),
 };
-export function keyGuidance(character: string, course: CourseId = COURSE): {key:string;finger:number;shift:boolean;shiftHand:'left'|'right'|null} | undefined {
+export function keyGuidance(character: string, course: CourseId = COURSE): {key:string;finger:number;shift:boolean;shiftHand:'left'|'right'|null;capsLock?:true} | undefined {
   if (character === ' ') return {key:' ',finger:8,shift:false,shiftHand:null};
   const lower=character.toLowerCase();
   for(const row of KEYBOARDS[course].rows)for(const key of row){
+    if (course === 'ch' && /^[ÄÖÜ]$/.test(character) && key.key === lower) return {key:lower,finger:key.finger,shift:false,shiftHand:null,capsLock:true};
     const shifted = key.shift === character || (lower !== character && key.key === lower);
     if(key.key===lower || key.shift===character) return {key:key.key,finger:key.finger,shift:shifted,shiftHand:shifted ? (key.finger<=3?'right':'left') : null};
   }

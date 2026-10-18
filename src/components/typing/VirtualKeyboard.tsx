@@ -41,19 +41,21 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey }: Virtua
   const typedChars = useTypingStore(state => state.typedChars);
   const lastWrong = useTypingStore(state => state.lastWrong);
   const quiet = useQuietMotion();
-  const [feedback, setFeedback] = useState<{ key: string; wrong: boolean; attempt: number } | null>(null);
+  const [expiredAttempt, setExpiredAttempt] = useState<readonly string[] | null>(null);
+  const character = typedChars.at(-1);
+  const pressedKey = character && expiredAttempt !== typedChars ? keyGuidance(character) : undefined;
+  const feedback = pressedKey ? { key: pressedKey.key, wrong: lastWrong, attempt: typedChars.length } : null;
   const currentKey = highlightKey || targetText[currentIndex] || '';
   const guidance = keyGuidance(currentKey);
   const finger = guidance?.finger ?? null;
 
+  // Derive immediate feedback from the store; only expiry needs local state.
+  // The array identity also distinguishes equal attempt counts in new targets.
   useEffect(() => {
-    const character = typedChars.at(-1);
-    if (!character) { setFeedback(null); return; }
-    const pressed = keyGuidance(character);
-    setFeedback(pressed ? { key: pressed.key, wrong: lastWrong, attempt: typedChars.length } : null);
-    const timer = window.setTimeout(() => setFeedback(null), 240);
+    if (!typedChars.length) return;
+    const timer = window.setTimeout(() => setExpiredAttempt(typedChars), 240);
     return () => window.clearTimeout(timer);
-  }, [typedChars, lastWrong]);
+  }, [typedChars]);
 
   function keycap(key: string, fingerIndex: number, shifted?: string) {
     const active = key === guidance?.key;
@@ -87,6 +89,7 @@ export function VirtualKeyboard({ showFingerHints = true, highlightKey }: Virtua
         {keycap(' ', 8)}
         <span className="keyboard-shift" data-active={guidance?.shiftHand === 'right'}><span>{t('Rechter Shift')}</span> ⇧</span>
       </div>
+      {guidance?.capsLock && <p role="status" className="keyboard-shift-guidance">{t('Caps Lock aan → {key} → Caps Lock uit', {key: currentKey})}</p>}
       {guidance?.shift && <p role="status" className="keyboard-shift-guidance">{guidance.shiftHand === 'left' ? t('Houd linker Shift ingedrukt') : t('Houd rechter Shift ingedrukt')} + {guidance.key.toUpperCase()} → <strong>{currentKey}</strong></p>}
       {showFingerHints && (
         <div className="keyboard-coach">

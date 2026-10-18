@@ -1,5 +1,7 @@
 import { COURSE, type CourseId } from '../course';
 import type { Region, Lesson } from './regions';
+import { structurePractice } from './practiceSequence';
+import { uppercasePractice } from './uppercasePractice';
 
 const names = ['Erics Höhle','Das Startdorf','Die flinken Felder','Der Flüsterwald','Die Sprachgipfel','Das schnelle Meer','Schloss Vollendung'];
 const titles = ['Hallo, Eric!','Bäcker und Wächter','Schmied und Laternenmacher','Arzt und Uhrmacher','Gastwirt und Holzfäller','Der Marktplatz','Bauer und Imkerin','Müller und Eule','Turmwächter und Zaubertier','Töpfer und Großvater','Narr und Wahrsagerin','Zauberer und Nachtigall','Hexe und Waldfee','Zentaur und Fuchs','Der Bär erwacht','Der erste Aufstieg','Die Kristallhöhle','Der Wolkenweg','Auf dem Gipfel','Der Hafen','Das Delfinrennen','Die Schatzkarte','Durch den Sturm','Das Schlosstor','Der Rittersaal','Der Thronsaal'];
@@ -89,10 +91,10 @@ const germanExercises: string[][] = [
  ['eric ist ein grüner drache.','er wohnt in einer höhle in lettoria.','wir haben alle buchstaben gelernt.','eric kann wieder feuer speien.','die magie ist zurück in lettoria.','du hast lettoria gerettet.']
 ];
 export function createCurriculum(original: Region[], course: CourseId = COURSE): Region[] {
- if(course==='nl') return original;
+ if(course==='nl') return structurePractice(uppercasePractice(original, course), course);
  const german=course==='de'||course==='ch';
  const learned = new Set<string>();
- return original.map((region,ri)=>({ ...region,
+ const regions = original.map((region,ri)=>({ ...region,
    name:german ? regional(names[ri],course) : region.name,
    description:german ? ['Hier beginnt dein Abenteuer mit Eric','Die Grundreihe auf deiner Tastatur','Die obere Buchstabenreihe','Die untere Buchstabenreihe','Ziffern und die Umschalttaste','Wörter und Sätze sicher tippen','Rette Lettoria mit allen gelernten Tasten'][ri] : region.description.replace('A S D F G H J K L ;','Q S D F G H J K L M').replace('Q W E R T Y U I O P','A Z E R T Y U I O P').replace('Z X C V B N M','W X C V B N ,'),
    lessons:region.lessons.map(lesson=>{
@@ -122,5 +124,6 @@ export function createCurriculum(original: Region[], course: CourseId = COURSE):
     } satisfies Lesson;
    })
  }));
+ return structurePractice(uppercasePractice(regions, course), course);
 }
 function regional(text:string,course:CourseId){return course==='ch'?text.replace(/ß/g,'ss'):text;}

@@ -5,6 +5,7 @@ export interface Lesson {
   description: string;
   newKeys: string[];
   exercises: string[];
+  practiceSteps?: import('./practiceSequence').PracticeStep[];
   storyIntro: string;
   storyOutro: string;
   storyImageUrl?: string;

@@ -10,12 +10,12 @@ export function ArcadeKeyGuide({ character }: { character?: string }) {
   const guidance = character === undefined ? undefined : keyGuidance(character);
   const label = (key: string) => key === ' ' ? '␣' : /^[a-zäöü]$/.test(key) ? key.toUpperCase() : key;
   return (
-    <div className="arcade-key-guide" role="group" aria-label={t('Toetsenhulp')} data-target={character} data-shift={guidance?.shift || false}>
+    <div className="arcade-key-guide" role="group" aria-label={t('Toetsenhulp')} data-target={character} data-shift={guidance?.shift || false} data-caps-lock={guidance?.capsLock || false}>
       <div className="arcade-guide-heading"><span>{t('Eerstvolgende doel')}</span><small>{COURSE_LABEL.split(' · ')[1]}</small></div>
       {guidance && character !== undefined ? (
         <>
           <div className="arcade-guide-body">
-            <span className="arcade-guide-target" aria-label={t('Typ dit teken')}>{label(character)}</span>
+            <span className="arcade-guide-target" aria-label={t('Typ dit teken')}>{character === ' ' ? '␣' : character}</span>
             <div className="arcade-guide-combination">
               <span className="arcade-guide-keys">
                 {guidance.shift && <><kbd data-shift-hand={guidance.shiftHand}>{guidance.shiftHand === 'left' ? t('Linker Shift') : t('Rechter Shift')}</kbd><span aria-hidden="true">+</span></>}
@@ -26,6 +26,7 @@ export function ArcadeKeyGuide({ character }: { character?: string }) {
               </span>
             </div>
           </div>
+          {guidance.capsLock && <p className="arcade-guide-extra">{t('Caps Lock aan → {key} → Caps Lock uit', {key: character})}</p>}
           {guidance.shift && <p className="arcade-guide-extra">{t('Gebruik de andere hand voor Shift. Het doel blijft op je wachten.')}</p>}
         </>
       ) : <p className="arcade-guide-wait">{t('Wacht op het volgende teken.')}</p>}

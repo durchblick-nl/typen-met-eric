@@ -1,5 +1,7 @@
 # Plan: Großbuchstaben-Erweiterung
 
+Historischer Entwurf. Am 18.10.2026 wurde auf ausdrücklichen Nutzerwunsch eine kleinere Erweiterung innerhalb der vorhandenen IDs 19–21 umgesetzt, ohne neue Region oder Neunummerierung. Beide Shift-Hände, Namen/Satzanfänge und Ä/Ö/Ü werden geübt; CH verwendet für große Umlaute Caps Lock. Die letzte Lektion enthält eine vollständige Eric-Geschichte mit Ziffern. Die nachfolgenden alten Bestandsaussagen und ID-Vorschläge beschreiben nicht mehr den aktuellen Code. Siehe `docs/plans/2026-10-18-curriculum-practice.md`.
+
 ## Aktuelle Situation
 
 - 26 Lektionen (0-25)

@@ -18,6 +18,7 @@ import { KeyboardHint, KeyboardHintDark } from '@/components/ui/KeyboardHint';
 import { ArcadeFlight } from '@/components/game/ArcadeFlight';
 import { LessonCelebration } from '@/components/typing/LessonCelebration';
 import { bonusJourney } from '@/lib/journey';
+import { PracticeGuide } from '@/components/typing/PracticeGuide';
 import { MagicFlight } from '@/components/game/MagicFlight';
 
 type LessonPhase = 'arcade' | 'warmup' | 'intro' | 'exercise' | 'outro' | 'game' | 'complete';
@@ -29,16 +30,13 @@ interface LessonClientProps {
 export function LessonClient({ lessonId }: LessonClientProps) {
   const router = useRouter();
 
-  const {
-    setTargetText,
-    isComplete: exerciseComplete,
-    accuracy,
-    typedChars,
-    errors,
-    keyStats,
-    isPaused,
-    reset: resetTyping,
-  } = useTypingStore();
+  // The lesson shell only needs completed results. Per-key updates belong to
+  // TypingArea/VirtualKeyboard/LiveStats, not the animated lesson tree.
+  const setTargetText = useTypingStore(state => state.setTargetText);
+  const exerciseComplete = useTypingStore(state => state.isComplete);
+  const accuracy = useTypingStore(state => state.isComplete ? state.accuracy : 100);
+  const isPaused = useTypingStore(state => state.isPaused);
+  const resetTyping = useTypingStore(state => state.reset);
 
   const completeLesson = useProgressStore(state => state.completeLesson);
   const recordPractice = useProgressStore(state => state.recordPractice);
@@ -63,6 +61,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
   const [cumulativeCorrect, setCumulativeCorrect] = useState(0);
   const [cumulativeTotal, setCumulativeTotal] = useState(0);
   const [lastProcessedExercise, setLastProcessedExercise] = useState(-1);
+  const processedExercise = useRef(-1);
 
   const [attemptKeys, setAttemptKeys] = useState<Record<string, KeyStat>>({});
   const weakKeys = Object.entries(attemptKeys).filter(([, stat]) => stat.errors > 0).sort((a, b) => b[1].errors / b[1].attempts - a[1].errors / a[1].attempts).slice(0, 3).map(([key]) => key);
@@ -91,9 +90,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
     // Only settle the completed target that is still current in the live store.
     const completed = useTypingStore.getState();
     // Prevent processing the same exercise twice (avoids infinite loop)
-    if (exerciseComplete && completed.isComplete && completed.targetText === currentExercise && phase === 'exercise' && exerciseIndex !== lastProcessedExercise) {
+    if (exerciseComplete && completed.isComplete && completed.targetText === currentExercise && phase === 'exercise' && exerciseIndex !== processedExercise.current) {
       const { keyStats, typedChars, errors } = completed;
-      // Mark this exercise as processed
+      // Claim completion before synchronous external-store notifications can rerender.
+      processedExercise.current = exerciseIndex;
       setLastProcessedExercise(exerciseIndex);
       recordPractice(keyStats);
       setAttemptKeys(previous => {
@@ -121,7 +121,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
         setPhase('outro');
       }
     }
-  }, [exerciseComplete, currentExercise, phase, isLastExercise, exerciseIndex, lastProcessedExercise, typedChars, errors, cumulativeCorrect, cumulativeTotal, lessonId, completeLesson, keyStats, recordPractice]);
+  }, [exerciseComplete, currentExercise, phase, isLastExercise, exerciseIndex, lastProcessedExercise, cumulativeCorrect, cumulativeTotal, lessonId, completeLesson, recordPractice]);
 
   // Handle transition to next exercise (separate effect to avoid timer cleanup issues)
   useEffect(() => {
@@ -141,6 +141,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
     setAttemptKeys({});
     setCumulativeCorrect(0);
     setCumulativeTotal(0);
+    processedExercise.current = -1;
     setLastProcessedExercise(-1);
     setPhase('exercise');
     setExerciseIndex(0);
@@ -173,6 +174,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
     // Reset cumulative stats for retry
     setCumulativeCorrect(0);
     setCumulativeTotal(0);
+    processedExercise.current = -1;
     setLastProcessedExercise(-1);
     setPhase('intro');
     setExerciseIndex(0);
@@ -302,6 +304,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 <p className="text-sm text-gray-600 mt-1">{' ' + t("Typ je geleerde tekens om kristallen te pakken en rotsen op te lossen.") + ' '}</p>
                 {mastered && <button className="mt-3 text-eric-green font-bold underline" data-bonus="arcade" onClick={handleStartArcade}>{' ' + t("Speel kristaljacht") + ' '}</button>}
               </div>
+              <PracticeGuide />
               {/* New keys + Start button in row */}
               <div className="flex flex-wrap items-center justify-center gap-4">
                 {lesson.newKeys.length > 0 && (
@@ -362,6 +365,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 />
               </div>
 
+              <PracticeGuide step={lesson.practiceSteps?.[exerciseIndex]} number={exerciseIndex + 1} total={lesson.exercises.length} />
               <div className="mb-6">
                 <TypingArea />
               </div>
@@ -422,6 +426,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 <button data-bonus="magic" onClick={handleStartGame} className="rounded-full px-5 py-2.5 border border-eric-green/30 text-eric-green font-semibold hover:bg-eric-green/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-eric-green">{t('Erics magievlucht')}</button>
               </div>}
               {weakKeys.length > 0 && <div className="mb-6 text-gray-700"><p className="mb-3">{' ' + t("Extra aandacht voor:") + ' '} <span className="font-mono font-bold">{weakKeys.map(key => key === ' ' ? '␣' : key).join(' · ')}</span></p><button className="text-eric-green underline font-semibold" onClick={() => { setTargetText(warmupText); setPhase('warmup'); }}>{' ' + t("Oefen deze toetsen even apart") + ' '}</button></div>}
+              {weakKeys.length > 0 && <p className="mb-6"><Link href="/oefenen#persoonlijk" className="text-eric-green underline font-semibold">{t('Probeer je persoonlijke toetsentraining')}</Link></p>}
               <div className="flex flex-wrap justify-center gap-4">
                 <button
                   onClick={handleBackToRegion}

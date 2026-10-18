@@ -317,6 +317,10 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="bg-perkament px-4 py-8 text-center">
+        <p className="text-gray-700 mb-3">{t('Onze lesopbouw is geïnspireerd door onderzoek naar hoe kinderen leren typen.')}</p>
+        <Link href="/over#leren" className="text-eric-green underline font-semibold">{t('Lees over onze aanpak en bronnen')}</Link>
+      </section>
       {/* Footer */}
       <Footer />
     </main>

@@ -8,7 +8,7 @@ Lettoria is a free Dutch/German typing tutor for children aged 8–12. Eric the 
 
 - Write child-facing copy in simple, encouraging Dutch or German for the selected course. Keep engineering documentation in English unless requested otherwise.
 - Protect the learning experience: accurate typing, correct finger use, readable targets and understandable feedback come before speed or spectacle.
-- Courses: NL QWERTY at `/`, Dutch Belgian AZERTY at `/be/`, German DE QWERTZ at `/de/` and German Swiss QWERTZ at `/ch/`. Shift guidance covers Belgian digits and punctuation; dedicated uppercase lessons, English and offline support remain planned. Check the code before making product claims.
+- Courses: NL QWERTY at `/`, Dutch Belgian AZERTY at `/be/`, German DE QWERTZ at `/de/` and German Swiss QWERTZ at `/ch/`. Shift guidance covers Belgian digits/punctuation and uppercase letters. Lessons 19–21 add both Shift hands, names/sentences and German capital umlauts (CH uses Caps Lock for Ä/Ö/Ü). English and offline support remain planned. Check the code before making product claims.
 - Keep this file focused on working rules. Store detailed designs in `docs/`; do not add feature-completion checklists here.
 
 ## Setup and commands
@@ -33,7 +33,7 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 
 ## Where to work
 
-- `src/lib/data/regions.ts`: base Dutch curriculum and shared lesson/region structure; exports the selected course through `createCurriculum()` in `src/lib/data/courseCurriculum.ts`. The latter defines regional keys, exercises and German stories. All courses currently have 26 lessons, IDs 0–25, in seven regions. Derive totals from the selected curriculum where possible.
+- `src/lib/data/regions.ts`: base Dutch curriculum and shared lesson/region structure; exports the selected course through `createCurriculum()` in `src/lib/data/courseCurriculum.ts`. The latter defines regional keys, exercises and German stories, then applies `uppercasePractice.ts` and `practiceSequence.ts`. `finalStory.ts` provides the final cumulative Eric story. All courses currently have 26 lessons, IDs 0–25, in seven regions. Derive totals from the selected curriculum where possible.
 - `src/lib/course.ts`, `src/lib/keyboards.ts` and `src/components/settings/CourseSelector.tsx`: build-time course selection, physical keyboard guidance and full-page navigation between course exports.
 - `src/lib/i18n/index.ts` and `src/lib/i18n/de.json`: UI translations via `t()` using Dutch source strings as lookup keys. Add German translations when adding UI copy; missing keys fall back to Dutch. Preserve Swiss spelling through `regionalGerman()`.
 - `src/app/les/[lessonId]/LessonClient.tsx`: lesson phases, cumulative accuracy, results and the bonus-game handoff.
@@ -55,11 +55,13 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 
 ## Typing and progression contracts
 
+- `src/lib/data/practiceSequence.ts` adds movement/mixing steps and explicit later retrieval to all courses. Preserve the alignment of `practiceSteps` with `exercises`; audit with `npm run audit:curriculum`. Review gaps are editorial choices, not research-proven mastery thresholds. Public methodology and source limitations are on `/over#leren`.
 - Exercise text must use only keys taught up to that lesson. Check the whole curriculum when changing exercise data, including spaces, punctuation, digits and case.
 - `src/lib/course.ts`, `src/lib/keyboards.ts` and `src/lib/data/courseCurriculum.ts` bind locale, curriculum and finger guidance together. Keep taught characters, physical positions and Shift guidance consistent; do not substitute letters inside real words to change layouts.
 - Currently cumulative lesson accuracy of at least 95% earns three stars and unlocks the next lesson; at least 85% but below 95% earns two stars, below 85% one star. Any change to this policy is a product change, not a cosmetic adjustment.
 - Calculate accuracy from correct characters / all attempts, without rounding before star thresholds. Wrong attempts stay at the same target and count even after a correct retry. Show WPM only after 15 active seconds and 20 correct characters; exclude pauses and inter-key idle gaps above 10 seconds.
 - Do not count movement or passive survival as typing mastery. Focus warmups do not award lesson stars.
+- `src/lib/personalPractice.ts` and `PersonalPractice.tsx` provide optional local error practice at `/oefenen#persoonlijk`. Keep selection within reachable taught keys; freeze each round, record completed tasks once, and never award lesson stars for this mode. Reuse regional `keyStats`; do not persist raw inputs or send counters to analytics.
 - Give actionable feedback for difficult keys. Keep mistakes encouraging and let the child retry.
 - Handle key repeat, modifier shortcuts, focus, IME/composition and navigation deliberately. Do not accidentally consume typing in form inputs or count browser shortcuts as practice.
 - Keep completed lessons, three-star mastery, game stars and game highscores distinct. Map, regions and diploma must agree on the same lesson-mastery rules.

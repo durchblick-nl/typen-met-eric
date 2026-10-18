@@ -1,6 +1,7 @@
 "use client";
 import { BonusJourneyNext } from './BonusJourneyNext';
 import type { BonusCoursePreview } from '@/lib/journey';
+import { ArcadeKeyGuide } from './ArcadeKeyGuide';
 import { t } from '@/lib/i18n';
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -290,7 +291,7 @@ export function MagicFlight({ lessonId, onExit, onNext, suggested }: Props) {
               {phase === "ready" && (
                 <>
                   <h2 className="text-2xl font-bold text-eric-green mb-3">{' ' + t("Geef Eric zijn magie terug") + ' '} </h2>
-                  <p className="text-gray-700 mb-5">{' ' + t("Typ de letters op het scherm. Na 40 goede toetsen, of 60 seconden, is je vlucht klaar. Een fout? Probeer dezelfde toets nog eens.") + ' '} </p>
+                  <p className="text-gray-700 mb-5">{' ' + t("Typ de tekens op het scherm. Na 40 goede toetsen, of 60 seconden, is je vlucht klaar. Een fout? Probeer dezelfde toets nog eens. De toetsenhulp toont je vinger en de juiste combinatie.") + ' '} </p>
                   <p className="text-sm text-gray-600 mb-5">{' ' + t("Gebruik je eigen toetsenbord. Er zijn geen stuurtoetsen.") + ' '} </p>
                   <button
                     className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
@@ -305,7 +306,7 @@ export function MagicFlight({ lessonId, onExit, onNext, suggested }: Props) {
                       ? t("Typ de spatie")
                       : target.length > 1
                         ? t("Typ het woord")
-                        : t("Typ de letter")}
+                        : t("Typ dit teken")}
                   </p>
                   <div
                     data-testid="flight-target"
@@ -326,6 +327,7 @@ export function MagicFlight({ lessonId, onExit, onNext, suggested }: Props) {
                       </span>
                     ))}
                   </div>
+                  <div className="mt-4"><ArcadeKeyGuide character={target[flight.charIndex]} /></div>
                   <p role="status" className="mt-5 text-gray-700 min-h-12">
                     {flight.wrong
                       ? t("Bijna! Probeer de onderstreepte toets nog eens.")

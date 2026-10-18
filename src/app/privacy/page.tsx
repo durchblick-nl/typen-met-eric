@@ -22,6 +22,8 @@ export default function PrivacyPage() {
           <section className="space-y-2">
             <h2 className="text-xl font-bold text-gray-800">{' ' + t("Wat blijft op je apparaat?") + ' '}</h2>
             <p>{' ' + t("Je lesvoortgang, sterren, oefencijfers per toets, spelrecords, grotversiering en instellingen voor geluid en rustige weergave worden lokaal in je browser bewaard. Je getypte oefentekst wordt niet naar onze analyse gestuurd. Een naam die je voor je diploma invult, wordt alleen op je apparaat gebruikt om de PDF te maken.") + ' '}</p>
+            <p>{t('Voor persoonlijke toetsentraining bewaren we per doeltoets het aantal pogingen en fouten in localStorage. We bewaren daarvoor geen volledige invoer of lijst met verkeerd ingedrukte toetsen. De oefeningen worden op je apparaat samengesteld; deze cijfers worden niet naar onze server of OpenPanel gestuurd.')}</p>
+            <p>{t('De voortgang en oefencijfers zijn apart per toetsenbordcursus, maar niet per persoon. Wie dezelfde browser gebruikt, deelt die gegevens. Er is geen synchronisatie tussen browsers of apparaten. Ze blijven bewaard totdat je ze wist via de browsergegevens; in privémodus kunnen ze bij het sluiten verdwijnen. Dit werkt ook zonder toestemming voor analyse.')}</p>
             <p>{' ' + t("Verwijder je browsergegevens of gebruik je een ander apparaat, dan is je lokale voortgang daar niet beschikbaar.") + ' '}</p>
           </section>
           <section className="space-y-2">
