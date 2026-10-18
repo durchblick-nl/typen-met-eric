@@ -78,7 +78,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: COURSE_URL,
-    languages: {'nl-NL':'https://lettoria.nl/','nl-BE':'https://lettoria.nl/be/','de-DE':'https://lettoria.nl/de/','de-CH':'https://lettoria.nl/ch/'},
+    languages: {'nl-NL':'https://lettoria.app/','nl-BE':'https://lettoria.app/be/','de-DE':'https://lettoria.app/de/','de-CH':'https://lettoria.app/ch/'},
   },
   category: "education",
 };

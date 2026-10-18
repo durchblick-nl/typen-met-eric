@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: '/private/',
         },
-        sitemap: 'https://lettoria.nl/sitemap.xml',
+        sitemap: 'https://lettoria.app/sitemap.xml',
     };
 }

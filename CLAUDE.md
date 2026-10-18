@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Lettoria** is a free children's typing tutor PWA for ages 8-12. A young dragon named Eric guides children through learning to type while exploring the magical world of Lettoria. Each lesson restores magic to different regions of the world.
 
-- **Domain:** https://lettoria.nl
+- **Domain:** https://lettoria.app
 - **Primary language:** Dutch (with German and English planned)
 - **Price:** 100% Free, no registration required, no data collection
 
@@ -122,7 +122,7 @@ The game world has 7 regions with 26 lessons total:
 - JSON-LD structured data (WebApplication, Course)
 - Dynamic sitemap.xml with all 39 pages (main, lessons, regions)
 - robots.txt with sitemap reference
-- Canonical URL: https://lettoria.nl
+- Canonical URL: https://lettoria.app
 - Eric dragon favicon (all sizes for browsers and PWA)
 
 ## Completed
@@ -167,7 +167,7 @@ The game world has 7 regions with 26 lessons total:
 - Build command: `npm run build`
 - Start command: `npx serve out -l 80`
 - Output directory: `out`
-- Production URL: https://lettoria.nl
+- Production URL: https://lettoria.app
 - Staging URL: https://typen.treehouse.ch
 
 ## Image Generation

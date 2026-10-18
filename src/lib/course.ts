@@ -11,7 +11,7 @@ export const COURSE_LABELS: Record<CourseId, string> = {
   nl: 'Nederland · QWERTY', be: 'België · AZERTY', de: 'Deutschland · QWERTZ', ch: 'Schweiz · QWERTZ',
 };
 export const COURSE_LABEL = COURSE_LABELS[COURSE];
-export const COURSE_URL = `https://lettoria.nl${BASE_PATH}`;
+export const COURSE_URL = `https://lettoria.app${BASE_PATH}`;
 export function storageKey(original: string): string {
   // Existing Dutch progress stays exactly where it is. Other curricula start separately.
   return COURSE === 'nl' ? original : `${original}-${COURSE}`;

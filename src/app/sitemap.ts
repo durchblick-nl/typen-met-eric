@@ -78,6 +78,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const pages = [...mainPages, ...regionPages, ...lessonPages];
     return COURSE === 'nl' ? pages.flatMap(page => COURSE_IDS.map(id => ({
         ...page,
-        url: id === 'nl' ? page.url : page.url.replace('https://lettoria.nl', `https://lettoria.nl/${id}`),
+        url: id === 'nl' ? page.url : page.url.replace('https://lettoria.app', `https://lettoria.app/${id}`),
     }))) : pages;
 }

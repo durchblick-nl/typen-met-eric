@@ -637,9 +637,9 @@ test('regional page metadata points to corresponding pages, not Dutch or course 
    process.env.NEXT_PUBLIC_LETTORIA_COURSE=course;
    const {coursePageMetadata}=sources()('lib/pageMetadata');
    const meta=coursePageMetadata('/privacy','Privacy & cookies');
-   assert.equal(meta.alternates.canonical,`https://lettoria.nl${course==='nl'?'':`/${course}`}/privacy`);
+   assert.equal(meta.alternates.canonical,`https://lettoria.app${course==='nl'?'':`/${course}`}/privacy`);
    assert.equal(meta.openGraph.url,meta.alternates.canonical);
-   assert.equal(meta.alternates.languages['de-CH'],'https://lettoria.nl/ch/privacy');
+   assert.equal(meta.alternates.languages['de-CH'],'https://lettoria.app/ch/privacy');
   }
  }finally{if(previous===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=previous;}
 });

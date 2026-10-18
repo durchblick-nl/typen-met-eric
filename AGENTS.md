@@ -4,7 +4,7 @@ Repository instructions for coding agents working on Lettoria. Follow the user's
 
 ## Product and scope
 
-Lettoria is a free Dutch/German typing tutor for children aged 8–12. Eric the dragon guides the child through a story about restoring magic to seven regions. No account or payment is required. Production: `https://lettoria.nl`; staging: `https://typen.treehouse.ch`.
+Lettoria is a free Dutch/German typing tutor for children aged 8–12. Eric the dragon guides the child through a story about restoring magic to seven regions. No account or payment is required. Production: `https://lettoria.app`; staging: `https://typen.treehouse.ch`.
 
 - Write child-facing copy in simple, encouraging Dutch or German for the selected course. Keep engineering documentation in English unless requested otherwise.
 - Protect the learning experience: accurate typing, correct finger use, readable targets and understandable feedback come before speed or spectacle.

@@ -83,7 +83,7 @@ export function DiplomaPreview({ name, date }: DiplomaPreviewProps) {
         </div>
 
         {/* Website */}
-        <p className="text-[8px] md:text-[10px] text-eric-green mb-2">www.lettoria.nl</p>
+        <p className="text-[8px] md:text-[10px] text-eric-green mb-2">www.lettoria.app</p>
 
         {/* Footer */}
         <div className="w-full flex items-end justify-between px-2 md:px-4 mt-auto">

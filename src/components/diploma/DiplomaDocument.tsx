@@ -291,7 +291,7 @@ export function DiplomaDocument({ name, date }: DiplomaDocumentProps) {
           </View>
 
           {/* Website */}
-          <Text style={styles.websiteText}>www.lettoria.nl</Text>
+          <Text style={styles.websiteText}>www.lettoria.app</Text>
 
           {/* Footer with date, signature, seal */}
           <View style={styles.footerSection}>

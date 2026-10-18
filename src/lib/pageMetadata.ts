@@ -3,7 +3,7 @@ import { BASE_PATH, COURSE_IDS, LANGUAGE } from './course';
 import { t } from './i18n';
 
 export function coursePageMetadata(path: string, sourceTitle: string): Metadata {
-  const origin = 'https://lettoria.nl';
+  const origin = 'https://lettoria.app';
   const title = t(sourceTitle);
   const canonical = `${origin}${BASE_PATH}${path}`;
   const languages = Object.fromEntries(COURSE_IDS.map(id => [
