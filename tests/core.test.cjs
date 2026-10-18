@@ -285,7 +285,7 @@ test("arcade typing clears a matching target, grants no points for errors, and c
   for (let i = 0; i < 6; i++) {
     state = {
       ...state,
-      objects: [{ id: i + 1, lane: 1, kind: "letter", depth: 0.7, key: "f" }],
+      objects: [{ id: i + 1, lane: 1, kind: "letter", challenge: "gem", depth: 0.7, key: "f" }],
     };
     state = typeArcade(state, "f");
   }
@@ -298,32 +298,38 @@ test("arcade typing clears a matching target, grants no points for errors, and c
   assert.equal(duplicate.hits, 6);
   assert.equal(duplicate.score, state.score);
 });
-test("arcade collisions respect lane, invulnerability, turbo and single crossing", () => {
-  const { arcadeCourse, newArcade, advanceArcade } =
-    sources()("lib/arcadeFlight");
-  const course = arcadeCourse(0);
-  let state = {
-    ...newArcade(course, 1),
-    nextSpawn: 99999,
-    objects: [
-      { id: 1, lane: 1, kind: "rock", depth: 0.85 },
-      { id: 2, lane: 0, kind: "rock", depth: 0.85 },
-      { id: 3, lane: 1, kind: "gem", depth: 0.85 },
-    ],
-  };
-  const crossed = advanceArcade(state, 100, course);
-  assert.equal(crossed.hearts, 2);
-  assert.equal(crossed.collected, 1);
-  assert.equal(crossed.score, 25);
-  assert.equal(advanceArcade(crossed, 100, course).hearts, 2);
-  assert.equal(
-    advanceArcade({ ...state, turboUntil: 5000 }, 100, course).hearts,
-    3,
-  );
-  assert.equal(
-    advanceArcade({ ...state, invulnerableUntil: 5000 }, 100, course).hearts,
-    3,
-  );
+test("arcade targets wait for typing; correct keys steer and resolve each challenge", () => {
+  const { arcadeCourse, newArcade, advanceArcade, typeArcade, arcadePlayerLane, ARCADE_TARGET_DEPTH } = sources()("lib/arcadeFlight");
+  const course = arcadeCourse(2);
+  let state = { ...newArcade(course, 1), nextSpawn: Infinity, objects: [
+    { id: 1, lane: 0, kind: 'letter', challenge: 'rock', depth: 0.7, key: 'f' },
+    { id: 2, lane: 2, kind: 'letter', challenge: 'gem', depth: 0.7, key: 'j' },
+  ] };
+  for (let i = 0; i < 200; i++) state = advanceArcade(state, 100, course);
+  assert.equal(state.objects.length, 2);
+  assert.ok(state.objects.every(object => object.depth === ARCADE_TARGET_DEPTH));
+  assert.equal(state.score, 0);
+  assert.equal(state.collected, 0);
+  assert.equal(state.lane, 1);
+  const wrong = typeArcade(state, 'x');
+  assert.deepEqual(wrong.objects, state.objects);
+  assert.equal(wrong.lane, 1);
+  assert.equal(wrong.score, 0);
+  assert.equal(wrong.attempts, 1);
+  const rock = typeArcade(wrong, 'f');
+  assert.equal(rock.lane, 0);
+  assert.equal(rock.objects.length, 1);
+  assert.equal(rock.collected, 0);
+  assert.ok(rock.score > 0);
+  assert.equal(arcadePlayerLane(rock), 1, 'flight starts from the current visual position');
+  const moving = advanceArcade(rock, 120, course);
+  assert.ok(arcadePlayerLane(moving) > 0 && arcadePlayerLane(moving) < 1);
+  assert.equal(advanceArcade(moving, 0, course), moving, 'pause freezes automatic travel too');
+  const gem = typeArcade(moving, 'j');
+  assert.equal(gem.lane, 2);
+  assert.equal(gem.collected, 1);
+  assert.equal(gem.objects.length, 0);
+  assert.equal(typeArcade(gem, 'j').collected, 1, 'a resolved crystal is awarded once');
 });
 test("arcade round ends, spawned targets stay unique and bounded, state advances only when ticked", () => {
   const { arcadeCourse, newArcade, advanceArcade, ARCADE_DURATION_MS } =
@@ -331,9 +337,8 @@ test("arcade round ends, spawned targets stay unique and bounded, state advances
   const course = arcadeCourse(2);
   let state = newArcade(course, 4);
   for (let i = 0; i < 750; i++) {
-    // Preserve lives to verify the full clock and all waves independently of survival.
     state = advanceArcade(
-      { ...state, hearts: 3, invulnerableUntil: 999999 },
+      state,
       100,
       course,
     );
@@ -639,73 +644,118 @@ test('regional page metadata points to corresponding pages, not Dutch or course 
  }finally{if(previous===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=previous;}
 });
 
-test('Shift combinations receive 25 percent extra reaction time on their actual layout', () => {
-  const {keyReactionFactor} = sources()('lib/keyboards');
-  for (const course of ['nl','be','de','ch']) {
-    assert.equal(keyReactionFactor('f',course),1);
-    assert.equal(keyReactionFactor('F',course),1.25);
-    assert.equal(keyReactionFactor(' ',course),1);
-  }
-  assert.equal(keyReactionFactor('1','be'),1.25);
-  assert.equal(keyReactionFactor('.','be'),1.25);
-  assert.equal(keyReactionFactor('/','be'),1.25);
-  assert.equal(keyReactionFactor('&','be'),1);
-  assert.equal(keyReactionFactor('1','nl'),1);
-  assert.equal(keyReactionFactor('1','de'),1);
-  assert.equal(keyReactionFactor('ß','de'),1);
-  assert.equal(keyReactionFactor("'",'ch'),1);
-});
-
-test('arcade slows only Shift targets, preserving hazards, clock, turbo and correct input', () => {
-  const saved=process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+test('every regional arcade target remains hittable and never needs a separate steering key', () => {
+  const previous = process.env.NEXT_PUBLIC_LETTORIA_COURSE;
   try {
-    for (const profile of ['nl','be','de','ch']) {
-      process.env.NEXT_PUBLIC_LETTORIA_COURSE=profile;
-      const {arcadeCourse,newArcade,advanceArcade,typeArcade}=sources()('lib/arcadeFlight');
-      const course={...arcadeCourse(15),travelMs:5000};
-      const state={...newArcade(course,1),nextSpawn:Infinity,turboUntil:5000,objects:[
-        {id:1,lane:0,kind:'letter',key:'1',depth:0.2},
-        {id:2,lane:1,kind:'letter',key:'f',depth:0.2},
-        {id:3,lane:2,kind:'rock',depth:0.2},
-        {id:4,lane:2,kind:'gem',depth:0.2},
-      ]};
-      const next=advanceArcade(state,200,course);
-      const drift=id=>next.objects.find(o=>o.id===id).depth-0.2;
-      assert.ok(Math.abs(drift(1)*(profile==='be'?1.25:1)-drift(2))<1e-12);
-      assert.equal(drift(2),drift(3));assert.equal(drift(3),drift(4));
-      assert.equal(next.elapsedMs,200);assert.equal(next.turboUntil,5000);
-      assert.equal(typeArcade(next,'Shift').hits,0);
-      const hit=typeArcade(next,'1');assert.equal(hit.hits,1);assert.equal(hit.attempts,1);
-      assert.equal(state.objects[0].depth,0.2,'simulation does not mutate prior state');
+    for (const courseId of ['nl', 'be', 'de', 'ch']) {
+      process.env.NEXT_PUBLIC_LETTORIA_COURSE = courseId;
+      const load = sources();
+      const { arcadeCourse, newArcade, advanceArcade, typeArcade, nextArcadeTarget } = load('lib/arcadeFlight');
+      const { keyGuidance } = load('lib/keyboards');
+      const { REGIONS } = load('lib/data/regions');
+      for (const lesson of REGIONS.flatMap(region => region.lessons)) {
+        const course = arcadeCourse(lesson.id);
+        for (const [index, key] of course.keys.entries()) {
+          assert.ok(keyGuidance(key), `${courseId}: ${key} has physical finger guidance`);
+          let state = { ...newArcade(course, 1), nextSpawn: Infinity, objects: [
+            { id: 1, lane: index % 3, kind: 'letter', challenge: index % 2 ? 'rock' : 'gem', depth: 0.2, key },
+          ] };
+          for (let i = 0; i < 150; i++) state = advanceArcade(state, 100, course);
+          assert.equal(state.objects.length, 1, `${courseId}/${lesson.id}: ${key} must wait`);
+          assert.equal(state.hits, 0);
+          assert.equal(state.collected, 0);
+          assert.equal(nextArcadeTarget(state.objects).key, key);
+          const wrong = typeArcade(state, '§');
+          assert.deepEqual(wrong.objects, state.objects);
+          const hit = typeArcade(wrong, key);
+          assert.equal(hit.hits, 1);
+          assert.equal(hit.lane, index % 3);
+          assert.equal(hit.objects.length, 0);
+          assert.equal(hit.collected, index % 2 ? 0 : 1);
+        }
+      }
+      const objects = [{ id: 3, lane: 0, kind: 'letter', challenge: 'gem', depth: 0.7, key: 'f' }, { id: 2, lane: 1, kind: 'letter', challenge: 'rock', depth: 0.1, key: 'j' }];
+      assert.equal(nextArcadeTarget(objects).id, 2, 'the cue is stable rather than a reaction deadline');
+      assert.deepEqual(objects.map(object => object.id), [3, 2]);
+      assert.equal(nextArcadeTarget([]), undefined);
     }
-  } finally { if(saved===undefined) delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=saved; }
+  } finally {
+    if (previous === undefined) delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+    else process.env.NEXT_PUBLIC_LETTORIA_COURSE = previous;
+  }
 });
 
-test('arcade hint follows earliest expiry and does not reorder objects', () => {
-  const saved=process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+test('bonus journeys preserve mastery and find the first reachable lesson in every course', () => {
+  const previous = process.env.NEXT_PUBLIC_LETTORIA_COURSE;
   try {
-    process.env.NEXT_PUBLIC_LETTORIA_COURSE='be';
-    const {nextArcadeTarget,typeArcade,newArcade,arcadeCourse}=sources()('lib/arcadeFlight');
-    const objects=[{id:3,lane:0,kind:'letter',key:'1',depth:0.6},{id:2,lane:1,kind:'letter',key:'f',depth:0.55},{id:1,lane:2,kind:'rock',depth:0.8}];
-    assert.equal(nextArcadeTarget(objects).key,'f');
-    assert.deepEqual(objects.map(o=>o.id),[3,2,1]);
-    const state={...newArcade(arcadeCourse(15),1),objects};
-    const next=typeArcade(state,'f');assert.equal(nextArcadeTarget(next.objects).key,'1');
-    assert.equal(nextArcadeTarget([{id:1,lane:0,kind:'letter',key:'f',depth:0.86}]),undefined);
-    assert.equal(nextArcadeTarget([]),undefined);
-  } finally { if(saved===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=saved; }
+    for (const course of ['nl', 'be', 'de', 'ch']) {
+      process.env.NEXT_PUBLIC_LETTORIA_COURSE = course;
+      const load = sources();
+      const { REGIONS } = load('lib/data/regions');
+      const { bonusJourney } = load('lib/journey');
+      const { arcadeCourse, ARCADE_DURATION_MS, arcadeReward } = load('lib/arcadeFlight');
+      const { storageKey } = load('lib/course');
+      storage();
+      const store = load('lib/stores/progressStore').useProgressStore;
+      const lessons = REGIONS.flatMap(region => region.lessons);
+      const complete = Object.fromEntries(lessons.map(lesson => [lesson.id, 3]));
+      for (const lesson of lessons) {
+        const journey = bonusJourney(lesson.id, {});
+        assert.equal(journey.current.lessonId, lesson.id);
+        assert.equal(journey.current.lessonNumber, lesson.id + 1);
+        assert.equal(journey.current.title, lesson.title);
+        assert.deepEqual(journey.current.focusKeys, lesson.newKeys);
+        assert.equal(journey.currentMastered, false);
+        assert.equal(arcadeCourse(lesson.id).title, lesson.title);
+        assert.equal(bonusJourney(lesson.id, complete).suggested, null);
+      }
+      assert.equal(bonusJourney(0, {}).suggested.lessonId, 0);
+      store.getState().completeLesson(0, 2);
+      assert.equal(bonusJourney(0, store.getState().lessonStars).currentMastered, false);
+      store.getState().completeLesson(0, 3);
+      store.getState().completeLesson(0, 1);
+      const retry = bonusJourney(0, store.getState().lessonStars);
+      assert.equal(retry.currentMastered, true);
+      assert.equal(retry.suggested.lessonId, 1);
+      assert.equal(JSON.parse(localStorage.getItem(storageKey('typen-met-eric-progress'))).state.lessonStars[0], 3);
+      assert.equal(bonusJourney(0, { 0: 3, 1: 3 }).suggested.lessonId, 2);
+      assert.equal(bonusJourney(25, { ...complete, 7: 2 }).suggested.lessonId, 7);
+      assert.equal(bonusJourney(25, { ...complete, 25: 2 }).currentMastered, false);
+      assert.equal(bonusJourney(25, { ...complete, 25: 2 }).suggested.lessonId, 25);
+      assert.deepEqual(bonusJourney(19, complete).current.focusKeys, []);
+      assert.equal(bonusJourney(-1, complete), undefined);
+      assert.equal(bonusJourney(999, complete), undefined);
+      assert.equal(ARCADE_DURATION_MS, 75000);
+      assert.equal(arcadeReward(999, true, 999), 26);
+      assert.ok(arcadeCourse(5).travelMs < arcadeCourse(0).travelMs);
+    }
+  } finally {
+    if (previous === undefined) delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+    else process.env.NEXT_PUBLIC_LETTORIA_COURSE = previous;
+  }
 });
 
-test('a Shift target remains hittable for its extra reaction window', () => {
-  const saved=process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+test('every course teaches and exercises the full lowercase alphabet', () => {
+  const previous = process.env.NEXT_PUBLIC_LETTORIA_COURSE;
   try {
-    process.env.NEXT_PUBLIC_LETTORIA_COURSE='be';
-    const {arcadeCourse,newArcade,advanceArcade,typeArcade}=sources()('lib/arcadeFlight');
-    const course={...arcadeCourse(15),travelMs:5000};
-    const initial={...newArcade(course,1),nextSpawn:Infinity,objects:[{id:1,lane:0,kind:'letter',key:'1',depth:0.82},{id:2,lane:1,kind:'letter',key:'f',depth:0.82}]};
-    const next=advanceArcade(initial,210,course);
-    assert.equal(next.missed,1);assert.equal(next.objects.length,1);assert.equal(next.objects[0].key,'1');
-    assert.equal(typeArcade(next,'1').hits,1);
-    assert.equal(advanceArcade(next,0,course),next,'paused/no-tick simulation preserves the extra window');
-  } finally { if(saved===undefined)delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;else process.env.NEXT_PUBLIC_LETTORIA_COURSE=saved; }
+    for (const course of ['nl', 'be', 'de', 'ch']) {
+      process.env.NEXT_PUBLIC_LETTORIA_COURSE = course;
+      const lessons = sources()('lib/data/regions').REGIONS.flatMap(region => region.lessons);
+      const taught = new Set(lessons.flatMap(lesson => lesson.newKeys));
+      const exercised = new Set(lessons.flatMap(lesson => lesson.exercises).join(''));
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz' + (course === 'de' ? 'äöüß' : course === 'ch' ? 'äöü' : '');
+      for (const character of alphabet) {
+        assert.ok(taught.has(character), `${course}: ${character} must be introduced`);
+        assert.ok(exercised.has(character), `${course}: ${character} must be practiced`);
+      }
+      for (const lesson of lessons) {
+        for (const character of lesson.newKeys) {
+          assert.ok(lesson.exercises.some(text => text.includes(character)), `${course} lesson ${lesson.id}: new key ${character} needs direct practice`);
+        }
+      }
+    }
+  } finally {
+    if (previous === undefined) delete process.env.NEXT_PUBLIC_LETTORIA_COURSE;
+    else process.env.NEXT_PUBLIC_LETTORIA_COURSE = previous;
+  }
 });

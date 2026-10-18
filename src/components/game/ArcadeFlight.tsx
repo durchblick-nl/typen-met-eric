@@ -8,7 +8,7 @@ import {
   nextArcadeTarget,
   newArcade,
   advanceArcade,
-  moveArcade,
+  arcadePlayerLane,
   typeArcade,
   arcadeTurbo,
   arcadePosition,
@@ -17,12 +17,14 @@ import {
 import { keyGuidance } from "@/lib/keyboards";
 import { ArcadeKeyGuide } from "./ArcadeKeyGuide";
 import { IllustratedProp } from "./IllustratedProp";
+import { BonusJourneyNext } from './BonusJourneyNext';
+import { CourseFocus } from './CourseFocus';
+import type { BonusCoursePreview } from '@/lib/journey';
 import { arcadeLandscape } from "@/lib/journey";
 import { FlightDragon } from "./FlightDragon";
 import { ArcadeMusic } from "@/lib/arcadeMusic";
 import { isTrainingKey } from "@/lib/hooks/useKeyboard";
 import { useGameStore } from "@/lib/stores/gameStore";
-import { getLessonById } from "@/lib/data/regions";
 import {
   ComfortSettings,
   useQuietMotion,
@@ -33,13 +35,13 @@ interface Props {
   lessonId: number;
   onExit: () => void;
   onNext: () => void;
-  isLastLesson: boolean;
+  suggested: BonusCoursePreview | null;
 }
 export function ArcadeFlight({
   lessonId,
   onExit,
   onNext,
-  isLastLesson,
+  suggested,
 }: Props) {
   const course = useMemo(() => arcadeCourse(lessonId), [lessonId]);
   const [state, setState] = useState(() => newArcade(course, 1));
@@ -78,7 +80,6 @@ export function ArcadeFlight({
       }
     });
   }, []);
-  const nextLesson = getLessonById(lessonId + 1)?.lesson;
   const changePhase = useCallback(
     (next: Phase) => {
       phaseRef.current = next;
@@ -100,7 +101,7 @@ export function ArcadeFlight({
           String(lessonId),
           final.hits,
           final.score,
-          final.elapsedMs >= ARCADE_DURATION_MS && final.hearts > 0,
+          final.elapsedMs >= ARCADE_DURATION_MS,
           final.collected,
         ),
     );
@@ -156,7 +157,6 @@ export function ArcadeFlight({
       last = now;
       commit(next);
       if (next.collected > previous.collected) chime(660);
-      if (next.hearts < previous.hearts) chime(180);
       if (next.ended) {
         finish();
         return;
@@ -198,13 +198,8 @@ export function ArcadeFlight({
         event.target.closest('button, input, a, [contenteditable="true"]')
       )
         return;
-      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-        event.preventDefault();
-        commit(
-          moveArcade(stateRef.current, event.key === "ArrowLeft" ? -1 : 1),
-        );
-        return;
-      }
+      // Arrow keys are not game controls and must not scroll the flight away.
+      if (event.key.startsWith('Arrow')) { event.preventDefault(); return; }
       if (!isTrainingKey(event, dialog.current)) return;
       event.preventDefault();
       const previous = stateRef.current;
@@ -254,13 +249,13 @@ export function ArcadeFlight({
   const turbo = arcadeTurbo(state);
   const priorityTarget = nextArcadeTarget(state.objects);
   const seconds = Math.ceil((ARCADE_DURATION_MS - state.elapsedMs) / 1000);
-  const player = arcadePosition(state.lane, 0.86);
+  const player = arcadePosition(quiet ? state.lane : arcadePlayerLane(state), 0.86);
   const button =
     "rounded-full px-5 py-2.5 font-bold border border-eric-green/25 hover:bg-eric-green/10 focus-visible:outline-2 focus-visible:outline-eric-green";
   const feedback =
     state.feedback && state.feedback.until > state.elapsedMs
       ? state.feedback.text
-      : t("Typ het teken. Pak kristallen. Ontwijk de rotsen.");
+      : t("Typ een zichtbaar teken. Eric vliegt er zelf naartoe.");
   const sceneFilter = course.regionId === "woud" ? "saturate(1.15)" : undefined;
   return (
     <section
@@ -275,9 +270,9 @@ export function ArcadeFlight({
         if (event.key !== "Tab") return;
         const controls = [
           ...(dialog.current?.querySelectorAll<HTMLElement>(
-            "button:not([disabled]), input:not([disabled]), a[href]",
+            "button:not([disabled]), input:not([disabled]), a[href], summary",
           ) || []),
-        ];
+        ].filter(control => control.getClientRects().length > 0);
         const first = controls[0],
           last = controls[controls.length - 1];
         if (
@@ -331,16 +326,9 @@ export function ArcadeFlight({
             <p className="text-xs text-gray-600">{' ' + t("Beste") + ' '} {state.bestStreak}</p>
           </div>
           <div className="rounded-xl bg-white/80 py-2">
-            <p className="text-xs text-gray-600">{' ' + t("Levens") + ' '}</p>
-            <strong
-              data-testid="arcade-hearts"
-              aria-label={t("{n} levens", {n:state.hearts})}
-              className="text-xl sm:text-2xl text-red-700 tracking-widest"
-            >
-              {"♥".repeat(Math.max(0, state.hearts))}
-              <span className="text-gray-300">
-                {"♡".repeat(3 - Math.max(0, state.hearts))}
-              </span>
+            <p className="text-xs text-gray-600">{t('Nauwkeurig')}</p>
+            <strong data-testid="arcade-accuracy" className="text-xl sm:text-2xl text-eric-green tabular-nums">
+              {state.attempts ? `${Math.floor(state.hits / state.attempts * 100)}%` : '—'}
             </strong>
           </div>
           <div className="rounded-xl bg-white/80 py-2">
@@ -355,7 +343,7 @@ export function ArcadeFlight({
         </div>
         <div
           data-testid="arcade-scene"
-          className="relative h-[clamp(260px,44svh,380px)] sm:h-[clamp(260px,48svh,490px)] overflow-hidden rounded-3xl border-4 border-eric-gold/40 bg-green-100"
+          className={`relative ${phase === "playing" ? "h-[clamp(260px,44svh,380px)] sm:h-[clamp(260px,48svh,490px)]" : "min-h-[clamp(260px,44svh,380px)] sm:min-h-[clamp(260px,48svh,490px)]"} overflow-hidden rounded-3xl border-4 border-eric-gold/40 bg-green-100`}
         >
           <Image
             src={arcadeLandscape(course.regionId)}
@@ -387,7 +375,7 @@ export function ArcadeFlight({
           </svg>
           <div className="absolute top-4 left-1/2 -translate-x-1/2 w-56 max-w-[80%] z-20 bg-perkament/95 rounded-full border-2 border-eric-gold px-3 py-1.5">
             <div className="flex justify-between text-xs font-bold text-eric-green mb-1">
-              <span>{turbo ? t("TURBO + SCHILD") : t("Turbo")}</span>
+              <span>{turbo ? t("TURBO · DUBBELE PUNTEN") : t("Turbo")}</span>
               <span>
                 {turbo
                   ? `${Math.ceil((state.turboUntil - state.elapsedMs) / 1000)}s`
@@ -422,20 +410,13 @@ export function ArcadeFlight({
                   opacity: Math.min(1, 0.4 + object.depth * 3),
                 }}
               >
-                {object.kind === "letter" ? (
-                  <div
-                    className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full flex items-center justify-center font-mono text-4xl sm:text-5xl font-bold border-[3px] shadow-lg ${object.depth >= 0.65 ? "bg-yellow-100 border-yellow-500 text-green-950" : "bg-green-100 border-eric-green text-green-950"}`}
+                <div
+                    className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full flex items-center justify-center font-mono text-4xl sm:text-5xl font-bold border-[3px] shadow-lg ${object.id === priorityTarget?.id ? "bg-yellow-100 border-yellow-500 text-green-950" : "bg-green-100 border-eric-green text-green-950"}`}
                   >
                     {object.key === " " ? "␣" : object.key}
+                    <IllustratedProp name={object.challenge} label={object.challenge === 'gem' ? t('Kristal') : t('Rots')} className="absolute -bottom-2 -right-2 w-8 sm:w-10" />
                     {object.key !== undefined && keyGuidance(object.key)?.shift && <span className="absolute -top-2 -right-1 rounded-full border border-eric-gold bg-perkament px-1.5 text-base leading-6" title={t('Shift-combinatie')} aria-label={t('Shift-combinatie')}>⇧</span>}
-                  </div>
-                ) : (
-                  <IllustratedProp
-                    name={object.kind === "gem" ? "gem" : "rock"}
-                    label={object.kind === "gem" ? t("Kristal") : t("Rots")}
-                    className={object.kind === "gem" ? "w-16" : "w-20"}
-                  />
-                )}
+                </div>
               </div>
             );
           })}
@@ -468,6 +449,7 @@ export function ArcadeFlight({
           <div
             data-testid="arcade-player"
             data-lane={state.lane}
+            data-flight-lane={arcadePlayerLane(state).toFixed(3)}
             className="absolute z-30 w-24 sm:w-32 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{
               left: `${player.x}%`,
@@ -485,20 +467,27 @@ export function ArcadeFlight({
             )}
           </div>
           {(phase === "ready" || phase === "paused" || phase === "ended") && (
-            <div className="absolute inset-0 z-40 bg-eric-green/15 flex items-center justify-center p-4">
-              <div className="bg-perkament/95 max-w-lg w-full max-h-full overflow-y-auto rounded-3xl p-5 sm:p-7 shadow-xl border border-eric-gold text-center">
+            <div className="relative z-40 bg-eric-green/15 flex items-center justify-center p-4" style={{ minHeight: "inherit" }}>
+              <div data-testid="arcade-card" className="bg-perkament/95 max-w-2xl w-full min-w-0 rounded-3xl p-5 sm:p-7 shadow-xl border border-eric-gold text-center">
                 {phase === "ready" && (
                   <>
                     <p className="text-xs font-bold text-eric-green mb-2">{' ' + t("DRIE STERREN. DEZE BAAN IS VAN JOU!") + ' '} </p>
-                    <h2 className="text-2xl sm:text-3xl text-eric-green font-bold mb-3">{' ' + t("Klaar voor de kristaljacht?") + ' '} </h2>
-                    <p className="text-gray-700 mb-3">{' ' + t("Met") + ' '} <kbd>←</kbd>{' ' + t("en") + ' '} <kbd>→</kbd>{' ' + t("wissel je van baan. Pak kristallen en ontwijk de rotsen. Typ de tekens om magische doelen te raken.") + ' '} </p>
-                    <p className="text-gray-700 mb-3">{' ' + t("Zes goede tekens op rij? Turbo! Dan krijg je dubbele punten en een schild. Doelen bij de gouden lijn geven extra punten.") + ' '} </p>
-                    <p className="text-sm text-gray-700 mb-3">{t('De toetsenhulp toont de juiste vinger en Shift-hand. Shift-doelen geven je meer tijd.')}</p>
-                    <p className="text-sm text-gray-600 mb-5">{' ' + t("3 levens · maximaal 75 seconden · eigen toetsenbord nodig") + ' '} </p>
+                    <h2 className="text-2xl sm:text-3xl text-eric-green font-bold mb-3">{t('Baan {n}: {title}', { n: lessonId + 1, title: course.title })}</h2>
+                    <div className="mb-4"><CourseFocus keys={course.focusKeys} /></div>
+                    <p className="text-gray-700 mb-3">{t('Typ een zichtbaar teken. Eric vliegt naar dat doel en pakt het kristal of lost de rots op. Houd je vingers bij de thuisrij.')}</p>
+                    <p className="text-sm text-gray-700 mb-3">{t('Een fout? Het doel blijft staan. Probeer dezelfde toets nog eens.')}</p>
+                    <p className="text-sm text-gray-600 mb-5">{' ' + t("75 seconden · alleen geleerde tekens · eigen toetsenbord nodig") + ' '} </p>
                     <button
-                      className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
+                      className={`${button} max-w-full bg-eric-green text-white hover:bg-eric-green/90`}
                       onClick={start}
                     >{' ' + t("Start de kristaljacht") + ' '} </button>
+                    <details className="mt-4 text-sm text-gray-700">
+                      <summary className="cursor-pointer font-semibold text-eric-green rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-eric-green">{t('Meer speltips')}</summary>
+                      <div className="mt-3">
+                        <p className="text-gray-700 mb-3">{t("Zes goede tekens op rij? Turbo! Dan krijg je 5,5 seconden dubbele punten.")}</p>
+                        <p className="text-sm text-gray-700 mb-3">{t('De toetsenhulp toont de juiste vinger en Shift-hand. Elk doel wacht tot je het goed typt.')}</p>
+                      </div>
+                    </details>
                   </>
                 )}
                 {phase === "paused" && (
@@ -506,7 +495,7 @@ export function ArcadeFlight({
                     <h2 className="text-3xl text-eric-green font-bold mb-3">{' ' + t("Even pauze") + ' '} </h2>
                     <p className="text-gray-700 mb-5">{' ' + t("De hele baan staat stil. Ga verder wanneer jij wilt.") + ' '} </p>
                     <button
-                      className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
+                      className={`${button} max-w-full bg-eric-green text-white hover:bg-eric-green/90`}
                       onClick={resume}
                     >{' ' + t("Verder vliegen") + ' '} </button>
                   </>
@@ -516,9 +505,7 @@ export function ArcadeFlight({
                     <h2 className="text-3xl text-eric-green font-bold mb-2">
                       {result?.record
                         ? t("Een nieuw record!")
-                        : state.hearts > 0
-                          ? t("De finish is bereikt!")
-                          : t("Goed gevlogen!")}
+                        : t("De finish is bereikt!")}
                     </h2>
                     <p className="text-4xl font-extrabold text-eric-green mb-2">
                       {state.score}{' ' + t("punten") + ' '} </p>
@@ -527,18 +514,8 @@ export function ArcadeFlight({
                     </p>
                     <p className="font-bold text-eric-green mb-4">
                       +{result?.gems ?? 0}{' ' + t("kristallen voor Erics grot") + ' '} </p>
-                    {nextLesson && (
-                      <p className="text-sm text-gray-700 mb-4">{' ' + t("Volgende uitdaging: les") + ' '} {lessonId + 2},{" "}
-                        {nextLesson.title}{' ' + t(". Met drie sterren speel je arcadebaan") + ' '}{" "}
-                        {lessonId + 2}{' ' + t("vrij.") + ' '} </p>
-                    )}
+                    <BonusJourneyNext suggested={suggested} onNext={onNext} />
                     <div className="flex flex-wrap gap-2 justify-center">
-                      <button
-                        className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
-                        onClick={onNext}
-                      >
-                        {isLastLesson ? t("Naar de kaart") : t("Volgende les")}
-                      </button>
                       <button className={button} onClick={start}>{' ' + t("Nog een race") + ' '} </button>
                       <Link className={button} href="/kaart#erics-grot">{' ' + t("Naar Erics grot") + ' '} </Link>
                     </div>
@@ -555,7 +532,7 @@ export function ArcadeFlight({
         >
           {phase === "playing"
             ? feedback
-            : t("← → Wissel van baan · Typ de tekens voor magie")}
+            : t("Je tekens sturen Eric. Je vingers blijven bij de thuisrij.")}
         </p>
         <footer className="flex flex-wrap justify-between items-center gap-4 mt-3">
           <p className="text-sm text-gray-600">{' ' + t("Je lessterren staan vast. Hier speel je voor je eigen record.") + ' '} </p>

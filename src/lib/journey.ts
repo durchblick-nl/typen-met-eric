@@ -1,5 +1,34 @@
 import { t } from '@/lib/i18n';
-import { REGIONS } from "./data/regions";
+import { REGIONS, getLessonById, type Lesson } from "./data/regions";
+
+export interface BonusCoursePreview {
+  lessonId: number;
+  lessonNumber: number;
+  title: string;
+  focusKeys: string[];
+}
+
+export interface BonusJourney {
+  current: BonusCoursePreview;
+  currentMastered: boolean;
+  suggested: BonusCoursePreview | null;
+}
+
+function bonusPreview(lesson: Lesson): BonusCoursePreview {
+  return { lessonId: lesson.id, lessonNumber: lesson.id + 1, title: lesson.title, focusKeys: [...lesson.newKeys] };
+}
+
+/** Derived from best lesson results, never from the latest attempt or game scores. */
+export function bonusJourney(lessonId: number, lessonStars: Record<number, number>): BonusJourney | undefined {
+  const current = getLessonById(lessonId)?.lesson;
+  if (!current) return undefined;
+  const suggested = nextJourneyLesson(lessonStars)?.lesson;
+  return {
+    current: bonusPreview(current),
+    currentMastered: (lessonStars[lessonId] || 0) >= 3,
+    suggested: suggested ? bonusPreview(suggested) : null,
+  };
+}
 
 export function nextJourneyLesson(lessonStars: Record<number, number>) {
   for (const region of REGIONS) {

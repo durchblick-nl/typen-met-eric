@@ -1,4 +1,6 @@
 "use client";
+import { BonusJourneyNext } from './BonusJourneyNext';
+import type { BonusCoursePreview } from '@/lib/journey';
 import { t } from '@/lib/i18n';
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -24,9 +26,9 @@ interface Props {
   lessonId: number;
   onExit: () => void;
   onNext: () => void;
-  isLastLesson: boolean;
+  suggested: BonusCoursePreview | null;
 }
-export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
+export function MagicFlight({ lessonId, onExit, onNext, suggested }: Props) {
   const [phase, setPhase] = useState<Phase>("ready");
   const phaseRef = useRef<Phase>("ready");
   const [targets, setTargets] = useState<string[]>([]);
@@ -361,13 +363,8 @@ export function MagicFlight({ lessonId, onExit, onNext, isLastLesson }: Props) {
                     <p className="text-sm text-gray-600 mb-2">{' ' + t("Je beste magievlucht voor deze les!") + ' '} </p>
                   )}
                   <p className="text-sm text-gray-600 mb-5">{' ' + t("Een fijn moment voor een pauze. Jij kiest wat volgt.") + ' '} </p>
+                  <BonusJourneyNext suggested={suggested} onNext={onNext} />
                   <div className="flex flex-wrap justify-center gap-2">
-                    <button
-                      className={`${button} bg-eric-green text-white hover:bg-eric-green/90`}
-                      onClick={onNext}
-                    >
-                      {isLastLesson ? t("Naar de kaart") : t("Volgende les")}
-                    </button>
                     <button className={button} onClick={start}>{' ' + t("Nog een vlucht") + ' '} </button>
                   </div>
                 </>

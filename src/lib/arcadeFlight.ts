@@ -1,18 +1,19 @@
 import { t } from '@/lib/i18n';
-import { keyReactionFactor } from "./keyboards";
 import { REGIONS } from "./data/regions";
 export const ARCADE_DURATION_MS = 75000;
-export const ARCADE_HIT_DEPTH = 0.86;
-export type ArcadeKind = "letter" | "gem" | "rock";
+export const ARCADE_TARGET_DEPTH = 0.72;
+export type ArcadeChallenge = "gem" | "rock";
 export interface ArcadeObject {
   id: number;
   lane: number;
-  kind: ArcadeKind;
+  kind: "letter";
+  challenge: ArcadeChallenge;
   depth: number;
-  key?: string;
+  key: string;
 }
 export interface ArcadeCourse {
   lessonId: number;
+  title: string;
   name: string;
   regionId: string;
   keys: string[];
@@ -24,16 +25,15 @@ export interface ArcadeCourse {
 export interface ArcadeState {
   elapsedMs: number;
   lane: number;
-  hearts: number;
+  laneFrom: number;
+  laneChangedAt: number;
   score: number;
   streak: number;
   bestStreak: number;
   hits: number;
   attempts: number;
   collected: number;
-  missed: number;
   turboUntil: number;
-  invulnerableUntil: number;
   nextSpawn: number;
   wave: number;
   nextId: number;
@@ -58,6 +58,7 @@ export function arcadeCourse(lessonId: number): ArcadeCourse {
   const difficulty = Math.min(5, Math.floor(lessonId / 5));
   return {
     lessonId,
+    title: lessons.find((lesson) => lesson.id === lessonId)?.title || "",
     name: region.name,
     regionId: region.id,
     keys: [...new Set(lessons.flatMap((lesson) => lesson.newKeys))],
@@ -74,16 +75,15 @@ export function newArcade(
   return {
     elapsedMs: 0,
     lane: 1,
-    hearts: 3,
+    laneFrom: 1,
+    laneChangedAt: 0,
     score: 0,
     streak: 0,
     bestStreak: 0,
     hits: 0,
     attempts: 0,
     collected: 0,
-    missed: 0,
     turboUntil: 0,
-    invulnerableUntil: 0,
     nextSpawn: 900,
     wave: 0,
     nextId: 2,
@@ -94,6 +94,7 @@ export function newArcade(
         id: 1,
         lane: 1,
         kind: "letter",
+        challenge: "gem",
         depth: 0.16,
         key: course.focusKeys[0] || course.keys[0],
       },
@@ -102,24 +103,17 @@ export function newArcade(
     shot: null,
   };
 }
-export function moveArcade(state: ArcadeState, direction: -1 | 1): ArcadeState {
-  return state.ended
-    ? state
-    : { ...state, lane: Math.max(0, Math.min(2, state.lane + direction)) };
+/** Automatic travel uses the simulation clock, so pausing freezes the whole flight. */
+export function arcadePlayerLane(state: ArcadeState): number {
+  const progress = Math.min(1, Math.max(0, (state.elapsedMs - state.laneChangedAt) / 240));
+  const eased = progress * progress * (3 - 2 * progress);
+  return state.laneFrom + (state.lane - state.laneFrom) * eased;
 }
-/** Hint the target with the least remaining reaction time, not just greatest depth. */
+
+/** Stable coaching: the oldest visible target stays available until it is typed. */
 export function nextArcadeTarget(objects: ArcadeObject[]): ArcadeObject | undefined {
-  let target: ArcadeObject | undefined;
-  let remaining = Infinity;
-  for (const object of objects) {
-    if (object.kind !== "letter" || object.key === undefined || object.depth < 0 || object.depth >= ARCADE_HIT_DEPTH) continue;
-    const time = (ARCADE_HIT_DEPTH - object.depth) * keyReactionFactor(object.key);
-    if (!target || time < remaining || (time === remaining && object.id < target.id)) {
-      target = object;
-      remaining = time;
-    }
-  }
-  return target;
+  return objects.reduce<ArcadeObject | undefined>((first, object) =>
+    !first || object.id < first.id ? object : first, undefined);
 }
 function random(state: ArcadeState): number {
   state.rng = (Math.imul(state.rng, 1664525) + 1013904223) >>> 0;
@@ -136,7 +130,7 @@ export function typeArcade(state: ArcadeState, key: string): ArcadeState {
         object.kind === "letter" &&
         object.key === key &&
         object.depth >= 0 &&
-        object.depth < ARCADE_HIT_DEPTH,
+        object.depth <= ARCADE_TARGET_DEPTH,
     )
     .sort((a, b) => b.depth - a.depth)[0];
   if (!target)
@@ -145,21 +139,24 @@ export function typeArcade(state: ArcadeState, key: string): ArcadeState {
       attempts: state.attempts + 1,
       streak: 0,
       feedback: {
-        text: t("Typ een teken dat je op de baan ziet."),
+        text: t("Probeer het zichtbare teken nog eens. Je kunt het!"),
         kind: "hint",
         until: state.elapsedMs + 1100,
       },
     };
   const streak = state.streak + 1;
-  const perfect = target.depth >= 0.65;
   const points =
-    (100 + (perfect ? 50 : 0)) *
+    150 *
     Math.min(3, 1 + Math.floor(streak / 4)) *
     (arcadeTurbo(state) ? 2 : 1);
   const triggerTurbo = streak % 6 === 0;
   return {
     ...state,
+    laneFrom: arcadePlayerLane(state),
+    lane: target.lane,
+    laneChangedAt: state.elapsedMs,
     score: state.score + points,
+    collected: state.collected + (target.challenge === "gem" ? 1 : 0),
     hits: state.hits + 1,
     attempts: state.attempts + 1,
     streak,
@@ -173,10 +170,10 @@ export function typeArcade(state: ArcadeState, key: string): ArcadeState {
     },
     feedback: {
       text: triggerTurbo
-        ? t("TURBO! Dubbele punten en een magisch schild!")
-        : perfect
-          ? t("Perfect! +{points}", { points })
-          : t("Raak! +{points}", { points }),
+        ? t("TURBO! Je tekens geven dubbele punten!")
+        : target.challenge === "rock"
+          ? t("Rots opgelost! +{points}", { points })
+          : t("Kristal gepakt! +{points}", { points }),
       kind: "good",
       until: state.elapsedMs + 1300,
     },
@@ -198,76 +195,28 @@ export function advanceArcade(
   const turbo = arcadeTurbo(next);
   const speed =
     (1 + (next.elapsedMs / ARCADE_DURATION_MS) * 0.35) * (turbo ? 1.22 : 1);
-  for (const object of state.objects) {
-    const moved = {
-      ...object,
-      // Only Shift targets get additional reaction time. Obstacles, round clock,
-      // turbo, collision depths and points remain identical across layouts.
-      depth: object.depth + (delta / (course.travelMs * (object.kind === "letter" && object.key !== undefined ? keyReactionFactor(object.key) : 1))) * speed,
-    };
-    if (object.depth < ARCADE_HIT_DEPTH && moved.depth >= ARCADE_HIT_DEPTH) {
-      if (object.kind === "letter") {
-        next.missed++;
-        next.streak = 0;
-        continue;
-      }
-      if (object.kind === "gem" && object.lane === next.lane) {
-        next.collected++;
-        next.score += turbo ? 50 : 25;
-        next.feedback = {
-          text: turbo ? t("Kristal! +50") : t("Kristal! +25"),
-          kind: "good",
-          until: next.elapsedMs + 900,
-        };
-      }
-      if (
-        object.kind === "rock" &&
-        object.lane === next.lane &&
-        !turbo &&
-        next.elapsedMs >= next.invulnerableUntil
-      ) {
-        next.hearts--;
-        next.streak = 0;
-        next.invulnerableUntil = next.elapsedMs + 1800;
-        next.feedback = {
-          text: t("Een rots! Wissel van baan met ← of →."),
-          kind: "hit",
-          until: next.elapsedMs + 1400,
-        };
-      }
-    }
-    if (moved.depth < 1.08) next.objects.push(moved);
-  }
-  next.ended = next.hearts <= 0 || next.elapsedMs >= ARCADE_DURATION_MS;
+  // Targets approach and wait. Neither a pause, a wrong key nor slow typing
+  // can discard a target or award points through passive survival/collisions.
+  next.objects = state.objects.map(object => ({
+    ...object,
+    depth: Math.min(ARCADE_TARGET_DEPTH, object.depth + (delta / course.travelMs) * speed),
+  }));
+  next.ended = next.elapsedMs >= ARCADE_DURATION_MS;
   if (!next.ended && next.elapsedMs >= next.nextSpawn) {
-    const lane = Math.floor(random(next) * 3);
-    const occupiedKeys = new Set(
-      next.objects
-        .filter(
-          (object) =>
-            object.kind === "letter" && object.depth < ARCADE_HIT_DEPTH,
-        )
-        .map((object) => object.key),
-    );
-    const preferred = [...course.focusKeys, ...course.keys].filter(
-      (key) => !occupiedKeys.has(key),
-    );
-    if (occupiedKeys.size < 3 && preferred.length) {
+    const occupiedKeys = new Set(next.objects.map(object => object.key));
+    const occupiedLanes = new Set(next.objects.map(object => object.lane));
+    const lanes = [0, 1, 2].filter(lane => !occupiedLanes.has(lane));
+    const preferred = [...course.focusKeys, ...course.keys].filter(key => !occupiedKeys.has(key));
+    if (next.objects.length < 3 && preferred.length && lanes.length) {
+      const lane = lanes[Math.floor(random(next) * lanes.length)];
       const key = preferred[Math.floor(random(next) * preferred.length)];
       next.objects.push({
-        id: next.nextId++,
-        lane,
-        kind: "letter",
-        depth: 0,
-        key,
+        id: next.nextId++, lane, kind: "letter", key, depth: 0,
+        // Introduce the crystal target first; rocks are also resolved by typing.
+        challenge: next.wave < 3 || next.wave % 3 === 0 ? "gem" : "rock",
       });
+      next.wave++;
     }
-    const otherLane = (lane + 1 + Math.floor(random(next) * 2)) % 3;
-    // First seconds teach typing and crystal collection; rocks arrive afterwards.
-    const kind: ArcadeKind =
-      next.wave < 3 || next.wave % 3 === 0 ? "gem" : "rock";
-    next.objects.push({ id: next.nextId++, lane: otherLane, kind, depth: 0 });
-    next.wave++;
     next.nextSpawn = next.elapsedMs + course.spawnMs;
   }
   return next;

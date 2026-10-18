@@ -3,19 +3,19 @@ import Image from "next/image";
 import { Eric } from "@/components/eric";
 import { IllustratedProp } from "@/components/game/IllustratedProp";
 import { KeyboardHint } from "@/components/ui/KeyboardHint";
+import type { BonusCoursePreview } from '@/lib/journey';
+import { CourseFocus } from '@/components/game/CourseFocus';
 
 export function LessonCelebration({
   stars,
   accuracy,
-  lessonId,
-  title,
+  course,
   mastered,
   onArcade,
 }: {
   stars: number;
   accuracy: number;
-  lessonId: number;
-  title: string;
+  course: BonusCoursePreview;
   mastered: boolean;
   onArcade: () => void;
 }) {
@@ -63,22 +63,30 @@ export function LessonCelebration({
         {accuracy}%
       </div>
       <p className="text-sm text-gray-600 mt-1">{' ' + t("Nauwkeurig") + ' '}</p>
-      {stars < 3 && (
+      {stars < 3 && !mastered && (
         <p className="max-w-md mx-auto text-gray-700 mt-4">{' ' + t("Neem je tijd. Met 95% nauwkeurigheid verdien je drie sterren en opent de volgende les.") + ' '} </p>
       )}
-      {(stars === 3 || mastered) && (
+      {!mastered && (
+        <div data-testid="locked-bonus" className="mt-6 rounded-2xl border-2 border-eric-gold/60 bg-white/65 p-5">
+          <h3 className="text-xl font-bold text-eric-green">{t('Baan {n} is nog gesloten', { n: course.lessonNumber })}</h3>
+          <p className="mt-2 mb-3 text-gray-700">{course.title}</p>
+          <CourseFocus keys={course.focusKeys} />
+          <p className="mt-3 text-gray-700">{t('Haal drie sterren in les {n} om deze baan te openen.', { n: course.lessonNumber })}</p>
+        </div>
+      )}
+      {mastered && (
         <div className="mt-6 flex flex-col sm:flex-row items-center gap-4 rounded-2xl border-2 border-eric-gold/60 bg-white/65 p-4 sm:px-6 text-center sm:text-left">
           <IllustratedProp name="gem" className="w-16 sm:w-20" />
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-eric-green">{' ' + t("Arcadebaan") + ' '} {lessonId + 1} {' ' + t("vrijgespeeld!") + ' '}
-            </h3>
-            <p className="text-gray-600 text-sm mt-1">
-              {title}{' ' + t("· Jouw kristaljacht wacht op je.") + ' '} </p>
+            <h3 className="text-xl font-bold text-eric-green">{t('Baan {n} is open', { n: course.lessonNumber })}</h3>
+            <p className="text-gray-600 text-sm mt-1">{course.title}</p>
+            {stars < 3 && <p className="mt-2 text-sm text-gray-700">{t('Je hebt deze baan al vrijgespeeld. Je kunt blijven spelen.')}</p>}
           </div>
           <button
             onClick={onArcade}
+            data-bonus="arcade"
             className="shrink-0 px-6 py-3 rounded-full bg-eric-green hover:bg-eric-green/90 text-white font-bold shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
-          >{' ' + t("Speel kristaljacht") + ' '}{stars === 3 && <KeyboardHint keyName="↵" />}
+          >{' ' + t("Speel kristaljacht") + ' '}<KeyboardHint keyName="↵" />
           </button>
         </div>
       )}

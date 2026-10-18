@@ -19,6 +19,7 @@ Use npm and the committed `package-lock.json`. Match tool versions to `package.j
 npm ci                              # Install the locked dependencies when needed
 npm run dev                         # Local Next.js development server
 npm run build                       # Four production exports combined into out/
+npm run build:course                # Export only the selected course (NL by default)
 npx tsc --noEmit --incremental false # Type check without a persistent cache
 npm test                            # Core regression tests (Node test runner + TypeScript compiler)
 npm run lint                        # next lint; see current limitation below
@@ -28,17 +29,21 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 
 `next.config.mjs` uses `output: 'export'` and unoptimized images. Keep functionality compatible with static hosting: no required server actions, runtime API routes, database calls or server-only authentication. `npm run start` invokes `next start`; serve `out/` for a production export instead. Stop the dev server before a production build to avoid sharing `.next/` between processes.
 
+`npm run dev` serves one course, selected by `NEXT_PUBLIC_LETTORIA_COURSE` (`nl`, `be`, `de`, `ch`; default `nl`). For example, `NEXT_PUBLIC_LETTORIA_COURSE=de npm run dev` serves the German course at `/de/`. Restart when changing course. To check course switching across all four exports, run `npm run build` and `npx serve out`. Do not deploy a single-course export over the combined site. See `docs/regional-courses.md`.
+
 ## Where to work
 
-- `src/lib/data/regions.ts`: authoritative curriculum, lesson IDs, new keys, exercises and stories. There are currently 26 lessons, IDs 0–25, in seven regions. Derive totals from this data where possible.
+- `src/lib/data/regions.ts`: base Dutch curriculum and shared lesson/region structure; exports the selected course through `createCurriculum()` in `src/lib/data/courseCurriculum.ts`. The latter defines regional keys, exercises and German stories. All courses currently have 26 lessons, IDs 0–25, in seven regions. Derive totals from the selected curriculum where possible.
+- `src/lib/course.ts`, `src/lib/keyboards.ts` and `src/components/settings/CourseSelector.tsx`: build-time course selection, physical keyboard guidance and full-page navigation between course exports.
+- `src/lib/i18n/index.ts` and `src/lib/i18n/de.json`: UI translations via `t()` using Dutch source strings as lookup keys. Add German translations when adding UI copy; missing keys fall back to Dutch. Preserve Swiss spelling through `regionalGerman()`.
 - `src/app/les/[lessonId]/LessonClient.tsx`: lesson phases, cumulative accuracy, results and the bonus-game handoff.
 - `src/lib/stores/typingStore.ts` and `src/lib/hooks/useKeyboard.ts`: typing state, timing, scoring and keyboard handling.
 - `src/components/typing/`: target text, virtual keyboard and finger guidance.
 - `src/lib/stores/progressStore.ts`: persistent lesson progress.
-- `src/components/game/ArcadeFlight.tsx` and `src/lib/arcadeFlight.ts`: three-lane bonus race unlocked by lesson mastery, deterministic state engine, typing targets, arrow movement, 75-second round, hearts and turbo.
+- `src/components/game/ArcadeFlight.tsx` and `src/lib/arcadeFlight.ts`: three-lane bonus race unlocked by lesson mastery, deterministic state engine, persistent typing targets, automatic lane travel, 75-second round and turbo.
 - `src/components/game/MagicFlight.tsx` and `src/lib/magicFlight.ts`: current optional bonus game, typing targets, 40-character goal, 60-second active clock and rewards.
 - `src/components/game/GrotRewards.tsx` and `src/lib/stores/gameStore.ts`: local decorations, game records and crystals. Original race components/abilities remain as historical implementation; they are not used by the lesson flow.
-- `src/lib/journey.ts` and `src/components/map/JourneyPreview.tsx`: first unmastered lesson and consistent Eric growth (18 and 45 earned lesson stars). Do not infer the next lesson from a count that skips gaps in saved progress.
+- `src/lib/journey.ts` and `src/components/map/JourneyPreview.tsx`: first unmastered lesson and consistent Eric growth (18 and 45 earned lesson stars). `bonusJourney()` derives the current bonus access and the next reachable learning task from best saved stars; both bonus games use that same continuation. Do not infer the next lesson from a count that skips gaps in saved progress.
 - `src/components/game/IllustratedProp.tsx`: six transparent props in a 3-column, 2-row atlas. Use CSS cell positioning; preserve square cells and alpha. `docs/art/eric-adventure.md` records the visual direction and asset roles.
 - `src/components/eric/EricPortrait.tsx`: matching baby/teen/adult portraits in the transparent 3-column growth atlas. Keep all horns and wings inside their cells and preserve original mood assets.
 - `src/components/game/FlightDragon.tsx`: separated dragon body, wing and tail atlas, poses derived from the arcade simulation clock; no independent animation timers.
@@ -52,7 +57,7 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 
 - Exercise text must use only keys taught up to that lesson. Check the whole curriculum when changing exercise data, including spaces, punctuation, digits and case.
 - `src/lib/course.ts`, `src/lib/keyboards.ts` and `src/lib/data/courseCurriculum.ts` bind locale, curriculum and finger guidance together. Keep taught characters, physical positions and Shift guidance consistent; do not substitute letters inside real words to change layouts.
-- Currently 95%+ cumulative lesson accuracy earns three stars and unlocks the next lesson; 85–94% earns two stars, below 85% one star. Any change to this policy is a product change, not a cosmetic adjustment.
+- Currently cumulative lesson accuracy of at least 95% earns three stars and unlocks the next lesson; at least 85% but below 95% earns two stars, below 85% one star. Any change to this policy is a product change, not a cosmetic adjustment.
 - Calculate accuracy from correct characters / all attempts, without rounding before star thresholds. Wrong attempts stay at the same target and count even after a correct retry. Show WPM only after 15 active seconds and 20 correct characters; exclude pauses and inter-key idle gaps above 10 seconds.
 - Do not count movement or passive survival as typing mastery. Focus warmups do not award lesson stars.
 - Give actionable feedback for difficult keys. Keep mistakes encouraging and let the child retry.
@@ -64,10 +69,12 @@ Current limitation: no ESLint configuration is checked in. Core tests are in `te
 - Make the game replayable through satisfying typing, fair challenge, visible improvement and a connection to Lettoria's story.
 - Preserve hardware-keyboard gameplay. Do not add touch gameplay without a requested product change; menus and exit controls still need to work on supported devices.
 - A typing reward should exercise the learned keys. Do not silently replace newly taught letters with movement-only abilities when designing a new mode.
-- Kristaljacht separates controls from taught characters: arrows steer; learned characters shoot visible letter targets. Keep at most three live letter targets with unique characters. Turbo lasts 5.5 active seconds after six consecutive hits. Every simulation clock, collision, effect and sprite animation pauses together.
+- Kristaljacht uses only learned characters for gameplay. A correct visible character moves Eric automatically to its lane and collects its crystal or dissolves its rock. Arrow keys never steer. Keep at most three targets with unique characters and lanes; targets wait until typed correctly or the 75-second round ends. Errors break the streak but do not discard targets. No hearts, passive collision damage or passive crystal collection. Turbo doubles points for 5.5 active seconds after six consecutive hits. Every simulation clock, automatic movement, effect and sprite animation pauses together.
+- `ArcadeKeyGuide.tsx` consistently hints the oldest waiting target and shows its physical key, typing finger and opposite Shift hand. There is no per-target reaction deadline, including for Belgian shifted digits/punctuation. Automatic lane interpolation derives solely from the simulation clock, not CSS or independent timers.
 - New arcade courses unlock at three-star lesson mastery and remain available after a weaker retry. Keep their records under `arcade-{lessonId}` so they do not compete with magic or legacy race records.
+- Both bonus-game entries and result-screen Enter behavior use best saved lesson mastery. A weaker retry shows its actual attempt score while preserving earned game access. Bonus start, pause and end cards grow with their content; do not constrain their primary actions inside a nested scroll area.
 - The magievlucht has one target at a time. Correct characters advance the target; wrong attempts break the streak without moving the target. It ends at 40 correct characters or 60 active seconds.
-- Use `kristallen` consistently for the current bonus rewards. Historical `totalGems` and race scores remain compatible; magic scores use `magic-{lessonId}` keys so unlike score scales do not compete.
+- Use `kristallen` in Dutch and its German translation `Kristalle` consistently for the current bonus rewards. Historical `totalGems` and race scores remain compatible; magic scores use `magic-{lessonId}` keys so unlike score scales do not compete.
 - Teach one mechanic at a time. Introduce additional abilities and hazards only when the child understands the core loop.
 - Give each round a clear goal and readable end state. Retry, continue and exit must be available without trapping the child or automatically dismissing results before they can read them.
 - Pause must freeze movement, collisions, spawning, game clocks, power-ups and scoring. Resuming must not produce a catch-up burst. Handle loss of visibility/focus deliberately.

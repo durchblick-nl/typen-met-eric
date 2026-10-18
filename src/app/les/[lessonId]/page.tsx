@@ -18,7 +18,7 @@ interface LessonPageProps {
 
 export default async function LessonPage({ params }: LessonPageProps) {
   const { lessonId } = await params;
-  return <LessonClient lessonId={parseInt(lessonId, 10)} />;
+  return <LessonClient key={lessonId} lessonId={parseInt(lessonId, 10)} />;
 }
 
 export async function generateMetadata({params}: {params:Promise<{lessonId:string}>}) {

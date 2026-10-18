@@ -1,7 +1,7 @@
 'use client';
 
 import { t } from '@/lib/i18n';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { getStars, type KeyStat } from '@/lib/stores/typingStore';
 import { ComfortSettings } from '@/components/settings/ComfortSettings';
 import { useTypingStore } from '@/lib/stores/typingStore';
@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { KeyboardHint, KeyboardHintDark } from '@/components/ui/KeyboardHint';
 import { ArcadeFlight } from '@/components/game/ArcadeFlight';
 import { LessonCelebration } from '@/components/typing/LessonCelebration';
+import { bonusJourney } from '@/lib/journey';
 import { MagicFlight } from '@/components/game/MagicFlight';
 
 type LessonPhase = 'arcade' | 'warmup' | 'intro' | 'exercise' | 'outro' | 'game' | 'complete';
@@ -39,12 +40,23 @@ export function LessonClient({ lessonId }: LessonClientProps) {
     reset: resetTyping,
   } = useTypingStore();
 
-  const { completeLesson, recordPractice } = useProgressStore();
-  const mastered = useProgressStore(state => state.lessonStars[lessonId] === 3);
+  const completeLesson = useProgressStore(state => state.completeLesson);
+  const recordPractice = useProgressStore(state => state.recordPractice);
+  const lessonStars = useProgressStore(state => state.lessonStars);
+  const journey = bonusJourney(lessonId, lessonStars);
+  const mastered = journey?.currentMastered ?? false;
+  const main = useRef<HTMLElement>(null);
+  const returnFocus = useRef<'arcade' | 'magic' | null>(null);
+  const restoreBonusFocus = () => {
+    if (!returnFocus.current) return;
+    const trigger = main.current?.querySelector<HTMLButtonElement>(`[data-bonus="${returnFocus.current}"]`);
+    if (trigger) { trigger.focus(); returnFocus.current = null; }
+  };
 
   const [phase, setPhase] = useState<LessonPhase>('intro');
   const [arcadeReturnPhase, setArcadeReturnPhase] = useState<'intro' | 'complete'>('complete');
   const handleStartArcade = () => { setArcadeReturnPhase(phase === 'intro' ? 'intro' : 'complete'); setPhase('arcade'); };
+  useEffect(() => { restoreBonusFocus(); }, [phase]);
   const [exerciseIndex, setExerciseIndex] = useState(0);
 
   // Cumulative stats across all exercises in the lesson
@@ -57,7 +69,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
   const warmupText = weakKeys.map(key => key.repeat(3)).join(lessonId >= 5 ? ' ' : '');
   const lessonData = getLessonById(lessonId);
 
-  if (!lessonData) {
+  if (!lessonData || !journey) {
     notFound();
   }
 
@@ -75,8 +87,12 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
   // Handle exercise completion - accumulate stats
   useEffect(() => {
+    // Effects from the previous target can run after the next target was reset.
+    // Only settle the completed target that is still current in the live store.
+    const completed = useTypingStore.getState();
     // Prevent processing the same exercise twice (avoids infinite loop)
-    if (exerciseComplete && phase === 'exercise' && exerciseIndex !== lastProcessedExercise) {
+    if (exerciseComplete && completed.isComplete && completed.targetText === currentExercise && phase === 'exercise' && exerciseIndex !== lastProcessedExercise) {
+      const { keyStats, typedChars, errors } = completed;
       // Mark this exercise as processed
       setLastProcessedExercise(exerciseIndex);
       recordPractice(keyStats);
@@ -105,7 +121,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
         setPhase('outro');
       }
     }
-  }, [exerciseComplete, phase, isLastExercise, exerciseIndex, lastProcessedExercise, typedChars, errors, cumulativeCorrect, cumulativeTotal, lessonId, completeLesson, keyStats, recordPractice]);
+  }, [exerciseComplete, currentExercise, phase, isLastExercise, exerciseIndex, lastProcessedExercise, typedChars, errors, cumulativeCorrect, cumulativeTotal, lessonId, completeLesson, keyStats, recordPractice]);
 
   // Handle transition to next exercise (separate effect to avoid timer cleanup issues)
   useEffect(() => {
@@ -120,6 +136,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
   }, [lastProcessedExercise, exerciseIndex, isLastExercise, phase, resetTyping, isPaused]);
 
   const handleStartExercise = () => {
+    resetTyping();
     // Reset cumulative stats for new lesson attempt
     setAttemptKeys({});
     setCumulativeCorrect(0);
@@ -140,12 +157,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
   };
 
   const handleGameComplete = () => {
-    // After game, go to next lesson or back to region
-    if (!isLastLesson) {
-      router.push(`/les/${lessonId + 1}`);
-    } else {
-      router.push('/kaart');
-    }
+    router.push(journey.suggested ? `/les/${journey.suggested.lessonId}` : '/kaart');
   };
 
   const handleBackToRegion = useCallback(() => {
@@ -187,7 +199,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
           handleContinue();
         } else if (phase === 'complete') {
           // Start the optional typing adventure after mastery; otherwise retry
-          if (stars >= 3) {
+          if (mastered) {
             handleStartArcade();
           } else {
             handleRetry();
@@ -201,10 +213,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [phase, handleBackToRegion, handleRetry, isLastLesson, stars]);
+  }, [phase, handleBackToRegion, handleRetry, isLastLesson, mastered]);
 
   return (
-    <main className="min-h-screen bg-perkament p-4 md:p-8">
+    <main ref={main} className="min-h-screen bg-perkament p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -237,8 +249,8 @@ export function LessonClient({ lessonId }: LessonClientProps) {
         </div>
 
         <div className="flex justify-end mb-4"><ComfortSettings /></div>
-        {phase === 'arcade' && <ArcadeFlight lessonId={lessonId} onNext={handleGameComplete} onExit={() => setPhase(arcadeReturnPhase)} isLastLesson={isLastLesson} />}
-        {phase === 'game' && <MagicFlight lessonId={lessonId} onNext={handleGameComplete} onExit={() => setPhase('complete')} isLastLesson={isLastLesson} />}
+        {phase === 'arcade' && <ArcadeFlight lessonId={lessonId} onNext={handleGameComplete} onExit={() => { returnFocus.current = 'arcade'; setPhase(arcadeReturnPhase); }} suggested={journey.suggested} />}
+        {phase === 'game' && <MagicFlight lessonId={lessonId} onNext={handleGameComplete} onExit={() => { returnFocus.current = 'magic'; setPhase('complete'); }} suggested={journey.suggested} />}
         <AnimatePresence mode="wait">
           {phase === 'warmup' && <motion.div key="warmup" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <h2 className="text-2xl text-eric-green font-bold mb-3">{' ' + t("Een beetje extra aandacht") + ' '}</h2>
@@ -250,6 +262,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
           {phase === 'intro' && (
             <motion.div
               key="intro"
+              onAnimationComplete={restoreBonusFocus}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -286,8 +299,8 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
               <div className="max-w-xl mx-auto mb-5 rounded-2xl bg-eric-green/5 border border-eric-green/15 p-4 text-center">
                 <p className="font-bold text-eric-green">{mastered ? t("Arcadebaan {n} is vrijgespeeld!",{n:lessonId+1}) : t("Drie sterren? Arcadebaan {n} is jouw beloning!",{n:lessonId+1})}</p>
-                <p className="text-sm text-gray-600 mt-1">{' ' + t("Kristallen pakken, rotsen ontwijken en met Eric naar een nieuw record vliegen.") + ' '}</p>
-                {mastered && <button className="mt-3 text-eric-green font-bold underline" onClick={handleStartArcade}>{' ' + t("Speel kristaljacht") + ' '}</button>}
+                <p className="text-sm text-gray-600 mt-1">{' ' + t("Typ je geleerde tekens om kristallen te pakken en rotsen op te lossen.") + ' '}</p>
+                {mastered && <button className="mt-3 text-eric-green font-bold underline" data-bonus="arcade" onClick={handleStartArcade}>{' ' + t("Speel kristaljacht") + ' '}</button>}
               </div>
               {/* New keys + Start button in row */}
               <div className="flex flex-wrap items-center justify-center gap-4">
@@ -392,6 +405,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
           {phase === 'complete' && (
             <motion.div
               key="complete"
+              onAnimationComplete={restoreBonusFocus}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="text-center"
@@ -399,11 +413,14 @@ export function LessonClient({ lessonId }: LessonClientProps) {
               <LessonCelebration
                 stars={stars}
                 accuracy={cumulativeAccuracy}
-                lessonId={lessonId}
-                title={lesson.title}
+                course={journey.current}
                 mastered={mastered}
                 onArcade={handleStartArcade}
               />
+              {mastered && <div className="mb-6 text-gray-700">
+                <p className="text-sm mb-2">{t('Liever rustig typen? Kies Erics magievlucht.')}</p>
+                <button data-bonus="magic" onClick={handleStartGame} className="rounded-full px-5 py-2.5 border border-eric-green/30 text-eric-green font-semibold hover:bg-eric-green/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-eric-green">{t('Erics magievlucht')}</button>
+              </div>}
               {weakKeys.length > 0 && <div className="mb-6 text-gray-700"><p className="mb-3">{' ' + t("Extra aandacht voor:") + ' '} <span className="font-mono font-bold">{weakKeys.map(key => key === ' ' ? '␣' : key).join(' · ')}</span></p><button className="text-eric-green underline font-semibold" onClick={() => { setTargetText(warmupText); setPhase('warmup'); }}>{' ' + t("Oefen deze toetsen even apart") + ' '}</button></div>}
               <div className="flex flex-wrap justify-center gap-4">
                 <button
@@ -414,18 +431,12 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                   <KeyboardHintDark keyName="Esc" />
                 </button>
 
-                {stars >= 3 && <button onClick={handleGameComplete} className="px-6 py-3 rounded-full border border-eric-green/30 font-semibold text-eric-green">{isLastLesson ? t("Naar de kaart") : t("Volgende les")}</button>}
-                {stars < 3 ? (
+                {mastered && <button onClick={handleGameComplete} className="px-6 py-3 rounded-2xl border border-eric-green/30 font-semibold text-eric-green">{journey.suggested ? t('Oefen les {n}: {title}', { n: journey.suggested.lessonNumber, title: journey.suggested.title }) : t('Naar de kaart')}</button>}
+                {stars < 3 && (
                   <button
                     onClick={handleRetry}
                     className="inline-flex items-center px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-full font-semibold transition-colors"
-                  >{' ' + t("Opnieuw proberen") + ' '} <KeyboardHint keyName="↵" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleStartGame}
-                    className="inline-flex items-center px-6 py-3 border border-eric-green/30 text-eric-green hover:bg-eric-green/10 rounded-full font-semibold transition-colors"
-                  >{' ' + t("Erics magievlucht") + ' '} </button>
+                  >{t('Opnieuw proberen')}{!mastered && <KeyboardHint keyName="↵" />}</button>
                 )}
               </div>
             </motion.div>

@@ -26,7 +26,7 @@ export function ArcadeKeyGuide({ character }: { character?: string }) {
               </span>
             </div>
           </div>
-          {guidance.shift && <p className="arcade-guide-extra">{t('Shift-combinatie: dit doel geeft je meer tijd.')}</p>}
+          {guidance.shift && <p className="arcade-guide-extra">{t('Gebruik de andere hand voor Shift. Het doel blijft op je wachten.')}</p>}
         </>
       ) : <p className="arcade-guide-wait">{t('Wacht op het volgende teken.')}</p>}
     </div>
