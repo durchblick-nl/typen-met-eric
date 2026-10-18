@@ -9,6 +9,7 @@ import { TypingArea, VirtualKeyboard, LiveStats } from '@/components/typing';
 import { PersonalPractice } from '@/components/typing/PersonalPractice';
 import { useProgressStore } from '@/lib/stores/progressStore';
 import { Eric } from '@/components/eric';
+import { Footer } from '@/components/Footer';
 import Link from 'next/link';
 
 // Sample exercises for the tutorial
@@ -152,7 +153,8 @@ export default function OefenenPage() {
     const frame = requestAnimationFrame(() => personalButton.current?.focus());
     return () => cancelAnimationFrame(frame);
   }, [mode]);
-  return <main className="min-h-screen bg-perkament p-4 md:p-8">
+  return <div className="min-h-screen bg-perkament flex flex-col">
+    <main className="flex-1 p-4 md:p-8">
     <div className="max-w-4xl mx-auto mb-6">
       <h1 className="text-3xl font-bold text-eric-green mb-4">{t('Snel oefenen')}</h1>
       <nav aria-label={t('Kies je oefening')} className="flex flex-wrap gap-3">
@@ -161,5 +163,7 @@ export default function OefenenPage() {
       </nav>
     </div>
     {mode === 'personal' ? <PersonalPractice onExit={() => { returnFocus.current = true; setMode('home'); }} /> : <HomePractice />}
-  </main>;
+    </main>
+    <Footer />
+  </div>;
 }
