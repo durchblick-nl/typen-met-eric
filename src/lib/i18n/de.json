@@ -635,6 +635,8 @@
   "Stoppen met toetsentraining": "Tastentraining beenden",
   "Hoe worden mijn oefencijfers bewaard?": "Wie werden meine Übungszahlen gespeichert?",
   "Kies je oefening": "Wähle deine Übung",
+  "Je kunt alvast oefenen": "Du kannst schon üben",
+  "Terug naar de thuisrij": "Zurück zur Grundreihe",
   "Thuisrij oefenen": "Grundreihe üben",
   "Probeer je persoonlijke toetsentraining": "Probiere dein persönliches Tastentraining",
   "Voor persoonlijke toetsentraining bewaren we per doeltoets het aantal pogingen en fouten in localStorage. We bewaren daarvoor geen volledige invoer of lijst met verkeerd ingedrukte toetsen. De oefeningen worden op je apparaat samengesteld; deze cijfers worden niet naar onze server of OpenPanel gestuurd.": "Für das persönliche Tastentraining speichern wir pro Zieltaste die Anzahl der Versuche und Fehler im localStorage. Dafür speichern wir keine vollständigen Eingaben oder Liste falsch gedrückter Tasten. Die Übungen werden auf deinem Gerät zusammengestellt; diese Zahlen werden weder an unseren Server noch an OpenPanel gesendet.",

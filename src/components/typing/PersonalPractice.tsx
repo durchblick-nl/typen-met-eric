@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { t } from '@/lib/i18n';
 import { personalPractice, mergePracticeStats } from '@/lib/personalPractice';
 import { useProgressStore } from '@/lib/stores/progressStore';
@@ -14,7 +15,7 @@ function buildPlan(variant = 0) {
   return personalPractice(saved.keyStats, saved.lessonStars, variant);
 }
 
-const button = 'rounded-full px-5 py-3 font-semibold border border-eric-green/30 text-eric-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eric-green';
+const button = 'inline-flex items-center justify-center text-center rounded-full px-5 py-3 font-semibold border border-eric-green/30 text-eric-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eric-green';
 const visible = (key: string) => key === ' ' ? '␣' : key;
 const ratio = (stat?: KeyStat) => stat?.attempts ? `${Math.floor((stat.attempts - stat.errors) / stat.attempts * 100)}% (${stat.attempts})` : '—';
 
@@ -66,11 +67,19 @@ export function PersonalPractice({ onExit }: { onExit: () => void }) {
 
   return <section className="max-w-4xl mx-auto" data-testid="personal-practice">
     <h2 ref={heading} tabIndex={-1} className="text-2xl font-bold text-eric-green mb-4 outline-none">{t('Jouw toetsentraining')}</h2>
-    <p className="text-gray-700 mb-5">{t('Je oefent toetsen waarbij eerder fouten zijn geteld. Drie korte opdrachten, zonder tijdslimiet of lessterren. Je cijfers blijven in deze browser.')}</p>
+    {plan.keys.length > 0 && <><p className="text-gray-700 mb-5">{t('Je oefent toetsen waarbij eerder fouten zijn geteld. Drie korte opdrachten, zonder tijdslimiet of lessterren. Je cijfers blijven in deze browser.')}</p>
     <p className="text-sm text-gray-600 mb-5">{t('Gebruik een fysiek toetsenbord. Alleen afgeronde opdrachten worden aan je oefencijfers toegevoegd.')}</p>
-    {!plan.keys.length ? <div className="rounded-2xl bg-white p-6 space-y-4">
-      <p>{t('Er zijn nog geen toetsen met opgeslagen fouten om te oefenen. Doe eerst een les, of oefen rustig verder op de thuisrij.')}</p>
-      <Link href="/kaart" className={button}>{t('Naar de kaart')}</Link>
+    </>}
+    {!plan.keys.length ? <div className="rounded-2xl border border-eric-green/15 bg-white p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6" data-testid="personal-empty">
+      <Image src="/images/eric/eric-encouraging.png" alt="" width={112} height={112} className="shrink-0" />
+      <div className="min-w-0 space-y-4">
+        <h3 className="text-xl font-bold text-eric-green">{t('Je kunt alvast oefenen')}</h3>
+        <p className="text-gray-700 leading-relaxed max-w-prose">{t('Er zijn nog geen toetsen met opgeslagen fouten om te oefenen. Doe eerst een les, of oefen rustig verder op de thuisrij.')}</p>
+        <div className="flex flex-wrap gap-3 pt-2">
+          <Link href="/kaart" className={`${button} bg-eric-green text-white`}>{t('Naar de kaart')}</Link>
+          <button onClick={onExit} className={button}>{t('Thuisrij oefenen')}</button>
+        </div>
+      </div>
     </div> : <>
       <p className="mb-4 text-gray-700">{t('Deze ronde:')} <strong className="font-mono text-eric-green">{plan.keys.map(visible).join(' · ')}</strong></p>
       {phase === 'ready' && <div className="rounded-2xl bg-white p-6 space-y-4">
@@ -98,7 +107,7 @@ export function PersonalPractice({ onExit }: { onExit: () => void }) {
       </div>}
     </>}
     <div className="flex flex-wrap items-center gap-4 mt-6">
-      <button onClick={() => { settle(); onExit(); }} className={button}>{t('Stoppen met toetsentraining')}</button>
+      {plan.keys.length > 0 && <button onClick={() => { settle(); onExit(); }} className={button}>{phase === 'ready' ? t('Terug naar de thuisrij') : t('Stoppen met toetsentraining')}</button>}
       <Link href="/privacy" className="text-eric-green underline text-sm">{t('Hoe worden mijn oefencijfers bewaard?')}</Link>
     </div>
   </section>;
