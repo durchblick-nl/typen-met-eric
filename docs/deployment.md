@@ -30,3 +30,8 @@ healthcheck and served the updated referral privacy text on `lettoria.app`.
 OpenPanel accepts `lettoria.app`, `www.lettoria.app`, `lettoria.nl` and
 `www.lettoria.nl`. Analytics remains opt-in and records only the referring
 origin; learner names, typing input and practice results stay local.
+
+Live migration checks on 2026-10-24 returned HTTP 200 for all four course roots,
+`/kaart`, `/les/0`, `lettoria.nl` and `typen.treehouse.ch`. After explicit consent,
+the production OpenPanel endpoint accepted the allowlisted page-view payload
+from `lettoria.app` with HTTP 200.
