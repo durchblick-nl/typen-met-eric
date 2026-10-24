@@ -32,7 +32,7 @@ export default function PrivacyPage() {
           </section>
           <section className="space-y-2">
             <h2 className="text-xl font-bold text-gray-800">{' ' + t("Optionele pagina-analyse met OpenPanel") + ' '}</h2>
-            <p>{' ' + t("Na toestemming laden we het analysescript van openpanel.dev en sturen we paginaweergaven naar onze OpenPanel-server op opapi.treehouse.ch. We sturen alleen het pagina-adres zonder zoekparameters of fragmenten en de algemene titel Lettoria. Verbindingsgegevens zoals je IP-adres en browserinformatie kunnen bij deze diensten worden verwerkt.") + ' '}</p>
+            <p>{' ' + t("Na toestemming laden we het analysescript van openpanel.dev en sturen we paginaweergaven naar onze OpenPanel-server op opapi.treehouse.ch. We sturen alleen het pagina-adres zonder zoekparameters of fragmenten en de algemene titel Lettoria. Daarnaast sturen we alleen de domeinnaam van de verwijzende website, zonder pad, poort, zoekparameters of fragment. Verbindingsgegevens zoals je IP-adres en browserinformatie kunnen bij deze diensten worden verwerkt.") + ' '}</p>
             <p>{' ' + t("We sturen geen namen, e-mailadressen, getypte tekst of lesresultaten mee. We gebruiken geen schermopnames, advertentiecookies, persoonlijke analyseprofielen of automatische klikregistratie.") + ' '}</p>
           </section>
           <section className="space-y-2">

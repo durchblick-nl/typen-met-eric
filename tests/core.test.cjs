@@ -895,3 +895,14 @@ test('uppercase lessons introduce opposite-hand Shift before names and the final
   }
  }
 });
+
+
+test('analytics keeps only HTTP(S) referring domains without private URL data', () => {
+ const {analyticsReferrerOrigin}=sources()('lib/analyticsPaths');
+ assert.equal(analyticsReferrerOrigin('https://www.google.com/search?q=child-name#private'),'https://www.google.com');
+ assert.equal(analyticsReferrerOrigin('https://name:password@school.example:8443/reports/child?token=secret#name'),'https://school.example');
+ assert.equal(analyticsReferrerOrigin('http://example.com/path?name=Max'),'http://example.com');
+ for(const value of ['',null,undefined,123,{},'not a URL','javascript:alert(1)','data:text/plain,private','file:///private/name','blob:https://example.com/id']){
+  assert.equal(analyticsReferrerOrigin(value),null);
+ }
+});

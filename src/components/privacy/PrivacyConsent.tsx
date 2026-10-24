@@ -1,7 +1,7 @@
 'use client';
 
 import { t } from '@/lib/i18n';
-import { analyticsPagePath } from '@/lib/analyticsPaths';
+import { analyticsPagePath, analyticsReferrerOrigin } from '@/lib/analyticsPaths';
 import { BASE_PATH, IS_GERMAN } from '@/lib/course';
 import { useEffect } from 'react';
 import * as CookieConsent from 'vanilla-cookieconsent';
@@ -30,7 +30,7 @@ let analyticsStarted = false;
 let analyticsAllowed = false;
 
 // Only known page paths are useful for statistics. Never transmit query strings,
-// fragments, typed text, certificate names, referrers or arbitrary event data.
+// fragments, typed text, certificate names, full referrer URLs or arbitrary event data.
 function filterPageView(event: OpenPanelEvent): boolean {
   if (!analyticsAllowed || !CookieConsent.acceptedCategory('analytics') ||
     event.type !== 'track' || event.payload.name !== 'screen_view') {
@@ -40,9 +40,11 @@ function filterPageView(event: OpenPanelEvent): boolean {
   const path = window.location.pathname;
   if (!analyticsPagePath(path)) return false;
 
+  const referrerOrigin = analyticsReferrerOrigin(event.payload.properties?.__referrer);
   event.payload.properties = {
     __path: `${window.location.origin}${path}`,
     __title: 'Lettoria',
+    ...(referrerOrigin ? { __referrer: referrerOrigin } : {}),
   };
   delete event.payload.profileId;
   delete event.payload.groups;
