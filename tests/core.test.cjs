@@ -906,3 +906,60 @@ test('analytics keeps only HTTP(S) referring domains without private URL data', 
   assert.equal(analyticsReferrerOrigin(value),null);
  }
 });
+
+test('keyboard guidance fades evenly per exercise and resets fully for a new attempt', () => {
+  const { keyboardHelpOpacity } = sources()('lib/lessonHelp');
+  assert.deepEqual(Array.from({ length: 6 }, (_, i) => Math.round(keyboardHelpOpacity(i, 6) * 100)), [100, 80, 60, 40, 20, 0]);
+  for (const count of [2, 5, 12, 30]) {
+    assert.equal(keyboardHelpOpacity(0, count), 1);
+    assert.equal(keyboardHelpOpacity(count - 1, count), 0);
+    for (let i = 1; i < count; i++) assert.ok(keyboardHelpOpacity(i, count) < keyboardHelpOpacity(i - 1, count));
+  }
+  assert.equal(keyboardHelpOpacity(0, 1), 1);
+  assert.equal(keyboardHelpOpacity(-1, 6), 1);
+  assert.equal(keyboardHelpOpacity(100, 6), 0);
+});
+
+test('blocked storage does not interrupt completion, practice recording or game rewards', () => {
+  storage();
+  localStorage.getItem = () => { throw new Error('SecurityError'); };
+  localStorage.setItem = () => { throw new Error('SecurityError'); };
+  const load = sources();
+  const progress = load('lib/stores/progressStore').useProgressStore;
+  const game = load('lib/stores/gameStore').useGameStore;
+  progress.getState().completeLesson(0, 3);
+  progress.getState().recordPractice({ f: { attempts: 3, errors: 1 } });
+  progress.getState().completeLesson(0, 1);
+  assert.equal(progress.getState().lessonStars[0], 3);
+  assert.equal(progress.getState().totalStars, 3);
+  assert.equal(progress.getState().currentLesson, 1);
+  assert.deepEqual(progress.getState().keyStats.f, { attempts: 3, errors: 1 });
+  game.getState().finishMagicRun(0, 40, 100);
+  assert.equal(game.getState().gamesPlayed, 1);
+  assert.equal(game.getState().highScores['magic-0'], 100);
+  assert.equal(load('lib/safeStorage').storageStatus.getSnapshot(), true);
+});
+
+test('safe storage retains legacy data, handles quota failures and never replaces unreadable saves', () => {
+  storage();
+  const { createSafeStorage } = sources()('lib/safeStorage');
+  const old = { state: { lessonStars: { 0: 3 } }, version: 0 };
+  localStorage.setItem('legacy', JSON.stringify(old));
+  let failures = 0;
+  const safe = createSafeStorage(() => localStorage, () => failures++);
+  assert.deepEqual(safe.getItem('legacy'), old);
+  const nativeSet = localStorage.setItem;
+  localStorage.setItem = () => { throw new Error('QuotaExceededError'); };
+  const next = { state: { lessonStars: { 0: 3, 1: 3 } }, version: 0 };
+  safe.setItem('legacy', next);
+  assert.deepEqual(safe.getItem('legacy'), next);
+  assert.equal(failures, 1);
+  assert.deepEqual(JSON.parse(localStorage.getItem('legacy')), old);
+  localStorage.setItem = nativeSet;
+  localStorage.setItem('broken', '{bad json');
+  const broken = createSafeStorage(() => localStorage, () => failures++);
+  assert.equal(broken.getItem('broken'), null);
+  broken.setItem('broken', next);
+  assert.equal(localStorage.getItem('broken'), '{bad json');
+  assert.deepEqual(broken.getItem('broken'), next);
+});

@@ -2,6 +2,7 @@ import { t } from '@/lib/i18n';
 import { storageKey } from '../course';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { createSafeStorage } from '../safeStorage';
 import { arcadeReward } from '@/lib/arcadeFlight';
 import { flightReward, GROT_DECORATIONS } from '@/lib/magicFlight';
 import { getAchievement } from '@/lib/data/achievements';
@@ -432,6 +433,7 @@ export const useGameStore = create<GameState>()(
     }),
     {
       name: storageKey('lettoria-game-store'),
+      storage: createSafeStorage<Pick<GameState, 'grotDecorations' | 'activeDecoration' | 'highScores' | 'totalGems' | 'totalScore' | 'gamesPlayed' | 'unlockedAchievements'>>(),
       partialize: (state) => ({
         grotDecorations: state.grotDecorations,
         activeDecoration: state.activeDecoration,

@@ -19,6 +19,7 @@ import { ArcadeFlight } from '@/components/game/ArcadeFlight';
 import { LessonCelebration } from '@/components/typing/LessonCelebration';
 import { bonusJourney } from '@/lib/journey';
 import { PracticeGuide } from '@/components/typing/PracticeGuide';
+import { keyboardHelpOpacity } from '@/lib/lessonHelp';
 import { MagicFlight } from '@/components/game/MagicFlight';
 
 type LessonPhase = 'arcade' | 'warmup' | 'intro' | 'exercise' | 'outro' | 'game' | 'complete';
@@ -75,6 +76,10 @@ export function LessonClient({ lessonId }: LessonClientProps) {
   const { region, lesson } = lessonData;
   const currentExercise = lesson.exercises[exerciseIndex];
   const isLastExercise = exerciseIndex >= lesson.exercises.length - 1;
+  const helpOpacity = keyboardHelpOpacity(exerciseIndex, lesson.exercises.length);
+  const previousLessons = [lessonId - 1, lessonId - 2]
+    .filter(id => id >= 0 && (id === 0 || lessonStars[id - 1] === 3 || (lessonStars[id] || 0) > 0))
+    .map(id => getLessonById(id)!.lesson);
 
   // Set up exercise when it changes
   useEffect(() => {
@@ -172,6 +177,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
   const handleRetry = useCallback(() => {
     resetTyping();
     // Reset cumulative stats for retry
+    setAttemptKeys({});
     setCumulativeCorrect(0);
     setCumulativeTotal(0);
     processedExercise.current = -1;
@@ -251,6 +257,11 @@ export function LessonClient({ lessonId }: LessonClientProps) {
         </div>
 
         <div className="flex justify-end mb-4"><ComfortSettings /></div>
+        {(phase === 'intro' || phase === 'exercise' || phase === 'complete') && <nav aria-label={t('Lessen herhalen')} className="mb-5 flex flex-wrap items-center gap-3 text-sm text-eric-green">
+          {phase === 'exercise' && <button onClick={handleRetry} className="rounded-full border border-eric-green/30 px-4 py-2 font-semibold hover:bg-eric-green/10">{t('Les opnieuw beginnen')}</button>}
+          {previousLessons.map(previous => <Link key={previous.id} href={`/les/${previous.id}`} className="rounded-full border border-eric-green/30 px-4 py-2 hover:bg-eric-green/10">{t('Herhaal les {n}', { n: previous.id + 1 })}</Link>)}
+          <span className="text-gray-600">{t('Herhalen mag altijd. Je verdiende sterren blijven bewaard.')}</span>
+        </nav>}
         {phase === 'arcade' && <ArcadeFlight lessonId={lessonId} onNext={handleGameComplete} onExit={() => { returnFocus.current = 'arcade'; setPhase(arcadeReturnPhase); }} suggested={journey.suggested} />}
         {phase === 'game' && <MagicFlight lessonId={lessonId} onNext={handleGameComplete} onExit={() => { returnFocus.current = 'magic'; setPhase('complete'); }} suggested={journey.suggested} />}
         <AnimatePresence mode="wait">
@@ -305,6 +316,7 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 {mastered && <button className="mt-3 text-eric-green font-bold underline" data-bonus="arcade" onClick={handleStartArcade}>{' ' + t("Speel kristaljacht") + ' '}</button>}
               </div>
               <PracticeGuide />
+              <p className="text-center text-sm text-gray-600 mb-4">{t('Het schermtoetsenbord wordt bij elke oefening iets lichter. Bij de laatste oefening typ je zonder hulp. Voel de streepjes op F en J.')}</p>
               {/* New keys + Start button in row */}
               <div className="flex flex-wrap items-center justify-center gap-4">
                 {lesson.newKeys.length > 0 && (
@@ -372,7 +384,15 @@ export function LessonClient({ lessonId }: LessonClientProps) {
 
               {/* Keyboard with Stats on the right */}
               <div className="flex flex-col sm:flex-row justify-center items-center sm:items-start gap-4">
-                <VirtualKeyboard showFingerHints={true} lessonId={lessonId} />
+                <div className="w-full max-w-[38rem] min-w-0">
+                  <p role="status" className="mb-3 text-center text-sm text-eric-green">{helpOpacity === 0
+                    ? t('Nu zonder schermtoetsenbord. Neem rustig de tijd!')
+                    : t('Toetsenbordhulp: {n}%', { n: Math.round(helpOpacity * 100) })}</p>
+                  <div aria-hidden={helpOpacity === 0} className="transition-opacity duration-700 motion-reduce:transition-none"
+                    style={{ opacity: helpOpacity, visibility: helpOpacity === 0 ? 'hidden' : 'visible' }}>
+                    <VirtualKeyboard showFingerHints={true} lessonId={lessonId} />
+                  </div>
+                </div>
                 <LiveStats vertical={true} />
               </div>
             </motion.div>
@@ -437,11 +457,11 @@ export function LessonClient({ lessonId }: LessonClientProps) {
                 </button>
 
                 {mastered && <button onClick={handleGameComplete} className="px-6 py-3 rounded-2xl border border-eric-green/30 font-semibold text-eric-green">{journey.suggested ? t('Oefen les {n}: {title}', { n: journey.suggested.lessonNumber, title: journey.suggested.title }) : t('Naar de kaart')}</button>}
-                {stars < 3 && (
+                {(
                   <button
                     onClick={handleRetry}
                     className="inline-flex items-center px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-full font-semibold transition-colors"
-                  >{t('Opnieuw proberen')}{!mastered && <KeyboardHint keyName="↵" />}</button>
+                  >{t('Les opnieuw beginnen')}{!mastered && <KeyboardHint keyName="↵" />}</button>
                 )}
               </div>
             </motion.div>

@@ -2,6 +2,7 @@ import { storageKey } from '../course';
 import { create } from 'zustand';
 import type { KeyStat } from './typingStore';
 import { persist } from 'zustand/middleware';
+import { createSafeStorage } from '../safeStorage';
 
 interface ProgressState {
   keyStats: Record<string, KeyStat>;
@@ -119,6 +120,7 @@ export const useProgressStore = create<ProgressState>()(
     }),
     {
       name: storageKey('typen-met-eric-progress'),
+      storage: createSafeStorage<ProgressState>(),
     }
   )
 );

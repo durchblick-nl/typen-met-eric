@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "vanilla-cookieconsent/dist/cookieconsent.css";
 import { ComfortProvider } from '@/components/settings/ComfortSettings';
+import { StorageNotice } from '@/components/settings/StorageNotice';
 import { PrivacyConsent } from '@/components/privacy/PrivacyConsent';
 
 export const metadata: Metadata = {
@@ -155,7 +156,7 @@ export default function RootLayout({
       </head>
       <body className="bg-perkament min-h-screen">
         <CourseSelector />
-        <ComfortProvider>{children}</ComfortProvider>
+        <ComfortProvider><StorageNotice />{children}</ComfortProvider>
         <PrivacyConsent />
       </body>
     </html>

@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { MotionConfig } from "framer-motion";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { createSafeStorage } from "@/lib/safeStorage";
 export const useComfortStore = create<{
   calm: boolean;
   setCalm: (calm: boolean) => void;
 }>()(
   persist((set) => ({ calm: false, setCalm: (calm) => set({ calm }) }), {
     name: "lettoria-comfort",
+    storage: createSafeStorage<{ calm: boolean }>(),
   }),
 );
 export function ComfortProvider({ children }: { children: React.ReactNode }) {
